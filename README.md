@@ -10,7 +10,7 @@
 <dependency>
     <groupId>net.thenextlvl.bank</groupId>
     <artifactId>bank-api</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <scope>compile</scope>
 </dependency>
  ```
