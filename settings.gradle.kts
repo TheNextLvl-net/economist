@@ -1,2 +1,1 @@
-rootProject.name = "bank-api"
-
+rootProject.name = "economist"
