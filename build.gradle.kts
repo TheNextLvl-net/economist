@@ -1,44 +1,88 @@
+import io.papermc.hangarpublishplugin.model.Platforms
+
 plugins {
     id("java")
-    id("maven-publish")
+
+    id("io.github.goooler.shadow") version "8.1.8"
+    id("io.papermc.hangar-publish-plugin") version "0.1.2"
+    id("net.minecrell.plugin-yml.paper") version "0.6.0"
+    id("com.modrinth.minotaur") version "2.+"
 }
+
+group = "net.thenextlvl.economist"
+version = "1.0.0"
 
 java {
-    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
-
-group = "net.thenextlvl"
-version = "1.0.1"
 
 repositories {
     mavenCentral()
     maven("https://repo.thenextlvl.net/releases")
+    maven("https://papermc.io/repo/repository/maven-public/")
 }
 
 dependencies {
-    implementation("net.thenextlvl.core:core-annotations:1.0.1")
+    compileOnly("org.projectlombok:lombok:1.18.34")
+    compileOnly("net.thenextlvl.core:annotations:2.0.1")
+    compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    implementation("org.bstats:bstats-bukkit:3.0.2")
+
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+
+    annotationProcessor("org.projectlombok:lombok:1.18.34")
 }
 
-tasks.getByName<Test>("test") {
+tasks.shadowJar {
+    dependencies {
+        relocate("org.bstats", "${rootProject.group}.metrics")
+    }
+}
+
+tasks.test {
     useJUnitPlatform()
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
-        repositories {
-            maven {
-                url = uri("https://repo.thenextlvl.net/releases")
-                credentials {
-                    username = extra["RELEASES_USER"].toString()
-                    password = extra["RELEASES_PASSWORD"].toString()
-                }
-            }
+paper {
+    name = "Economist"
+    main = "net.thenextlvl.economist.EconomistPlugin"
+    author = "NonSwag"
+    apiVersion = "1.21"
+    foliaSupported = true
+
+    website = "https://thenextlvl.net"
+    provides = listOf("Vault")
+}
+
+val versionString: String = project.version as String
+val isRelease: Boolean = !versionString.contains("-pre")
+
+val versions: List<String> = (property("gameVersions") as String)
+    .split(",")
+    .map { it.trim() }
+
+hangarPublish { // docs - https://docs.papermc.io/misc/hangar-publishing
+    publications.register("plugin") {
+        id.set("Economist") // todo: create project
+        version.set(versionString)
+        channel.set(if (isRelease) "Release" else "Snapshot")
+        apiKey.set(System.getenv("HANGAR_API_TOKEN"))
+        platforms.register(Platforms.PAPER) {
+            jar.set(tasks.shadowJar.flatMap { it.archiveFile })
+            platformVersions.set(versions)
         }
     }
+}
+
+modrinth {
+    token.set(System.getenv("MODRINTH_TOKEN"))
+    projectId.set("") // todo: create project
+    versionType = if (isRelease) "release" else "beta"
+    uploadFile.set(tasks.shadowJar)
+    gameVersions.set(versions)
+    loaders.add("paper")
+    loaders.add("folia")
 }
