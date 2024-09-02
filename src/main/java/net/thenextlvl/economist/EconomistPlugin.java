@@ -48,7 +48,11 @@ public class EconomistPlugin extends JavaPlugin {
             )).build());
 
     private final BankController bankController = new EconomistBankController(this);
-    private final EconomyController economyController = new EconomistEconomyController(this);
+    private final EconomyController economyController;
+
+    public EconomistPlugin() {
+        this.economyController = new EconomistEconomyController(this);
+    }
 
     @Override
     public void onLoad() {
