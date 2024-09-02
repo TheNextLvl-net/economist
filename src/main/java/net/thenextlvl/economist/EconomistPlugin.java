@@ -14,10 +14,12 @@ import net.thenextlvl.economist.command.BalanceCommand;
 import net.thenextlvl.economist.command.BankCommand;
 import net.thenextlvl.economist.command.EconomyCommand;
 import net.thenextlvl.economist.command.TopListCommand;
-import net.thenextlvl.economist.controller.EconomistBankController;
-import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.configuration.PluginConfig;
 import net.thenextlvl.economist.configuration.StorageType;
+import net.thenextlvl.economist.controller.EconomistBankController;
+import net.thenextlvl.economist.controller.EconomistEconomyController;
+import net.thenextlvl.economist.controller.data.DataController;
+import net.thenextlvl.economist.controller.data.SQLiteController;
 import net.thenextlvl.economist.service.ServiceEconomyController;
 import net.thenextlvl.economist.version.PluginVersionChecker;
 import org.bstats.bukkit.Metrics;
@@ -27,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.Locale;
 
 @Getter
@@ -52,6 +55,14 @@ public class EconomistPlugin extends JavaPlugin {
 
     private final EconomistBankController bankController = new EconomistBankController(this);
     private final EconomistEconomyController economyController = new EconomistEconomyController(this);
+    private final DataController dataController;
+
+    public EconomistPlugin() throws SQLException {
+        this.dataController = switch (config().storageType()) {
+            case SQLite -> new SQLiteController(new File(getDataFolder(), "saves.db"));
+            default -> throw new IllegalStateException("Unexpected value: " + config().storageType());
+        };
+    }
 
     @Override
     public void onLoad() {
