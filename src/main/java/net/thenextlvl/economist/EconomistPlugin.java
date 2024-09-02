@@ -40,7 +40,6 @@ public class EconomistPlugin extends JavaPlugin {
     private final ComponentBundle bundle = new ComponentBundle(
             new File(getDataFolder(), "translations"),
             audience -> audience instanceof Player player ? player.locale() : Locale.US)
-            .fallback(Locale.US)
             .register("economist", Locale.US)
             .register("economist_german", Locale.GERMANY)
             .miniMessage(bundle -> MiniMessage.builder().tags(TagResolver.resolver(
