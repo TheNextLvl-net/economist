@@ -1,4 +1,5 @@
 import io.papermc.hangarpublishplugin.model.Platforms
+import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 import net.minecrell.pluginyml.paper.PaperPluginDescription
 
 plugins {
@@ -71,10 +72,35 @@ paper {
     }
 
     permissions {
-        register("economist.admin")
-        register("economist.balance")
-        register("economist.balance-top")
-        register("economist.bank")
+        register("economist.admin") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            children = listOf(
+                "economist.balance.world",
+                "economist.balance-top",
+                "economist.bank",
+                "economist.pay",
+            )
+        }
+        register("economist.balance") {
+            default = BukkitPluginDescription.Permission.Default.TRUE
+        }
+        register("economist.balance.others") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            children = listOf("economist.balance")
+        }
+        register("economist.balance.world") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            children = listOf("economist.balance.others")
+        }
+        register("economist.balance-top") {
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("economist.bank") {
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("economist.pay") {
+            default = BukkitPluginDescription.Permission.Default.TRUE
+        }
     }
 }
 
