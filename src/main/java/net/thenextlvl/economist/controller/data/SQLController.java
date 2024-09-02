@@ -2,6 +2,7 @@ package net.thenextlvl.economist.controller.data;
 
 import lombok.SneakyThrows;
 import net.kyori.adventure.key.Key;
+import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.model.EconomistAccount;
 import org.bukkit.World;
@@ -14,17 +15,20 @@ import java.util.UUID;
 
 public class SQLController implements DataController {
     private final Connection connection;
+    private final EconomistPlugin plugin;
 
-    public SQLController(Connection connection) throws SQLException {
+    public SQLController(Connection connection, EconomistPlugin plugin) throws SQLException {
         this.connection = connection;
+        this.plugin = plugin;
         createTables();
     }
 
     @Override
     public boolean deleteAccount(UUID uuid, @Nullable World world) {
         try {
-            executeUpdate("DELETE FROM accounts WHERE uuid = ? AND world = ?",
-                    uuid, world != null ? world.key().asString() : null);
+            var name = world != null ? world.key().asString() : null;
+            executeUpdate("DELETE FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
+                    uuid, name, name);
             return true;
         } catch (SQLException e) {
             return false;
@@ -32,22 +36,38 @@ public class SQLController implements DataController {
     }
 
     @Override
+    public Account createAccount(UUID uuid, @Nullable World world) {
+        try {
+            var balance = plugin.config().startBalance();
+            executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
+                    uuid, world != null ? world.key().asString() : null, balance);
+            return new EconomistAccount(balance, world, uuid);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     @SneakyThrows
     public @Nullable Account getAccount(UUID uuid, @Nullable World world) {
-        var balance = executeQuery("SELECT balance FROM accounts WHERE uuid = ? AND world = ?",
-                resultSet -> resultSet.getBigDecimal("balance"),
-                uuid, world != null ? world.key().asString() : null);
-        return balance != null ? new EconomistAccount(balance, world, uuid) : null;
+        var name = world != null ? world.key().asString() : null;
+        return executeQuery("SELECT * FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
+                resultSet -> {
+                    if (!resultSet.next()) return null;
+                    var balance = resultSet.getBigDecimal("balance");
+                    return balance != null ? new EconomistAccount(balance, world, uuid) : null;
+                }, uuid, name, name);
     }
 
     @Override
     public boolean save(Account account) {
         try {
-            executeUpdate("UPDATE accounts SET balance = ? WHERE uuid = ? AND world = ?",
-                    account.getBalance(), account.getOwner(),
-                    account.getWorld().map(World::key).map(Key::asString).orElse(null));
+            var name = account.getWorld().map(World::key).map(Key::asString).orElse(null);
+            executeUpdate("UPDATE accounts SET balance = ? WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
+                    account.getBalance(), account.getOwner(), name, name);
             return true;
         } catch (SQLException e) {
+            plugin.getComponentLogger().error("Failed to save account {}", account.getOwner(), e);
             return false;
         }
     }
@@ -56,12 +76,13 @@ public class SQLController implements DataController {
         executeUpdate("""
                 CREATE TABLE IF NOT EXISTS accounts (
                   uuid TEXT NOT NULL UNIQUE PRIMARY KEY,
-                  balance DECIMAL(65, 30) NOT NULL,
+                  balance DECIMAL(65, 20) NOT NULL,
                   world TEXT NULL
                 )""");
         executeUpdate("""
                 CREATE TABLE IF NOT EXISTS banks (
                   name TEXT NOT NULL UNIQUE PRIMARY KEY,
+                  balance DECIMAL(65, 20) NOT NULL,
                   owner TEXT NOT NULL UNIQUE,
                   members LIST NOT NULL
                 )""");
@@ -89,7 +110,7 @@ public class SQLController implements DataController {
 
     @FunctionalInterface
     protected interface ThrowingFunction<T, R> {
-        R apply(T t) throws SQLException;
+        @Nullable R apply(T t) throws SQLException;
 
         static <T, R> ThrowingFunction<T, R> unchecked(ThrowingFunction<T, R> f) {
             return f;
