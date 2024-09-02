@@ -1,7 +1,7 @@
 package net.thenextlvl.economist.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.api.Account;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
@@ -11,12 +11,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class EconomistAccount implements Account {
-    private BigDecimal balance = BigDecimal.ZERO;
-
-    private final UUID owner;
+    private BigDecimal balance;
     private final @Nullable World world;
+    private final UUID owner;
 
     @Override
     public BigDecimal deposit(Number amount) {
