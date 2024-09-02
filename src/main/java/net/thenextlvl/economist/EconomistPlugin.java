@@ -61,10 +61,6 @@ public class EconomistPlugin extends JavaPlugin {
     }
 
     @Override
-    public void onEnable() {
-    }
-
-    @Override
     public void onDisable() {
         metrics().shutdown();
     }
