@@ -76,13 +76,18 @@ public class EconomistEconomyController implements EconomyController {
     }
 
     @Override
+    public CompletableFuture<Boolean> deleteAccount(String name) {
+        return CompletableFuture.supplyAsync(() -> plugin.dataController().deleteAccount(name));
+    }
+
+    @Override
     public CompletableFuture<Boolean> deleteAccount(UUID uuid) {
-        return null;
+        return CompletableFuture.supplyAsync(() -> plugin.dataController().deleteAccount(uuid, null));
     }
 
     @Override
     public CompletableFuture<Boolean> deleteAccount(UUID uuid, World world) {
-        return null;
+        return CompletableFuture.supplyAsync(() -> plugin.dataController().deleteAccount(uuid, world));
     }
 
     @Override
