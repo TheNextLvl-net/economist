@@ -30,7 +30,7 @@ import java.util.Locale;
 @Accessors(fluent = true)
 public class EconomistPlugin extends JavaPlugin {
     private final PluginVersionChecker versionChecker = new PluginVersionChecker(this);
-    private final Metrics metrics = new Metrics(this, 23083);
+    private final Metrics metrics = new Metrics(this, 23261);
 
     private final PluginConfig config = new GsonFile<>(
             IO.of(getDataFolder(), "config.json"),
