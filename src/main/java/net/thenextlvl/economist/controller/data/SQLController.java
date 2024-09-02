@@ -1,5 +1,9 @@
 package net.thenextlvl.economist.controller.data;
 
+import lombok.SneakyThrows;
+import net.kyori.adventure.key.Key;
+import net.thenextlvl.economist.api.Account;
+import net.thenextlvl.economist.model.EconomistAccount;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,9 +21,10 @@ public class SQLController implements DataController {
     }
 
     @Override
-    public boolean deleteAccount(String name) {
+    public boolean deleteAccount(UUID uuid, @Nullable World world) {
         try {
-            executeUpdate("DELETE FROM accounts WHERE name = ?", name);
+            executeUpdate("DELETE FROM accounts WHERE uuid = ? AND world = ?",
+                    uuid, world != null ? world.key().asString() : null);
             return true;
         } catch (SQLException e) {
             return false;
@@ -27,10 +32,20 @@ public class SQLController implements DataController {
     }
 
     @Override
-    public boolean deleteAccount(UUID uuid, @Nullable World world) {
+    @SneakyThrows
+    public @Nullable Account getAccount(UUID uuid, @Nullable World world) {
+        var balance = executeQuery("SELECT balance FROM accounts WHERE uuid = ? AND world = ?",
+                resultSet -> resultSet.getBigDecimal("balance"),
+                uuid, world != null ? world.key().asString() : null);
+        return balance != null ? new EconomistAccount(balance, world, uuid) : null;
+    }
+
+    @Override
+    public boolean save(Account account) {
         try {
-            executeUpdate("DELETE FROM accounts WHERE uuid = ? AND world = ?",
-                    uuid, world == null ? null : world.getName());
+            executeUpdate("UPDATE accounts SET balance = ? WHERE uuid = ? AND world = ?",
+                    account.getBalance(), account.getOwner(),
+                    account.getWorld().map(World::key).map(Key::asString).orElse(null));
             return true;
         } catch (SQLException e) {
             return false;
@@ -53,7 +68,7 @@ public class SQLController implements DataController {
     }
 
     @SuppressWarnings("SqlSourceToSinkFlow")
-    protected <T> T executeQuery(String query, ThrowingFunction<ResultSet, T> mapper, Object... parameters) throws SQLException {
+    protected <T> @Nullable T executeQuery(String query, ThrowingFunction<ResultSet, T> mapper, @Nullable Object... parameters) throws SQLException {
         try (var preparedStatement = connection.prepareStatement(query)) {
             for (var i = 0; i < parameters.length; i++)
                 preparedStatement.setObject(i + 1, parameters[i]);
