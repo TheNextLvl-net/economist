@@ -10,16 +10,14 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.api.bank.BankController;
-import net.thenextlvl.economist.command.BalanceCommand;
-import net.thenextlvl.economist.command.BankCommand;
-import net.thenextlvl.economist.command.EconomyCommand;
-import net.thenextlvl.economist.command.TopListCommand;
+import net.thenextlvl.economist.command.*;
 import net.thenextlvl.economist.configuration.PluginConfig;
 import net.thenextlvl.economist.configuration.StorageType;
 import net.thenextlvl.economist.controller.EconomistBankController;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.controller.data.DataController;
 import net.thenextlvl.economist.controller.data.SQLiteController;
+import net.thenextlvl.economist.listener.ConnectionListener;
 import net.thenextlvl.economist.service.ServiceEconomyController;
 import net.thenextlvl.economist.version.PluginVersionChecker;
 import org.bstats.bukkit.Metrics;
@@ -59,7 +57,7 @@ public class EconomistPlugin extends JavaPlugin {
 
     public EconomistPlugin() throws SQLException {
         this.dataController = switch (config().storageType()) {
-            case SQLite -> new SQLiteController(new File(getDataFolder(), "saves.db"));
+            case SQLite -> new SQLiteController(this);
             default -> throw new IllegalStateException("Unexpected value: " + config().storageType());
         };
     }
@@ -72,7 +70,14 @@ public class EconomistPlugin extends JavaPlugin {
     }
 
     @Override
+    public void onEnable() {
+        getServer().getPluginManager().registerEvents(new ConnectionListener(this), this);
+    }
+
+    @Override
     public void onDisable() {
+        economyController().save();
+        bankController().save();
         metrics().shutdown();
     }
 
@@ -89,6 +94,7 @@ public class EconomistPlugin extends JavaPlugin {
         new BalanceCommand(this).register();
         new BankCommand(this).register();
         new EconomyCommand(this).register();
+        new PayCommand(this).register();
         new TopListCommand(this).register();
     }
 }
