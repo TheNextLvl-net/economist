@@ -246,14 +246,6 @@ public interface EconomyController {
     }
 
     /**
-     * Deletes the account associated with the specified name.
-     *
-     * @param name the name of the account to be deleted
-     * @return a CompletableFuture that will complete when the account is deleted
-     */
-    CompletableFuture<Boolean> deleteAccount(String name);
-
-    /**
      * Deletes the account with the specified uuid.
      *
      * @param uuid the uuid of the account to be deleted
