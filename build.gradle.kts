@@ -27,11 +27,14 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.projectlombok:lombok:1.18.34")
-    compileOnly("net.thenextlvl.core:annotations:2.0.1")
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    compileOnly("net.thenextlvl.core:annotations:2.0.1")
+    compileOnly("net.thenextlvl.services:service-io:1.0.0")
+    compileOnly("org.jetbrains:annotations:24.1.0")
+    compileOnly("org.projectlombok:lombok:1.18.34")
 
     implementation("org.bstats:bstats-bukkit:3.0.3")
+    implementation(project(":api"))
 
     testImplementation(platform("org.junit:junit-bom:5.11.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -40,9 +43,7 @@ dependencies {
 }
 
 tasks.shadowJar {
-    dependencies {
-        relocate("org.bstats", "${rootProject.group}.metrics")
-    }
+    relocate("org.bstats", "${rootProject.group}.metrics")
 }
 
 tasks.test {
