@@ -71,10 +71,14 @@ public class BalanceCommand {
                                     : controller.getCurrencyNamePlural(locale)),
                             Placeholder.parsed("symbol", controller.getCurrencySymbol()));
 
-                }, () -> plugin.bundle().sendMessage(sender,
-                        world != null ? "account.not-found.world" : "account.not-found",
-                        Placeholder.parsed("player", String.valueOf(player.getName())),
-                        Placeholder.parsed("world", world != null ? world.getName() : "null"))));
+                }, () -> {
+                    var message = world != null && !world.equals(sender instanceof Player p ? p.getWorld() : null)
+                            ? "account.not-found.world" : "account.not-found";
+
+                    plugin.bundle().sendMessage(sender, message,
+                            Placeholder.parsed("player", String.valueOf(player.getName())),
+                            Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
+                }));
 
         return Command.SINGLE_SUCCESS;
     }
