@@ -71,9 +71,10 @@ paper {
     }
 
     permissions {
-        register("economist.balance-top")
-        register("economist.balance")
         register("economist.admin")
+        register("economist.balance")
+        register("economist.balance-top")
+        register("economist.bank")
     }
 }
 
