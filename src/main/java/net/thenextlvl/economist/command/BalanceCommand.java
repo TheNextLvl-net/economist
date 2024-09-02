@@ -15,7 +15,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -47,7 +46,7 @@ public class BalanceCommand {
                 })
                 .build();
         plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
-                event.registrar().register(command, "Display a players balance", List.of("money"))));
+                event.registrar().register(command, "Display a players balance", plugin.config().balanceAliases())));
     }
 
     private int balance(CommandContext<CommandSourceStack> context, OfflinePlayer player, @Nullable World world) {
