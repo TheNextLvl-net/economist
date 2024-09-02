@@ -33,7 +33,7 @@ public class EconomistAccount implements Account {
     }
 
     @Override
-    public void setBalance(Number balance) {
-        this.balance = new BigDecimal(balance.toString());
+    public BigDecimal setBalance(Number balance) {
+        return this.balance = new BigDecimal(balance.toString());
     }
 }
