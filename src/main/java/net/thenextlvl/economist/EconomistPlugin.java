@@ -11,6 +11,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.api.bank.BankController;
 import net.thenextlvl.economist.command.BalanceCommand;
+import net.thenextlvl.economist.command.BankCommand;
 import net.thenextlvl.economist.command.EconomyCommand;
 import net.thenextlvl.economist.command.TopListCommand;
 import net.thenextlvl.economist.controller.EconomistBankController;
@@ -71,6 +72,7 @@ public class EconomistPlugin extends JavaPlugin {
 
     private void registerCommands() {
         new BalanceCommand(this).register();
+        new BankCommand(this).register();
         new EconomyCommand(this).register();
         new TopListCommand(this).register();
     }
