@@ -34,6 +34,7 @@ dependencies {
 
     implementation("net.thenextlvl.core:files:1.0.5")
     implementation("net.thenextlvl.core:i18n:1.0.19")
+    implementation("net.thenextlvl.core:paper:1.4.1")
     implementation("org.bstats:bstats-bukkit:3.0.3")
     implementation(project(":api"))
 
@@ -59,6 +60,12 @@ paper {
     foliaSupported = true
 
     website = "https://thenextlvl.net"
+
+    permissions {
+        register("economist.balance-top")
+        register("economist.balance")
+        register("economist.admin")
+    }
 }
 
 val versionString: String = project.version as String
