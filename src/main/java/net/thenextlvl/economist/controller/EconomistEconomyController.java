@@ -1,22 +1,40 @@
 package net.thenextlvl.economist.controller;
 
-import lombok.RequiredArgsConstructor;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.EconomyController;
-import net.thenextlvl.economist.model.EconomistAccount;
+import net.thenextlvl.economist.controller.data.DataController;
 import org.bukkit.World;
+import org.jetbrains.annotations.Nullable;
 
-import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-@RequiredArgsConstructor
 public class EconomistEconomyController implements EconomyController {
     private final EconomistPlugin plugin;
+    private final Cache<Identifier, Account> cache;
+
+    public EconomistEconomyController(EconomistPlugin plugin) {
+        this.cache = CacheBuilder.newBuilder()
+                .expireAfterWrite(10, java.util.concurrent.TimeUnit.MINUTES)
+                .<Identifier, Account>removalListener(notification -> {
+                    if (!notification.wasEvicted() || notification.getValue() == null) return;
+                    if (dataController().save(notification.getValue())) return;
+                    plugin.getComponentLogger().error("Failed to save account {} to database",
+                            notification.getValue().getOwner());
+                })
+                .build();
+        this.plugin = plugin;
+    }
+
+
+    private record Identifier(UUID uuid, @Nullable World world) {
+    }
 
     @Override
     public String format(Number amount, Locale locale) {
@@ -24,6 +42,10 @@ public class EconomistEconomyController implements EconomyController {
         format.setMaximumFractionDigits(plugin.config().fractionalDigits());
         format.setMinimumFractionDigits(plugin.config().fractionalDigits());
         return format.format(amount);
+    }
+
+    private DataController dataController() {
+        return plugin.dataController();
     }
 
     @Override
@@ -47,12 +69,13 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public Optional<Account> getAccount(UUID uuid) {
-        return Optional.of(new EconomistAccount(BigDecimal.ZERO, null, uuid));
+        return Optional.ofNullable(cache.getIfPresent(new Identifier(uuid, null)));
     }
 
     @Override
     public Optional<Account> getAccount(UUID uuid, World world) {
-        return Optional.of(new EconomistAccount(BigDecimal.ZERO, world, uuid));
+        return Optional.ofNullable(cache.getIfPresent(new Identifier(uuid, world)));
+        // return Optional.of(new EconomistAccount(BigDecimal.ZERO, world, uuid));
     }
 
     @Override
@@ -67,27 +90,30 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public CompletableFuture<Optional<Account>> loadAccount(UUID uuid) {
-        return null;
+        return CompletableFuture.supplyAsync(() -> {
+            var optional = Optional.ofNullable(dataController().getAccount(uuid, null));
+            optional.ifPresent(account -> cache.put(new Identifier(uuid, null), account));
+            return optional;
+        });
     }
 
     @Override
     public CompletableFuture<Optional<Account>> loadAccount(UUID uuid, World world) {
-        return null;
-    }
-
-    @Override
-    public CompletableFuture<Boolean> deleteAccount(String name) {
-        return CompletableFuture.supplyAsync(() -> plugin.dataController().deleteAccount(name));
+        return CompletableFuture.supplyAsync(() -> {
+            var optional = Optional.ofNullable(dataController().getAccount(uuid, world));
+            optional.ifPresent(account -> cache.put(new Identifier(uuid, world), account));
+            return optional;
+        });
     }
 
     @Override
     public CompletableFuture<Boolean> deleteAccount(UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> plugin.dataController().deleteAccount(uuid, null));
+        return CompletableFuture.supplyAsync(() -> dataController().deleteAccount(uuid, null));
     }
 
     @Override
     public CompletableFuture<Boolean> deleteAccount(UUID uuid, World world) {
-        return CompletableFuture.supplyAsync(() -> plugin.dataController().deleteAccount(uuid, world));
+        return CompletableFuture.supplyAsync(() -> dataController().deleteAccount(uuid, world));
     }
 
     @Override
