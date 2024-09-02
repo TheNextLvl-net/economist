@@ -26,23 +26,23 @@ public class BalanceCommand {
 
     public void register() {
         var command = Commands.literal("balance")
-                .requires(stack -> stack.getSender().hasPermission("economist.admin"))
+                .requires(stack -> stack.getSender().hasPermission("economist.balance"))
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
+                        .requires(stack -> stack.getSender().hasPermission("economist.balance.others"))
                         .then(Commands.argument("world", ArgumentTypes.world())
+                                .requires(stack -> stack.getSender().hasPermission("economist.balance.world"))
                                 .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var world = context.getArgument("world", World.class);
                                     return balance(context, player, world);
                                 }))
                         .executes(context -> {
-                            var target = context.getArgument("player", OfflinePlayer.class);
-                            if (context.getSource().getSender() instanceof Player player)
-                                return balance(context, target, player.getWorld());
-                            return balance(context, target, null);
+                            var player = context.getArgument("player", OfflinePlayer.class);
+                            return balance(context, player, null);
                         }))
                 .executes(context -> {
                     if (context.getSource().getSender() instanceof Player player)
-                        return balance(context, player, player.getWorld());
+                        return balance(context, player, null);
                     throw new IllegalArgumentException("No player defined");
                 })
                 .build();
@@ -59,26 +59,22 @@ public class BalanceCommand {
                 .thenAccept(optional -> optional.ifPresentOrElse(account -> {
                     var locale = sender instanceof Player p ? p.locale() : Locale.US;
 
-                    var message = world != null && world.equals(sender instanceof Player p ? p.getWorld() : null)
-                            ? (player.equals(sender) ? "account.balance.self" : "account.balance.other")
-                            : (player.equals(sender) ? "account.balance.world.self" : "account.balance.world.other");
+                    var message = world != null
+                            ? (player.equals(sender) ? "account.balance.world.self" : "account.balance.world.other")
+                            : (player.equals(sender) ? "account.balance.self" : "account.balance.other");
 
                     plugin.bundle().sendMessage(sender, message,
                             Placeholder.parsed("player", String.valueOf(player.getName())),
                             Placeholder.parsed("balance", controller.format(account.getBalance(), locale)),
-                            Placeholder.parsed("currency", account.getBalance().intValueExact() == 1
+                            Placeholder.parsed("currency", account.getBalance().intValue() == 1
                                     ? controller.getCurrencyNameSingular(locale)
                                     : controller.getCurrencyNamePlural(locale)),
-                            Placeholder.parsed("symbol", controller.getCurrencySymbol()));
-
-                }, () -> {
-                    var message = world != null && !world.equals(sender instanceof Player p ? p.getWorld() : null)
-                            ? "account.not-found.world" : "account.not-found";
-
-                    plugin.bundle().sendMessage(sender, message,
-                            Placeholder.parsed("player", String.valueOf(player.getName())),
+                            Placeholder.parsed("symbol", controller.getCurrencySymbol()),
                             Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
-                }));
+
+                }, () -> plugin.bundle().sendMessage(sender, world != null ? "account.not-found.world" : "account.not-found",
+                        Placeholder.parsed("player", String.valueOf(player.getName())),
+                        Placeholder.parsed("world", world != null ? world.key().asString() : "null"))));
 
         return Command.SINGLE_SUCCESS;
     }
