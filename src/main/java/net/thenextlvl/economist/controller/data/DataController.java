@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public interface DataController {
-    @Nullable Account createAccount(UUID uuid, @Nullable World world);
+    Account createAccount(UUID uuid, @Nullable World world);
 
     @Nullable Account getAccount(UUID uuid, @Nullable World world);
 
