@@ -58,20 +58,24 @@ public class BalanceCommand {
                 .orElseGet(() -> controller.tryGetAccount(player))
                 .thenAccept(optional -> optional.ifPresentOrElse(account -> {
                     var locale = sender instanceof Player p ? p.locale() : Locale.US;
+
                     var message = world != null && world.equals(sender instanceof Player p ? p.getWorld() : null)
                             ? (player.equals(sender) ? "account.balance.self" : "account.balance.other")
                             : (player.equals(sender) ? "account.balance.world.self" : "account.balance.world.other");
+
                     plugin.bundle().sendMessage(sender, message,
                             Placeholder.parsed("player", String.valueOf(player.getName())),
                             Placeholder.parsed("balance", controller.format(account.getBalance(), locale)),
-                            Placeholder.parsed("currency", account.getBalance().intValue() == 1
+                            Placeholder.parsed("currency", account.getBalance().intValueExact() == 1
                                     ? controller.getCurrencyNameSingular(locale)
                                     : controller.getCurrencyNamePlural(locale)),
                             Placeholder.parsed("symbol", controller.getCurrencySymbol()));
+
                 }, () -> plugin.bundle().sendMessage(sender,
                         world != null ? "account.not-found.world" : "account.not-found",
                         Placeholder.parsed("player", String.valueOf(player.getName())),
                         Placeholder.parsed("world", world != null ? world.getName() : "null"))));
+
         return Command.SINGLE_SUCCESS;
     }
 }
