@@ -1,4 +1,4 @@
-package net.thenextlvl.economist.model.configuration;
+package net.thenextlvl.economist.configuration;
 
 import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.Range;
