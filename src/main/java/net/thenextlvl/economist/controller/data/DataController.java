@@ -7,9 +7,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public interface DataController {
-    boolean deleteAccount(UUID uuid, @Nullable World world);
+    @Nullable Account createAccount(UUID uuid, @Nullable World world);
 
     @Nullable Account getAccount(UUID uuid, @Nullable World world);
+
+    boolean deleteAccount(UUID uuid, @Nullable World world);
 
     boolean save(Account account);
 }
