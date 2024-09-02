@@ -304,4 +304,50 @@ public interface BankController {
      * @return an Optional containing the Bank associated with the UUID and world, or empty if not found
      */
     Optional<Bank> getBank(UUID uuid, World world);
+
+    /**
+     * Checks if a bank with the given name exists.
+     *
+     * @param name The name of the bank to check.
+     * @return true if the bank exists, false otherwise.
+     */
+    boolean hasBank(String name);
+
+    /**
+     * Checks if the specified player has a bank account.
+     *
+     * @param player the player for whom to check the bank account
+     * @return true if the player has a bank account, false otherwise
+     */
+    default boolean hasBank(OfflinePlayer player) {
+        return hasBank(player.getUniqueId());
+    }
+
+    /**
+     * Checks if the given player has a bank in the specified world.
+     *
+     * @param player the player whose bank status is being checked
+     * @param world  the world in which to check for the player's bank
+     * @return true if the player has a bank in the specified world, false otherwise
+     */
+    default boolean hasBank(OfflinePlayer player, World world) {
+        return hasBank(player.getUniqueId(), world);
+    }
+
+    /**
+     * Checks if a bank account associated with the given UUID exists.
+     *
+     * @param uuid the UUID of the bank account to check
+     * @return true if a bank account associated with the UUID exists, false otherwise
+     */
+    boolean hasBank(UUID uuid);
+
+    /**
+     * Checks if a bank account exists for the given player in the specified world.
+     *
+     * @param uuid the unique identifier of the player
+     * @param world the world in which to check for the bank account
+     * @return true if the bank account exists, false otherwise
+     */
+    boolean hasBank(UUID uuid, World world);
 }
