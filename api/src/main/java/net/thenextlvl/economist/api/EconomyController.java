@@ -16,9 +16,10 @@ public interface EconomyController {
      * Formats the specified amount as a string.
      *
      * @param amount the number amount to be formatted
+     * @param locale the locale to use for formatting
      * @return the formatted amount as a string
      */
-    String format(Number amount);
+    String format(Number amount, Locale locale);
 
     /**
      * Retrieves the plural form of the currency name based on the provided locale.
