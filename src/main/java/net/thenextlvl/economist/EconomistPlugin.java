@@ -18,9 +18,11 @@ import net.thenextlvl.economist.controller.EconomistBankController;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.model.configuration.PluginConfig;
 import net.thenextlvl.economist.model.configuration.StorageType;
+import net.thenextlvl.economist.service.ServiceEconomyController;
 import net.thenextlvl.economist.version.PluginVersionChecker;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -48,16 +50,13 @@ public class EconomistPlugin extends JavaPlugin {
                     Placeholder.component("prefix", bundle.component(Locale.US, "prefix"))
             )).build());
 
-    private final BankController bankController = new EconomistBankController(this);
-    private final EconomyController economyController;
-
-    public EconomistPlugin() {
-        this.economyController = new EconomistEconomyController(this);
-    }
+    private final EconomistBankController bankController = new EconomistBankController(this);
+    private final EconomistEconomyController economyController = new EconomistEconomyController(this);
 
     @Override
     public void onLoad() {
         versionChecker().checkVersion();
+        registerServices();
         registerCommands();
     }
 
@@ -68,6 +67,15 @@ public class EconomistPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         metrics().shutdown();
+    }
+
+    private void registerServices() {
+        getServer().getServicesManager().register(BankController.class, bankController, this, ServicePriority.Highest);
+        getServer().getServicesManager().register(EconomyController.class, economyController, this, ServicePriority.Highest);
+
+        if (getServer().getPluginManager().getPlugin("ServiceIO") == null) return;
+        new ServiceEconomyController(this).register();
+        getComponentLogger().info("Registered ServiceIO support");
     }
 
     private void registerCommands() {
