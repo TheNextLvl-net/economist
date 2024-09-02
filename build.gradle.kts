@@ -13,8 +13,11 @@ group = "net.thenextlvl.economist"
 version = "1.0.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+tasks.compileJava {
+    options.release.set(21)
 }
 
 repositories {
@@ -54,7 +57,6 @@ paper {
     foliaSupported = true
 
     website = "https://thenextlvl.net"
-    provides = listOf("Vault")
 }
 
 val versionString: String = project.version as String
@@ -66,7 +68,7 @@ val versions: List<String> = (property("gameVersions") as String)
 
 hangarPublish { // docs - https://docs.papermc.io/misc/hangar-publishing
     publications.register("plugin") {
-        id.set("Economist") // todo: create project
+        id.set("Economist")
         version.set(versionString)
         channel.set(if (isRelease) "Release" else "Snapshot")
         apiKey.set(System.getenv("HANGAR_API_TOKEN"))
