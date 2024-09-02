@@ -6,7 +6,6 @@ plugins {
     id("io.github.goooler.shadow") version "8.1.8"
     id("io.papermc.hangar-publish-plugin") version "0.1.2"
     id("net.minecrell.plugin-yml.paper") version "0.6.0"
-    id("com.modrinth.minotaur") version "2.+"
 }
 
 group = "net.thenextlvl.economist"
@@ -78,14 +77,4 @@ hangarPublish { // docs - https://docs.papermc.io/misc/hangar-publishing
             platformVersions.set(versions)
         }
     }
-}
-
-modrinth {
-    token.set(System.getenv("MODRINTH_TOKEN"))
-    projectId.set("") // todo: create project
-    versionType = if (isRelease) "release" else "beta"
-    uploadFile.set(tasks.shadowJar)
-    gameVersions.set(versions)
-    loaders.add("paper")
-    loaders.add("folia")
 }
