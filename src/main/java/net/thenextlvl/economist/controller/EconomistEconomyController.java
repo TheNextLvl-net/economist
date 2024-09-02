@@ -1,11 +1,13 @@
 package net.thenextlvl.economist.controller;
 
+import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.model.EconomistAccount;
 import org.bukkit.World;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Currency;
 import java.util.Locale;
@@ -13,12 +15,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@RequiredArgsConstructor
 public class EconomistEconomyController implements EconomyController {
     private final EconomistPlugin plugin;
-
-    public EconomistEconomyController(EconomistPlugin plugin) {
-        this.plugin = plugin;
-    }
 
     @Override
     public String format(Number amount, Locale locale) {
@@ -50,12 +49,12 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public Optional<Account> getAccount(UUID uuid) {
-        return Optional.of(new EconomistAccount(uuid, null));
+        return Optional.of(new EconomistAccount(BigDecimal.ZERO, null, uuid));
     }
 
     @Override
     public Optional<Account> getAccount(UUID uuid, World world) {
-        return Optional.of(new EconomistAccount(uuid, world));
+        return Optional.of(new EconomistAccount(BigDecimal.ZERO, world, uuid));
     }
 
     @Override
