@@ -9,6 +9,8 @@ import org.bukkit.World;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.Optional;
@@ -21,8 +23,7 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public String format(Number amount, Locale locale) {
-        var format = new DecimalFormat();
-        format.setCurrency(Currency.getInstance(locale));
+        var format = NumberFormat.getInstance(locale);
         format.setMaximumFractionDigits(plugin.config().fractionalDigits());
         format.setMinimumFractionDigits(plugin.config().fractionalDigits());
         return format.format(amount);
