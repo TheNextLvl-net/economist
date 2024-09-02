@@ -105,4 +105,8 @@ public class EconomistBankController implements BankController {
     public boolean hasBank(UUID uuid, World world) {
         return false;
     }
+
+    public void save() {
+
+    }
 }
