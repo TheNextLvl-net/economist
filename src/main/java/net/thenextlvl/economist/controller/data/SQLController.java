@@ -1,8 +1,12 @@
 package net.thenextlvl.economist.controller.data;
 
+import org.bukkit.World;
+import org.jetbrains.annotations.Nullable;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class SQLController implements DataController {
     private final Connection connection;
@@ -10,6 +14,27 @@ public class SQLController implements DataController {
     public SQLController(Connection connection) throws SQLException {
         this.connection = connection;
         createTables();
+    }
+
+    @Override
+    public boolean deleteAccount(String name) {
+        try {
+            executeUpdate("DELETE FROM accounts WHERE name = ?", name);
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean deleteAccount(UUID uuid, @Nullable World world) {
+        try {
+            executeUpdate("DELETE FROM accounts WHERE uuid = ? AND world = ?",
+                    uuid, world == null ? null : world.getName());
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     private void createTables() throws SQLException {
@@ -23,11 +48,12 @@ public class SQLController implements DataController {
                 CREATE TABLE IF NOT EXISTS banks (
                   name TEXT NOT NULL UNIQUE PRIMARY KEY,
                   owner TEXT NOT NULL UNIQUE,
-                  members SET NOT NULL
+                  members LIST NOT NULL
                 )""");
     }
 
-    private <T> T executeQuery(String query, ThrowingFunction<ResultSet, T> mapper, Object... parameters) throws SQLException {
+    @SuppressWarnings("SqlSourceToSinkFlow")
+    protected <T> T executeQuery(String query, ThrowingFunction<ResultSet, T> mapper, Object... parameters) throws SQLException {
         try (var preparedStatement = connection.prepareStatement(query)) {
             for (var i = 0; i < parameters.length; i++)
                 preparedStatement.setObject(i + 1, parameters[i]);
@@ -37,7 +63,8 @@ public class SQLController implements DataController {
         }
     }
 
-    private void executeUpdate(String query, Object... parameters) throws SQLException {
+    @SuppressWarnings("SqlSourceToSinkFlow")
+    protected void executeUpdate(String query, @Nullable Object... parameters) throws SQLException {
         try (var preparedStatement = connection.prepareStatement(query)) {
             for (var i = 0; i < parameters.length; i++)
                 preparedStatement.setObject(i + 1, parameters[i]);
@@ -46,7 +73,7 @@ public class SQLController implements DataController {
     }
 
     @FunctionalInterface
-    private interface ThrowingFunction<T, R> {
+    protected interface ThrowingFunction<T, R> {
         R apply(T t) throws SQLException;
 
         static <T, R> ThrowingFunction<T, R> unchecked(ThrowingFunction<T, R> f) {
