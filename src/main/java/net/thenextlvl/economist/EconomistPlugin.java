@@ -29,6 +29,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.Set;
 
 @Getter
 @Accessors(fluent = true)
@@ -38,7 +39,7 @@ public class EconomistPlugin extends JavaPlugin {
 
     private final PluginConfig config = new GsonFile<>(
             IO.of(getDataFolder(), "config.json"),
-            new PluginConfig(2, "$", new BigDecimal(0), StorageType.SQLite)
+            new PluginConfig(0.01, 2, "$", new BigDecimal(0), StorageType.SQLite, Set.of("money"))
     ).validate().save().getRoot();
 
     private final ComponentBundle bundle = new ComponentBundle(
