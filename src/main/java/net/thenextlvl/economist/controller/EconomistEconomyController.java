@@ -8,10 +8,7 @@ import net.thenextlvl.economist.model.EconomistAccount;
 import org.bukkit.World;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.Currency;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;

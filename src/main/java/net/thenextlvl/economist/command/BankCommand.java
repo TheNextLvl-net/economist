@@ -5,8 +5,6 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @SuppressWarnings("UnstableApiUsage")
 public class BankCommand {
