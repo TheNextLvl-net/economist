@@ -1,4 +1,5 @@
 import io.papermc.hangarpublishplugin.model.Platforms
+import net.minecrell.pluginyml.paper.PaperPluginDescription
 
 plugins {
     id("java")
@@ -21,6 +22,7 @@ tasks.compileJava {
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
     maven("https://repo.thenextlvl.net/releases")
     maven("https://papermc.io/repo/repository/maven-public/")
 }
@@ -60,6 +62,13 @@ paper {
     foliaSupported = true
 
     website = "https://thenextlvl.net"
+
+    serverDependencies {
+        register("ServiceIO") {
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+            required = false
+        }
+    }
 
     permissions {
         register("economist.balance-top")
