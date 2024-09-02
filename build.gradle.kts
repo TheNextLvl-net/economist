@@ -32,6 +32,8 @@ dependencies {
     compileOnly("org.jetbrains:annotations:24.1.0")
     compileOnly("org.projectlombok:lombok:1.18.34")
 
+    implementation("net.thenextlvl.core:files:1.0.5")
+    implementation("net.thenextlvl.core:i18n:1.0.19")
     implementation("org.bstats:bstats-bukkit:3.0.3")
     implementation(project(":api"))
 
