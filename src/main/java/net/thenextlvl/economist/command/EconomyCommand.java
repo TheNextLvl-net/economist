@@ -13,14 +13,17 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
+import net.thenextlvl.economist.api.Account;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.BiFunction;
 
 @RequiredArgsConstructor
 @SuppressWarnings("UnstableApiUsage")
@@ -28,95 +31,93 @@ public class EconomyCommand {
     private final EconomistPlugin plugin;
 
     public void register() {
-        var minimum = Commands.argument("amount", DoubleArgumentType.doubleArg(plugin.config().minimumPayment()));
-        var target = Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer());
-        var targets = Commands.argument("players", ArgumentTypes.players());
         var command = Commands.literal("economy")
                 .requires(stack -> stack.getSender().hasPermission("economist.admin"))
-                .then(Commands.literal("give")
-                        .then(target.then(minimum))
-                        .then(targets.then(minimum)))
-                .then(reset())
-                .then(set())
-                .then(Commands.literal("take")
-                        .then(target.then(minimum))
-                        .then(targets.then(minimum)))
-                .build();
+                .then(give()).then(reset()).then(set()).then(take()).build();
         plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
                 event.registrar().register(command, "Manage the economy", List.of("eco"))));
     }
 
+    private ArgumentBuilder<CommandSourceStack, ?> give() {
+        return create("give", "balance.deposited", "balance.deposited.world", Account::deposit, plugin.config().minimumPayment());
+    }
+
+    private ArgumentBuilder<CommandSourceStack, ?> take() {
+        return create("take", "balance.withdrawn", "balance.withdrawn.world", Account::withdraw, plugin.config().minimumPayment());
+    }
+
     private ArgumentBuilder<CommandSourceStack, ?> set() {
-        var amountArgument = Commands.argument("amount", DoubleArgumentType.doubleArg(0));
-        var worldArgument = Commands.argument("world", ArgumentTypes.world());
-        return Commands.literal("set")
-                .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
-                        .then(amountArgument
-                                .then(worldArgument
-                                        .executes(context -> {
-                                            var player = context.getArgument("player", OfflinePlayer.class);
-                                            var amount = context.getArgument("amount", Double.class);
-                                            var world = context.getArgument("world", World.class);
-                                            return set(context, List.of(player), amount, world);
-                                        }))
-                                .executes(context -> {
-                                    var player = context.getArgument("player", OfflinePlayer.class);
-                                    var amount = context.getArgument("amount", Double.class);
-                                    return set(context, List.of(player), amount, null);
-                                })))
-                .then(Commands.argument("players", ArgumentTypes.players())
-                        .then(amountArgument
-                                .then(worldArgument
-                                        .executes(context -> {
-                                            var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
-                                            var amount = context.getArgument("amount", Double.class);
-                                            var world = context.getArgument("world", World.class);
-                                            return set(context, List.copyOf(players.resolve(context.getSource())), amount, world);
-                                        }))
-                                .executes(context -> {
-                                    var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
-                                    var amount = context.getArgument("amount", Double.class);
-                                    return set(context, List.copyOf(players.resolve(context.getSource())), amount, null);
-                                })));
+        return create("set", "balance.set", "balance.set.world", Account::setBalance, -Double.MAX_VALUE);
     }
 
     private ArgumentBuilder<CommandSourceStack, ?> reset() {
-        var worldArgument = Commands.argument("world", ArgumentTypes.world());
         return Commands.literal("reset")
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
-                        .then(worldArgument.executes(context -> {
+                        .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
                             var world = context.getArgument("world", World.class);
-                            return set(context, List.of(player), plugin.config().startBalance(), world);
+                            return execute(context, "balance.reset.world", List.of(player), plugin.config().startBalance(), world, Account::setBalance);
                         })).executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
-                            return set(context, List.of(player), plugin.config().startBalance(), null);
+                            return execute(context, "balance.reset", List.of(player), plugin.config().startBalance(), null, Account::setBalance);
                         }))
                 .then(Commands.argument("players", ArgumentTypes.players())
-                        .then(worldArgument.executes(context -> {
+                        .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                             var resolve = players.resolve(context.getSource());
                             var world = context.getArgument("world", World.class);
-                            return set(context, resolve, plugin.config().startBalance(), world);
+                            return execute(context, "balance.reset.world", resolve, plugin.config().startBalance(), world, Account::setBalance);
                         })).executes(context -> {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                             var resolve = players.resolve(context.getSource());
-                            return set(context, resolve, plugin.config().startBalance(), null);
+                            return execute(context, "balance.reset", resolve, plugin.config().startBalance(), null, Account::setBalance);
                         }));
     }
 
-    private int set(CommandContext<CommandSourceStack> context, Collection<? extends OfflinePlayer> players, Number amount, @Nullable World world) {
+    private ArgumentBuilder<CommandSourceStack, ?> create(String command, String successMessage, String successMessageWorld,
+                                                          BiFunction<Account, Number, BigDecimal> function, Double minimum) {
+        return Commands.literal(command)
+                .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
+                        .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
+                                .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
+                                    var player = context.getArgument("player", OfflinePlayer.class);
+                                    var amount = context.getArgument("amount", Double.class);
+                                    var world = context.getArgument("world", World.class);
+                                    return execute(context, successMessageWorld, List.of(player), amount, world, function);
+                                })).executes(context -> {
+                                    var player = context.getArgument("player", OfflinePlayer.class);
+                                    var amount = context.getArgument("amount", Double.class);
+                                    return execute(context, successMessage, List.of(player), amount, null, function);
+                                })))
+                .then(Commands.argument("players", ArgumentTypes.players())
+                        .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
+                                .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
+                                    var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
+                                    var amount = context.getArgument("amount", Double.class);
+                                    var world = context.getArgument("world", World.class);
+                                    return execute(context, successMessageWorld, List.copyOf(players.resolve(context.getSource())), amount, world, function);
+                                })).executes(context -> {
+                                    var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
+                                    var amount = context.getArgument("amount", Double.class);
+                                    return execute(context, successMessage, List.copyOf(players.resolve(context.getSource())), amount, null, function);
+                                })));
+    }
+
+    private int execute(CommandContext<CommandSourceStack> context, String successMessage,
+                        Collection<? extends OfflinePlayer> players, Number amount, @Nullable World world,
+                        BiFunction<Account, Number, BigDecimal> function) {
         var sender = context.getSource().getSender();
         var locale = sender instanceof Player p ? p.locale() : Locale.US;
         if (!players.isEmpty()) players.forEach(player -> (world != null
                 ? plugin.economyController().tryGetAccount(player, world)
                 : plugin.economyController().tryGetAccount(player))
                 .thenAccept(optional -> optional.ifPresentOrElse(account -> {
-                    var balance = account.setBalance(amount);
-                    plugin.bundle().sendMessage(sender, world != null ? "balance.reset.world" : "balance.reset",
+                    var balance = function.apply(account, amount);
+                    plugin.bundle().sendMessage(sender, successMessage,
                             Placeholder.parsed("world", world != null ? world.key().asString() : "null"),
                             Placeholder.parsed("player", String.valueOf(player.getName())),
                             Placeholder.parsed("balance", plugin.economyController().format(balance, locale)),
+                            Placeholder.parsed("amount", plugin.economyController().format(amount, locale)),
                             Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()));
                 }, () -> plugin.bundle().sendMessage(sender, world != null ? "account.not-found.world" : "account.not-found",
                         Placeholder.parsed("player", String.valueOf(player.getName())),
