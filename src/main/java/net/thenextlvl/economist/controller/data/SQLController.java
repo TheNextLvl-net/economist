@@ -8,6 +8,7 @@ import net.thenextlvl.economist.model.EconomistAccount;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,7 +42,7 @@ public class SQLController implements DataController {
             var balance = plugin.config().startBalance();
             executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
                     uuid, world != null ? world.key().asString() : null, balance);
-            return new EconomistAccount(balance, world, uuid);
+            return new EconomistAccount(BigDecimal.valueOf(balance), world, uuid);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
