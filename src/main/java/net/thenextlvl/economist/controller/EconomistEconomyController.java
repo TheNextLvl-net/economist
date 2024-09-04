@@ -7,6 +7,7 @@ import net.thenextlvl.economist.controller.data.DataController;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +29,18 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public String format(Number amount, Locale locale) {
+        if (plugin.config().scientificNumbers()) return scientificFormat(amount);
         var format = NumberFormat.getInstance(locale);
+        format.setRoundingMode(RoundingMode.DOWN);
         format.setMaximumFractionDigits(plugin.config().fractionalDigits());
         format.setMinimumFractionDigits(plugin.config().fractionalDigits());
-        return format.format(amount);
+        if (!plugin.config().abbreviateBalance()) return format.format(amount);
+        return Abbreviation.format(amount.doubleValue(), format, locale);
+    }
+
+    private String scientificFormat(Number amount) {
+        var format = "%." + fractionalDigits() + "e";
+        return format.formatted(amount.doubleValue());
     }
 
     private DataController dataController() {
