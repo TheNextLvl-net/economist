@@ -74,44 +74,100 @@ paper {
     permissions {
         register("economist.admin") {
             default = BukkitPluginDescription.Permission.Default.OP
+            description = "Admin permission to manage the economy."
             children = listOf(
                 "economist.balance-top.world",
-                "economist.balance.world",
-                "economist.bank",
+                "economist.bank.admin",
+                "economist.loan",
                 "economist.pay.world",
             )
         }
 
+        register("economist.bank.admin") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Admin permission to manage banks."
+            children = listOf(
+                "economist.bank.create.others",
+                "economist.bank.delete.others",
+                "economist.bank.manage.others",
+            )
+        }
+
+        register("economist.bank.create.others") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to create banks for others."
+            children = listOf("economist.bank.create")
+        }
+        register("economist.bank.delete.others") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to delete others' banks."
+            children = listOf("economist.bank.delete")
+        }
+        register("economist.bank.manage.others") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to manage others' banks."
+            children = listOf("economist.bank.manage")
+        }
+
+        register("economist.bank.create") {
+            default = BukkitPluginDescription.Permission.Default.TRUE
+            description = "Allows players to create banks."
+            children = listOf("economist.bank")
+        }
+        register("economist.bank.delete") {
+            default = BukkitPluginDescription.Permission.Default.TRUE
+            description = "Allows players to delete their bank."
+            children = listOf("economist.bank")
+        }
+        register("economist.bank.manage") {
+            default = BukkitPluginDescription.Permission.Default.TRUE
+            description = "Allows players to manage their bank."
+            children = listOf("economist.bank")
+        }
+
+        register("economist.bank") {
+            description = "Allows players to use banks."
+        }
+
         register("economist.balance") {
             default = BukkitPluginDescription.Permission.Default.TRUE
+            description = "Allows players to see their balance."
         }
         register("economist.balance.others") {
             default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to see other players' balances."
             children = listOf("economist.balance")
         }
         register("economist.balance.world") {
             default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to see other players' balances in specific worlds."
             children = listOf("economist.balance.others")
         }
 
         register("economist.balance-top") {
             default = BukkitPluginDescription.Permission.Default.OP
+            children = listOf("economist.balance")
+            description = "Allows players to see the balance top list."
         }
         register("economist.balance-top.world") {
             default = BukkitPluginDescription.Permission.Default.OP
-            children = listOf("economist.balance-top")
-        }
-
-        register("economist.bank") {
-            default = BukkitPluginDescription.Permission.Default.OP
+            children = listOf("economist.balance-top", "economist.balance.world")
+            description = "Allows players to see the balance top list of specific worlds."
         }
 
         register("economist.pay") {
             default = BukkitPluginDescription.Permission.Default.TRUE
+            description = "Allows players to make payments."
         }
         register("economist.pay.world") {
             default = BukkitPluginDescription.Permission.Default.OP
             children = listOf("economist.pay")
+            description = "Allows players to make payments to specific worlds."
+        }
+
+        register("economist.loan") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to loan money when making payments with insufficient funds."
         }
     }
 }
