@@ -119,7 +119,9 @@ public class EconomyCommand {
                             Placeholder.parsed("balance", plugin.economyController().format(balance, locale)),
                             Placeholder.parsed("amount", plugin.economyController().format(amount, locale)),
                             Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()));
-                }, () -> plugin.bundle().sendMessage(sender, world != null ? "account.not-found.world" : "account.not-found",
+                }, () -> plugin.bundle().sendMessage(sender, world != null
+                                ? (sender.equals(player) ? "account.not-found.world.self" : "account.not-found.world.other")
+                                : (sender.equals(player) ? "account.not-found.self" : "account.not-found.other"),
                         Placeholder.parsed("player", String.valueOf(player.getName())),
                         Placeholder.parsed("world", world != null ? world.key().asString() : "null")))));
         else plugin.bundle().sendMessage(sender, "player.define");
