@@ -12,6 +12,8 @@ public record PluginConfig(
         @SerializedName("currency-symbol") String currencySymbol,
         @SerializedName("start-balance") BigDecimal startBalance,
         @SerializedName("storage-type") StorageType storageType,
-        @SerializedName("balance-aliases") Set<String> balanceAliases
+        @SerializedName("balance-aliases") Set<String> balanceAliases,
+        @SerializedName("abbreviate-balance") boolean abbreviateBalance,
+        @SerializedName("scientific-numbers") boolean scientificNumbers
 ) {
 }
