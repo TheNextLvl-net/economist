@@ -24,7 +24,12 @@ public class EconomistEconomyController implements EconomyController {
     }
 
     public void save() {
-        cache.values().forEach(dataController()::save);
+        cache.values().forEach(this::save);
+        cache.clear();
+    }
+
+    public void save(Account account) {
+        dataController().save(account);
     }
 
     @Override
