@@ -39,11 +39,12 @@ public class EconomistPlugin extends JavaPlugin {
 
     private final PluginConfig config = new GsonFile<>(
             IO.of(getDataFolder(), "config.json"),
-            new PluginConfig(0.01, 2, "$", new BigDecimal(0), StorageType.SQLite, Set.of("money"))
+            new PluginConfig(0.01, 2, "$", new BigDecimal(0), StorageType.SQLite, Set.of("money"), true, false)
     ).validate().save().getRoot();
 
-    private final ComponentBundle bundle = new ComponentBundle(
-            new File(getDataFolder(), "translations"),
+    private final File translations = new File(getDataFolder(), "translations");
+
+    private final ComponentBundle bundle = new ComponentBundle(translations,
             audience -> audience instanceof Player player ? player.locale() : Locale.US)
             .register("economist", Locale.US)
             .register("economist_german", Locale.GERMANY)
@@ -51,6 +52,11 @@ public class EconomistPlugin extends JavaPlugin {
                     TagResolver.standard(),
                     Placeholder.component("prefix", bundle.component(Locale.US, "prefix"))
             )).build());
+
+    private final ComponentBundle abbreviations = new ComponentBundle(translations,
+            audience -> audience instanceof Player player ? player.locale() : Locale.US)
+            .register("abbreviations", Locale.US)
+            .register("abbreviations_german", Locale.GERMANY);
 
     private final EconomistBankController bankController = new EconomistBankController(this);
     private final EconomistEconomyController economyController = new EconomistEconomyController(this);
