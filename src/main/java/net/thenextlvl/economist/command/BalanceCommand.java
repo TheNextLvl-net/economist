@@ -71,7 +71,9 @@ public class BalanceCommand {
                             Placeholder.parsed("symbol", controller.getCurrencySymbol()),
                             Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
 
-                }, () -> plugin.bundle().sendMessage(sender, world != null ? "account.not-found.world" : "account.not-found",
+                }, () -> plugin.bundle().sendMessage(sender, world != null
+                                ? (player.equals(sender) ? "account.not-found.world.self" : "account.not-found.world.other")
+                                : (player.equals(sender) ? "account.not-found.self" : "account.not-found.other"),
                         Placeholder.parsed("player", String.valueOf(player.getName())),
                         Placeholder.parsed("world", world != null ? world.key().asString() : "null"))));
 
