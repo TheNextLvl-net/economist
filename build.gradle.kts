@@ -75,12 +75,13 @@ paper {
         register("economist.admin") {
             default = BukkitPluginDescription.Permission.Default.OP
             children = listOf(
+                "economist.balance-top.world",
                 "economist.balance.world",
-                "economist.balance-top",
                 "economist.bank",
-                "economist.pay",
+                "economist.pay.world",
             )
         }
+
         register("economist.balance") {
             default = BukkitPluginDescription.Permission.Default.TRUE
         }
@@ -92,14 +93,25 @@ paper {
             default = BukkitPluginDescription.Permission.Default.OP
             children = listOf("economist.balance.others")
         }
+
         register("economist.balance-top") {
             default = BukkitPluginDescription.Permission.Default.OP
         }
+        register("economist.balance-top.world") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            children = listOf("economist.balance-top")
+        }
+
         register("economist.bank") {
             default = BukkitPluginDescription.Permission.Default.OP
         }
+
         register("economist.pay") {
             default = BukkitPluginDescription.Permission.Default.TRUE
+        }
+        register("economist.pay.world") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            children = listOf("economist.pay")
         }
     }
 }
