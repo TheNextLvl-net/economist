@@ -39,7 +39,7 @@ public class EconomistPlugin extends JavaPlugin {
 
     private final PluginConfig config = new GsonFile<>(
             IO.of(getDataFolder(), "config.json"),
-            new PluginConfig(0.01, 2, "$", 250, 0, StorageType.SQLite, Set.of("money"), true, false, true)
+            new PluginConfig(0.01, 2, "$", 250, 0, StorageType.SQLite, Set.of("bal", "money"), true, false, true)
     ).validate().save().getRoot();
 
     private final File translations = new File(getDataFolder(), "translations");
