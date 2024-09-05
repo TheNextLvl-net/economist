@@ -1,5 +1,6 @@
 package net.thenextlvl.economist.service;
 
+import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.service.mode.ServiceAccount;
@@ -8,24 +9,23 @@ import net.thenextlvl.service.api.economy.EconomyController;
 import net.thenextlvl.service.api.economy.bank.BankController;
 import org.bukkit.World;
 import org.bukkit.plugin.ServicePriority;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@RequiredArgsConstructor
 public class ServiceEconomyController implements EconomyController {
-    private final ServiceBankController serviceBankController;
+    private final @Nullable ServiceBankController bankController;
     private final EconomistPlugin plugin;
 
-    public ServiceEconomyController(EconomistPlugin plugin) {
-        this.serviceBankController = new ServiceBankController(plugin);
-        this.plugin = plugin;
-    }
-
     public void register() {
-        plugin.getServer().getServicesManager().register(EconomyController.class, this, plugin, ServicePriority.Highest);
-        plugin.getServer().getServicesManager().register(BankController.class, serviceBankController, plugin, ServicePriority.Highest);
+        var services = plugin.getServer().getServicesManager();
+        services.register(EconomyController.class, this, plugin, ServicePriority.Highest);
+        if (bankController == null) return;
+        services.register(BankController.class, bankController, plugin, ServicePriority.Highest);
     }
 
     private EconomistEconomyController economyController() {
@@ -34,7 +34,7 @@ public class ServiceEconomyController implements EconomyController {
 
     @Override
     public Optional<BankController> getBankController() {
-        return Optional.of(serviceBankController);
+        return Optional.ofNullable(bankController);
     }
 
     @Override

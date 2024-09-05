@@ -18,6 +18,7 @@ import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.controller.data.DataController;
 import net.thenextlvl.economist.controller.data.SQLiteController;
 import net.thenextlvl.economist.listener.ConnectionListener;
+import net.thenextlvl.economist.service.ServiceBankController;
 import net.thenextlvl.economist.service.ServiceEconomyController;
 import net.thenextlvl.economist.version.PluginVersionChecker;
 import org.bstats.bukkit.Metrics;
@@ -38,7 +39,7 @@ public class EconomistPlugin extends JavaPlugin {
 
     private final PluginConfig config = new GsonFile<>(
             IO.of(getDataFolder(), "config.json"),
-            new PluginConfig(0.01, 2, "$", 250, 0, StorageType.SQLite, Set.of("money"), true, false)
+            new PluginConfig(0.01, 2, "$", 250, 0, StorageType.SQLite, Set.of("money"), true, false, true)
     ).validate().save().getRoot();
 
     private final File translations = new File(getDataFolder(), "translations");
@@ -88,17 +89,19 @@ public class EconomistPlugin extends JavaPlugin {
     }
 
     private void registerServices() {
-        getServer().getServicesManager().register(BankController.class, bankController, this, ServicePriority.Highest);
-        getServer().getServicesManager().register(EconomyController.class, economyController, this, ServicePriority.Highest);
+        var services = getServer().getServicesManager();
+        if (config().banks()) services.register(BankController.class, bankController, this, ServicePriority.Highest);
+        services.register(EconomyController.class, economyController, this, ServicePriority.Highest);
 
         if (getServer().getPluginManager().getPlugin("ServiceIO") == null) return;
-        new ServiceEconomyController(this).register();
+        var banks = config().banks() ? new ServiceBankController(this) : null;
+        new ServiceEconomyController(banks, this).register();
         getComponentLogger().info("Registered ServiceIO support");
     }
 
     private void registerCommands() {
+        if (config().banks()) new BankCommand(this).register();
         new BalanceCommand(this).register();
-        new BankCommand(this).register();
         new EconomyCommand(this).register();
         new PayCommand(this).register();
         new TopListCommand(this).register();

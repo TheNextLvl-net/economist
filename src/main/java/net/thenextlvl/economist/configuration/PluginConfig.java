@@ -14,6 +14,7 @@ public record PluginConfig(
         @SerializedName("storage-type") StorageType storageType,
         @SerializedName("balance-aliases") Set<String> balanceAliases,
         @SerializedName("abbreviate-balance") boolean abbreviateBalance,
-        @SerializedName("scientific-numbers") boolean scientificNumbers
+        @SerializedName("scientific-numbers") boolean scientificNumbers,
+        @SerializedName("enable-banks") boolean banks
 ) {
 }
