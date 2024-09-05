@@ -101,6 +101,7 @@ public class EconomistPlugin extends JavaPlugin {
 
     private void registerCommands() {
         if (config().banks()) new BankCommand(this).register();
+        new AccountCommand(this).register();
         new BalanceCommand(this).register();
         new EconomyCommand(this).register();
         new PayCommand(this).register();
