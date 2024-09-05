@@ -1,5 +1,6 @@
 package net.thenextlvl.economist.controller;
 
+import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.EconomyController;
@@ -12,13 +13,10 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+@RequiredArgsConstructor
 public class EconomistEconomyController implements EconomyController {
     private final Map<Identifier, Account> cache = new HashMap<>();
     private final EconomistPlugin plugin;
-
-    public EconomistEconomyController(EconomistPlugin plugin) {
-        this.plugin = plugin;
-    }
 
     private record Identifier(UUID uuid, @Nullable World world) {
     }
