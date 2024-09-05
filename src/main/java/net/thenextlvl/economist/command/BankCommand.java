@@ -26,6 +26,6 @@ public class BankCommand {
                 .then(Commands.literal("withdraw").requires(stack -> stack.getSender().hasPermission("economist.bank.withdraw")))
                 .build();
         plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
-                event.registrar().register(command, "Manage banks")));
+                event.registrar().register(command, "Manage bank accounts")));
     }
 }
