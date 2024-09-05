@@ -81,6 +81,20 @@ paper {
             )
         }
 
+        register("economist.account.create") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to create accounts."
+            children = listOf("economist.account")
+        }
+        register("economist.account.delete") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to delete accounts."
+            children = listOf("economist.account")
+        }
+        register("economist.account") {
+            description = "Allows players to use accounts."
+        }
+
         register("economist.bank.manage.others") {
             default = BukkitPluginDescription.Permission.Default.OP
             description = "Allows players to manage others' banks."
