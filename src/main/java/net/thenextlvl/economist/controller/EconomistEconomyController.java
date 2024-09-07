@@ -81,69 +81,54 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public CompletableFuture<Account> createAccount(UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> {
-            var account = dataController().createAccount(uuid, null);
-            cache.put(new Identifier(uuid, null), account);
-            return account;
-        }).exceptionally(throwable -> {
-            plugin.getComponentLogger().error("Failed to create account {}", uuid, throwable);
-            return null;
-        });
+        return create(uuid, null);
     }
 
     @Override
     public CompletableFuture<Account> createAccount(UUID uuid, World world) {
-        return CompletableFuture.supplyAsync(() -> {
-            var account = dataController().createAccount(uuid, world);
-            cache.put(new Identifier(uuid, world), account);
-            return account;
-        }).exceptionally(throwable -> {
-            plugin.getComponentLogger().error("Failed to create account {} {}", uuid, world.key().asString(), throwable);
-            return null;
-        });
+        return create(uuid, world);
     }
 
     @Override
     public CompletableFuture<Optional<Account>> loadAccount(UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> {
-            var optional = Optional.ofNullable(dataController().getAccount(uuid, null));
-            optional.ifPresent(account -> cache.put(new Identifier(uuid, null), account));
-            return optional;
-        }).exceptionally(throwable -> {
-            plugin.getComponentLogger().error("Failed to load account {}", uuid, throwable);
-            return Optional.empty();
-        });
+        return load(uuid, null);
     }
 
     @Override
     public CompletableFuture<Optional<Account>> loadAccount(UUID uuid, World world) {
-        return CompletableFuture.supplyAsync(() -> {
-            var optional = Optional.ofNullable(dataController().getAccount(uuid, world));
-            optional.ifPresent(account -> cache.put(new Identifier(uuid, world), account));
-            return optional;
-        }).exceptionally(throwable -> {
-            plugin.getComponentLogger().error("Failed to load account {} {}", uuid, world.key().asString(), throwable);
-            return Optional.empty();
-        });
+        return load(uuid, world);
     }
 
     @Override
     public CompletableFuture<Boolean> deleteAccount(UUID uuid) {
-        return CompletableFuture.supplyAsync(() ->
-                dataController().deleteAccount(uuid, null)
-        ).exceptionally(throwable -> {
-            plugin.getComponentLogger().error("Failed to delete account {}", uuid, throwable);
-            return false;
-        });
+        return delete(uuid, null);
     }
 
     @Override
     public CompletableFuture<Boolean> deleteAccount(UUID uuid, World world) {
-        return CompletableFuture.supplyAsync(() ->
-                dataController().deleteAccount(uuid, world)
-        ).exceptionally(throwable -> {
-            plugin.getComponentLogger().error("Failed to delete account {} {}", uuid, world.key().asString(), throwable);
-            return false;
+        return delete(uuid, world);
+    }
+
+    private CompletableFuture<Account> create(UUID uuid, @Nullable World world) {
+        return CompletableFuture.supplyAsync(() -> {
+            var account = dataController().createAccount(uuid, world);
+            cache.put(new Identifier(uuid, world), account);
+            return account;
+        });
+    }
+
+    private CompletableFuture<Optional<Account>> load(UUID uuid, @Nullable World world) {
+        return CompletableFuture.supplyAsync(() -> {
+            var optional = Optional.ofNullable(dataController().getAccount(uuid, world));
+            optional.ifPresent(account -> cache.put(new Identifier(uuid, world), account));
+            return optional;
+        });
+    }
+
+    private CompletableFuture<Boolean> delete(UUID uuid, @Nullable World world) {
+        return CompletableFuture.supplyAsync(() -> {
+            cache.remove(new Identifier(uuid, world));
+            return dataController().deleteAccount(uuid, world);
         });
     }
 
