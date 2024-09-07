@@ -21,31 +21,25 @@ public class SQLController implements DataController {
     public SQLController(Connection connection, EconomistPlugin plugin) throws SQLException {
         this.connection = connection;
         this.plugin = plugin;
-        createTables();
+        createAccountTable();
+        createBankTable();
     }
 
     @Override
+    @SneakyThrows
     public boolean deleteAccount(UUID uuid, @Nullable World world) {
-        try {
-            var name = world != null ? world.key().asString() : null;
-            executeUpdate("DELETE FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
-                    uuid, name, name);
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
+        var name = world != null ? world.key().asString() : null;
+        return executeUpdate("DELETE FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
+                uuid, name, name) != 0;
     }
 
     @Override
+    @SneakyThrows
     public Account createAccount(UUID uuid, @Nullable World world) {
-        try {
-            var balance = plugin.config().startBalance();
-            executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
-                    uuid, world != null ? world.key().asString() : null, balance);
-            return new EconomistAccount(BigDecimal.valueOf(balance), world, uuid);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        var balance = plugin.config().startBalance();
+        executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
+                uuid, world != null ? world.key().asString() : null, balance);
+        return new EconomistAccount(BigDecimal.valueOf(balance), world, uuid);
     }
 
     @Override
@@ -73,13 +67,40 @@ public class SQLController implements DataController {
         }
     }
 
-    private void createTables() throws SQLException {
+    protected void createAccountTable() throws SQLException {
         executeUpdate("""
                 CREATE TABLE IF NOT EXISTS accounts (
-                  uuid TEXT NOT NULL UNIQUE PRIMARY KEY,
+                  uuid TEXT NOT NULL,
                   balance DECIMAL(65, 20) NOT NULL,
-                  world TEXT NULL
+                  world TEXT NULL,
+                  UNIQUE (uuid, world)
                 )""");
+
+        executeUpdate("""
+                CREATE TRIGGER IF NOT EXISTS enforce_unique_uuid_world
+                BEFORE INSERT ON accounts
+                FOR EACH ROW
+                WHEN NEW.world IS NULL
+                BEGIN
+                  SELECT RAISE(ABORT, 'Cannot insert another row with NULL world for the same uuid')
+                  WHERE EXISTS (
+                    SELECT 1 FROM accounts WHERE uuid = NEW.uuid AND world IS NULL
+                  );
+                END;""");
+        executeUpdate("""
+                CREATE TRIGGER IF NOT EXISTS enforce_unique_uuid_world_update
+                BEFORE UPDATE ON accounts
+                FOR EACH ROW
+                WHEN NEW.world IS NULL
+                BEGIN
+                  SELECT RAISE(ABORT, 'Cannot update to a row with NULL world for the same uuid')
+                  WHERE EXISTS (
+                    SELECT 1 FROM accounts WHERE uuid = NEW.uuid AND world IS NULL AND rowid != OLD.rowid
+                  );
+                END;""");
+    }
+
+    protected void createBankTable() throws SQLException {
         executeUpdate("""
                 CREATE TABLE IF NOT EXISTS banks (
                   name TEXT NOT NULL UNIQUE PRIMARY KEY,
@@ -101,11 +122,11 @@ public class SQLController implements DataController {
     }
 
     @SuppressWarnings("SqlSourceToSinkFlow")
-    protected void executeUpdate(String query, @Nullable Object... parameters) throws SQLException {
+    protected int executeUpdate(String query, @Nullable Object... parameters) throws SQLException {
         try (var preparedStatement = connection.prepareStatement(query)) {
             for (var i = 0; i < parameters.length; i++)
                 preparedStatement.setObject(i + 1, parameters[i]);
-            preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate();
         }
     }
 
