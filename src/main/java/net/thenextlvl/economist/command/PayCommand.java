@@ -11,6 +11,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
+import net.thenextlvl.economist.api.Account;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @SuppressWarnings("UnstableApiUsage")
@@ -70,41 +72,48 @@ public class PayCommand {
             return 0;
         } else if (players.size() > 1) players.remove(sender);
 
-        Optional.ofNullable(world).map(w -> plugin.economyController().tryGetAccount(sender, w))
-                .orElseGet(() -> plugin.economyController().tryGetAccount(sender))
-                .thenAccept(optional -> optional.ifPresentOrElse(account -> players.forEach(player ->
-
-                        plugin.economyController().tryGetAccount(player).thenAccept(optional1 ->
-
-                                optional1.ifPresentOrElse(target -> {
-                                    if (account.getBalance().doubleValue() - amount >= minimum) {
-
-                                        account.withdraw(amount);
-                                        target.deposit(amount);
-
-                                        plugin.bundle().sendMessage(sender, "player.pay.outgoing",
-                                                Placeholder.parsed("amount", plugin.economyController().format(amount, sender.locale())),
-                                                Placeholder.parsed("player", player.getName() != null ? player.getName() : "null"),
-                                                Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()));
-
-                                        var online = player.getPlayer();
-                                        if (online != null) plugin.bundle().sendMessage(online, "player.pay.incoming",
-                                                Placeholder.parsed("amount", plugin.economyController().format(amount, online.locale())),
-                                                Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()),
-                                                Placeholder.parsed("player", sender.getName()));
-
-                                    } else plugin.bundle().sendMessage(sender, "account.funds");
-                                }, () -> {
-                                    var message = world != null ? "account.not-found.world.other" : "account.not-found.other";
-                                    var placeholder = Placeholder.parsed("world", world != null ? world.key().asString() : "null");
-                                    plugin.bundle().sendMessage(sender, message, placeholder);
-                                }))), () -> {
-
-                    var message = world != null ? "account.not-found.world.self" : "account.not-found.self";
-                    var placeholder = Placeholder.parsed("world", world != null ? world.key().asString() : "null");
-                    plugin.bundle().sendMessage(sender, message, placeholder);
-                }));
+        getAccount(sender, world).thenAccept(optional -> optional.ifPresentOrElse(account ->
+                        players.forEach(player -> getAccount(player, world).thenAccept(optional1 ->
+                                optional1.ifPresentOrElse(target ->
+                                                pay(sender, player, account, target, amount, minimum),
+                                        () -> missingAccount(world, sender, player)
+                                ))),
+                () -> missingAccount(world, sender, sender)));
 
         return players.size();
+    }
+
+    private CompletableFuture<Optional<Account>> getAccount(OfflinePlayer player, @Nullable World world) {
+        if (world == null) return plugin.economyController().tryGetAccount(player);
+        return plugin.economyController().tryGetAccount(player, world);
+    }
+
+    private void pay(Player sender, OfflinePlayer player, Account source, Account target, double amount, double minimum) {
+        if (source.getBalance().doubleValue() - amount < minimum) {
+            plugin.bundle().sendMessage(sender, "account.funds");
+            return;
+        }
+
+        source.withdraw(amount);
+        target.deposit(amount);
+
+        plugin.bundle().sendMessage(sender, "player.pay.outgoing",
+                Placeholder.parsed("amount", plugin.economyController().format(amount, sender.locale())),
+                Placeholder.parsed("player", player.getName() != null ? player.getName() : "null"),
+                Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()));
+
+        var online = player.getPlayer();
+        if (online != null) plugin.bundle().sendMessage(online, "player.pay.incoming",
+                Placeholder.parsed("amount", plugin.economyController().format(amount, online.locale())),
+                Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()),
+                Placeholder.parsed("player", sender.getName()));
+    }
+
+    private void missingAccount(@Nullable World world, Player sender, OfflinePlayer player) {
+        plugin.bundle().sendMessage(sender, world != null
+                        ? (player.equals(sender) ? "account.not-found.world.self" : "account.not-found.world.other")
+                        : (player.equals(sender) ? "account.not-found.self" : "account.not-found.other"),
+                Placeholder.parsed("player", player.getName() != null ? player.getName() : "null"),
+                Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
     }
 }
