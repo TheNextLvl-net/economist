@@ -12,7 +12,6 @@ import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.api.bank.BankController;
 import net.thenextlvl.economist.command.*;
 import net.thenextlvl.economist.configuration.PluginConfig;
-import net.thenextlvl.economist.configuration.StorageType;
 import net.thenextlvl.economist.controller.EconomistBankController;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.controller.data.DataController;
@@ -29,7 +28,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Locale;
-import java.util.Set;
 
 @Getter
 @Accessors(fluent = true)
@@ -39,7 +37,7 @@ public class EconomistPlugin extends JavaPlugin {
 
     private final PluginConfig config = new GsonFile<>(
             IO.of(getDataFolder(), "config.json"),
-            new PluginConfig(0.01, 2, "$", 250, 0, StorageType.SQLite, Set.of("bal", "money"), true, false, true)
+            new PluginConfig()
     ).validate().save().getRoot();
 
     private final File translations = new File(getDataFolder(), "translations");
@@ -90,17 +88,18 @@ public class EconomistPlugin extends JavaPlugin {
 
     private void registerServices() {
         var services = getServer().getServicesManager();
-        if (config().banks()) services.register(BankController.class, bankController, this, ServicePriority.Highest);
+        if (config().banks().enabled())
+            services.register(BankController.class, bankController, this, ServicePriority.Highest);
         services.register(EconomyController.class, economyController, this, ServicePriority.Highest);
 
         if (getServer().getPluginManager().getPlugin("ServiceIO") == null) return;
-        var banks = config().banks() ? new ServiceBankController(this) : null;
+        var banks = config().banks().enabled() ? new ServiceBankController(this) : null;
         new ServiceEconomyController(banks, this).register();
         getComponentLogger().info("Registered ServiceIO support");
     }
 
     private void registerCommands() {
-        if (config().banks()) new BankCommand(this).register();
+        if (config().banks().enabled()) new BankCommand(this).register();
         new AccountCommand(this).register();
         new BalanceCommand(this).register();
         new EconomyCommand(this).register();
