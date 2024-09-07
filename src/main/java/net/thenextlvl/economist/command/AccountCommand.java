@@ -29,7 +29,7 @@ public class AccountCommand {
     public void register() {
         var command = Commands.literal("account")
                 .requires(stack -> stack.getSender().hasPermission("economist.account"))
-                // .then(Commands.literal("balance").redirect())
+                .then(new BalanceCommand(plugin).create())
                 .then(create())
                 .then(delete())
                 .build();

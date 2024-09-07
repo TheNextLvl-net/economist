@@ -2,6 +2,7 @@ package net.thenextlvl.economist.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import core.paper.command.CustomArgumentTypes;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -24,7 +25,12 @@ public class BalanceCommand {
     private final EconomistPlugin plugin;
 
     public void register() {
-        var command = Commands.literal("balance")
+        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
+                event.registrar().register(create(), "Display a players balance", plugin.config().balanceAliases())));
+    }
+
+    LiteralCommandNode<CommandSourceStack> create() {
+        return Commands.literal("balance")
                 .requires(stack -> stack.getSender().hasPermission("economist.balance"))
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .requires(stack -> stack.getSender().hasPermission("economist.balance.others"))
@@ -40,13 +46,12 @@ public class BalanceCommand {
                             return balance(context, player, null);
                         }))
                 .executes(context -> {
-                    if (context.getSource().getSender() instanceof Player player)
-                        return balance(context, player, null);
-                    throw new IllegalArgumentException("No player defined");
+                    var sender = context.getSource().getSender();
+                    if (sender instanceof Player player) return balance(context, player, null);
+                    plugin.bundle().sendMessage(sender, "player.define");
+                    return 0;
                 })
                 .build();
-        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
-                event.registrar().register(command, "Display a players balance", plugin.config().balanceAliases())));
     }
 
     private int balance(CommandContext<CommandSourceStack> context, OfflinePlayer player, @Nullable World world) {
