@@ -12,7 +12,10 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public class SQLController implements DataController {
     private final Connection connection;
@@ -73,16 +76,11 @@ public class SQLController implements DataController {
     }
 
     @Override
+    @SneakyThrows
     public boolean save(Account account) {
-        try {
-            var name = account.getWorld().map(World::key).map(Key::asString).orElse(null);
-            executeUpdate("UPDATE accounts SET balance = ? WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
-                    account.getBalance(), account.getOwner(), name, name);
-            return true;
-        } catch (SQLException e) {
-            plugin.getComponentLogger().error("Failed to save account {}", account.getOwner(), e);
-            return false;
-        }
+        var name = account.getWorld().map(World::key).map(Key::asString).orElse(null);
+        return executeUpdate("UPDATE accounts SET balance = ? WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
+                account.getBalance(), account.getOwner(), name, name) == 1;
     }
 
     protected void createAccountTable() throws SQLException {
