@@ -60,6 +60,14 @@ public interface Account extends Comparable<Account> {
     }
 
     /**
+     * Sets the balance of the account.
+     *
+     * @param balance the new balance of the account
+     * @return the updated balance of the account
+     */
+    BigDecimal setBalance(BigDecimal balance);
+
+    /**
      * Sets the balance of the account to the specified value.
      *
      * @param balance the new balance of the account
