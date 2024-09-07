@@ -23,12 +23,13 @@ public class EconomistEconomyController implements EconomyController {
     }
 
     public void save() {
-        cache.values().forEach(this::save);
+        cache.values().forEach(dataController()::save);
         cache.clear();
     }
 
     public void save(Account account) {
         dataController().save(account);
+        cache.remove(new Identifier(account.getOwner(), account.getWorld().orElse(null)));
     }
 
     @Override
