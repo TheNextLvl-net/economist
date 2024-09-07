@@ -14,6 +14,7 @@ public class ConnectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if (!plugin.config().accounts().autoCreate()) return;
         plugin.economyController().tryGetAccount(event.getPlayer()).thenAccept(optional -> {
             if (optional.isEmpty()) plugin.economyController().createAccount(event.getPlayer());
         });
