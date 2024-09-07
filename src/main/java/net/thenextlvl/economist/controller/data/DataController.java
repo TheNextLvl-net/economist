@@ -4,12 +4,15 @@ import net.thenextlvl.economist.api.Account;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface DataController {
+    @Nullable Account getAccount(UUID uuid, @Nullable World world);
+
     Account createAccount(UUID uuid, @Nullable World world);
 
-    @Nullable Account getAccount(UUID uuid, @Nullable World world);
+    List<Account> getOrdered(@Nullable World world, int start, int limit);
 
     boolean deleteAccount(UUID uuid, @Nullable World world);
 

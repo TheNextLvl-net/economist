@@ -7,6 +7,7 @@ import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.controller.data.DataController;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.math.RoundingMode;
 import java.text.NumberFormat;
@@ -35,8 +36,8 @@ public class EconomistEconomyController implements EconomyController {
         if (plugin.config().scientificNumbers()) return scientificFormat(amount);
         var format = NumberFormat.getInstance(locale);
         format.setRoundingMode(RoundingMode.DOWN);
-        format.setMaximumFractionDigits(plugin.config().fractionalDigits());
-        format.setMinimumFractionDigits(plugin.config().fractionalDigits());
+        format.setMaximumFractionDigits(plugin.config().currency().maxFractionalDigits());
+        format.setMinimumFractionDigits(plugin.config().currency().minFractionalDigits());
         if (!plugin.config().abbreviateBalance()) return format.format(amount);
         return Abbreviation.format(amount.doubleValue(), format, locale);
     }
@@ -66,7 +67,7 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public String getCurrencySymbol() {
-        return plugin.config().currencySymbol();
+        return plugin.config().currency().symbol();
     }
 
     @Override
@@ -77,6 +78,16 @@ public class EconomistEconomyController implements EconomyController {
     @Override
     public Optional<Account> getAccount(UUID uuid, World world) {
         return Optional.ofNullable(cache.get(new Identifier(uuid, world)));
+    }
+
+    @Override
+    public CompletableFuture<@Unmodifiable List<Account>> tryGetOrdered(int start, int limit) {
+        return ordered(null, start, limit);
+    }
+
+    @Override
+    public CompletableFuture<@Unmodifiable List<Account>> tryGetOrdered(World world, int start, int limit) {
+        return ordered(world, start, limit);
     }
 
     @Override
@@ -109,6 +120,20 @@ public class EconomistEconomyController implements EconomyController {
         return delete(uuid, world);
     }
 
+    private CompletableFuture<@Unmodifiable List<Account>> ordered(@Nullable World world, int start, int limit) {
+        return CompletableFuture.supplyAsync(() -> {
+            var accounts = dataController().getOrdered(world, start, limit);
+            accounts.forEach(account -> {
+                var identifier = new Identifier(account.getOwner(), world);
+                cache.compute(identifier, (key, value) -> {
+                    if (value != null) account.setBalance(value.getBalance());
+                    return account;
+                });
+            });
+            return accounts;
+        });
+    }
+
     private CompletableFuture<Account> create(UUID uuid, @Nullable World world) {
         return CompletableFuture.supplyAsync(() -> {
             var account = dataController().createAccount(uuid, world);
@@ -134,6 +159,6 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public int fractionalDigits() {
-        return plugin.config().fractionalDigits();
+        return plugin.config().currency().maxFractionalDigits();
     }
 }

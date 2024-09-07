@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
+import java.util.*;
 
 public class SQLController implements DataController {
     private final Connection connection;
@@ -31,6 +31,24 @@ public class SQLController implements DataController {
         var name = world != null ? world.key().asString() : null;
         return executeUpdate("DELETE FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
                 uuid, name, name) != 0;
+    }
+
+    @Override
+    @SneakyThrows
+    public List<Account> getOrdered(@Nullable World world, int start, int limit) {
+        var name = world != null ? world.key().asString() : null;
+        return Objects.requireNonNull(executeQuery("""
+                SELECT balance, uuid FROM accounts WHERE
+                (world = ? OR (? IS NULL AND world IS NULL))
+                ORDER BY balance DESC LIMIT ? OFFSET ?""", resultSet -> {
+            var accounts = new LinkedList<Account>();
+            while (resultSet.next()) {
+                var balance = resultSet.getBigDecimal("balance");
+                var owner = UUID.fromString(resultSet.getString("uuid"));
+                accounts.add(new EconomistAccount(balance, world, owner));
+            }
+            return accounts;
+        }, name, name, limit, start));
     }
 
     @Override

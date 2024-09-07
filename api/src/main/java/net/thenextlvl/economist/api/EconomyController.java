@@ -2,10 +2,9 @@ package net.thenextlvl.economist.api;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -81,6 +80,27 @@ public interface EconomyController {
      * @return an optional containing the account, or empty
      */
     Optional<Account> getAccount(UUID uuid, World world);
+
+    /**
+     * Attempts to retrieve a list of accounts in an ordered fashion based on the specified start index and limit.
+     *
+     * @param start the index at which to start retrieving accounts
+     * @param limit the number of accounts to retrieve
+     * @return a CompletableFuture that will complete with an unmodifiable list of accounts
+     */
+    CompletableFuture<@Unmodifiable List<Account>> tryGetOrdered(int start, int limit);
+
+    /**
+     * Attempts to retrieve a list of accounts in the specified world, ordered and based
+     * on the provided start index and limit.
+     *
+     * @param world the world in which the accounts are located
+     * @param start the index at which to start retrieving accounts
+     * @param limit the number of accounts to retrieve
+     *
+     * @return a CompletableFuture that will complete with an unmodifiable list of accounts
+     */
+    CompletableFuture<@Unmodifiable List<Account>> tryGetOrdered(World world, int start, int limit);
 
     /**
      * Retrieve the account for the specified player or try to load it.
