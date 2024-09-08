@@ -24,8 +24,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 
 @RequiredArgsConstructor
 @SuppressWarnings("UnstableApiUsage")
@@ -144,19 +144,13 @@ public class AccountCommand {
     private void prune(CommandContext<CommandSourceStack> context, List<OfflinePlayer> players, @Nullable World world) {
         var sender = context.getSource().getSender();
         var placeholder = Placeholder.parsed("world", world != null ? world.key().asString() : "null");
-        var latch = new CountDownLatch(players.size());
-        players.forEach(player -> deleteAccount(player, world).thenAcceptAsync(success -> {
-            var message = world != null ? "account.prune.player.world" : "account.prune.player";
-            var identity = player.getName() != null ? player.getName() : player.getUniqueId().toString();
-            plugin.bundle().sendMessage(sender, message, placeholder, Placeholder.parsed("player", identity));
-            latch.countDown();
-        }));
-        latch.await();
-        var message = players.isEmpty()
-                ? (world != null ? "account.prune.none.world" : "account.prune.none")
-                : (world != null ? "account.prune.success.world" : "account.prune.success");
-        plugin.bundle().sendMessage(sender, message, placeholder,
-                Placeholder.parsed("pruned", String.valueOf(players.size())));
+        deleteAccounts(players.stream().map(OfflinePlayer::getUniqueId).toList(), world).thenAccept(success -> {
+            var message = players.isEmpty()
+                    ? (world != null ? "account.prune.none.world" : "account.prune.none")
+                    : (world != null ? "account.prune.success.world" : "account.prune.success");
+            plugin.bundle().sendMessage(sender, message, placeholder,
+                    Placeholder.parsed("pruned", String.valueOf(players.size())));
+        });
     }
 
     private int create(CommandContext<CommandSourceStack> context, Collection<? extends OfflinePlayer> players, @Nullable World world) {
@@ -209,5 +203,10 @@ public class AccountCommand {
     private CompletableFuture<Boolean> deleteAccount(OfflinePlayer player, @Nullable World world) {
         if (world == null) return plugin.economyController().deleteAccount(player);
         return plugin.economyController().deleteAccount(player, world);
+    }
+
+    private CompletableFuture<Boolean> deleteAccounts(List<UUID> accounts, @Nullable World world) {
+        if (world == null) return plugin.economyController().deleteAccounts(accounts);
+        return plugin.economyController().deleteAccounts(accounts, world);
     }
 }
