@@ -51,7 +51,7 @@ public class TopListCommand {
         int pageEntryCount = plugin.config().balanceTop().entriesPerPage();
         var index = pageEntryCount * (page - 1);
         getOrdered(world, index, pageEntryCount)
-                .thenAccept(accounts -> top(sender, accounts, world))
+                .thenAccept(accounts -> top(sender, accounts, index, world))
                 .exceptionally(throwable -> {
                     plugin.getComponentLogger().error("Failed to retrieve top-list", throwable);
                     return null;
@@ -59,7 +59,7 @@ public class TopListCommand {
         return 0;
     }
 
-    private void top(CommandSender sender, List<Account> accounts, @Nullable World world) {
+    private void top(CommandSender sender, List<Account> accounts, int index, @Nullable World world) {
         if (accounts.isEmpty()) {
             plugin.bundle().sendMessage(sender, "balance.top-list.empty");
             return;
@@ -74,8 +74,8 @@ public class TopListCommand {
             var player = plugin.getServer().getOfflinePlayer(account.getOwner());
             plugin.bundle().sendMessage(sender, "balance.top-list",
                     Placeholder.parsed("balance", plugin.economyController().format(account.getBalance(), locale)),
-                    Placeholder.parsed("player", player.getName() != null ? player.getName() : "null"),
-                    Placeholder.parsed("rank", String.valueOf(i + 1)),
+                    Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
+                    Placeholder.parsed("rank", String.valueOf(index + (i + 1))),
                     Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()));
         }
     }
