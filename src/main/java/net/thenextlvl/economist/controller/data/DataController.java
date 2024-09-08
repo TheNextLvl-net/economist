@@ -12,6 +12,8 @@ public interface DataController {
 
     Account createAccount(UUID uuid, @Nullable World world);
 
+    List<UUID> getAccounts(@Nullable World world);
+
     List<Account> getOrdered(@Nullable World world, int start, int limit);
 
     boolean deleteAccount(UUID uuid, @Nullable World world);
