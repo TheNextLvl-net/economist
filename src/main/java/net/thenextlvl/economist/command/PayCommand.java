@@ -99,7 +99,7 @@ public class PayCommand {
 
         plugin.bundle().sendMessage(sender, "player.pay.outgoing",
                 Placeholder.parsed("amount", plugin.economyController().format(amount, sender.locale())),
-                Placeholder.parsed("player", player.getName() != null ? player.getName() : "null"),
+                Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
                 Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()));
 
         var online = player.getPlayer();
@@ -113,7 +113,7 @@ public class PayCommand {
         plugin.bundle().sendMessage(sender, world != null
                         ? (player.equals(sender) ? "account.not-found.world.self" : "account.not-found.world.other")
                         : (player.equals(sender) ? "account.not-found.self" : "account.not-found.other"),
-                Placeholder.parsed("player", player.getName() != null ? player.getName() : "null"),
+                Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
                 Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
     }
 }
