@@ -16,7 +16,7 @@ public interface DataController {
 
     List<Account> getOrdered(@Nullable World world, int start, int limit);
 
-    boolean deleteAccount(UUID uuid, @Nullable World world);
+    boolean deleteAccounts(List<UUID> accounts, @Nullable World world);
 
     boolean save(Account account);
 }
