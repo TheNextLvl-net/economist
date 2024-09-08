@@ -86,11 +86,39 @@ paper {
             description = "Allows players to create accounts."
             children = listOf("economist.account")
         }
+        register("economist.account.create.others") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to create accounts for others."
+            children = listOf("economist.account.create")
+        }
+        register("economist.account.create.world") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to create accounts in specific worlds."
+            children = listOf("economist.account.create.others")
+        }
+
         register("economist.account.delete") {
             default = BukkitPluginDescription.Permission.Default.OP
             description = "Allows players to delete accounts."
             children = listOf("economist.account")
         }
+        register("economist.account.delete.others") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to delete accounts for others."
+            children = listOf("economist.account.delete")
+        }
+        register("economist.account.delete.world") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to delete accounts in specific worlds."
+            children = listOf("economist.account.delete.others")
+        }
+
+        register("economist.account.prune") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Prune accounts that haven't been used in a while."
+            children = listOf("economist.account")
+        }
+
         register("economist.account") {
             description = "Allows players to use accounts."
         }
@@ -209,6 +237,9 @@ paper {
             default = BukkitPluginDescription.Permission.Default.OP
             description = "Admin permission to manage the economy."
             children = listOf(
+                "economist.account.create.others",
+                "economist.account.delete.others",
+                "economist.account.prune",
                 "economist.balance-top.world",
                 "economist.pay.world",
                 "economist.loan"
