@@ -27,10 +27,15 @@ public class SQLController implements DataController {
 
     @Override
     @SneakyThrows
-    public boolean deleteAccount(UUID uuid, @Nullable World world) {
+    public boolean deleteAccounts(List<UUID> accounts, @Nullable World world) {
         var name = world != null ? world.key().asString() : null;
-        return executeUpdate("DELETE FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
-                uuid, name, name) != 0;
+        var statement = "DELETE FROM accounts WHERE uuid IN (" +
+                     String.join(",", Collections.nCopies(accounts.size(), "?")) +
+                     ") AND (world = ? OR (? IS NULL AND world IS NULL))";
+        var params = new ArrayList<@Nullable Object>(accounts);
+        params.add(name);
+        params.add(name);
+        return executeUpdate(statement, params.toArray(new Object[0])) != 0;
     }
 
     @Override
