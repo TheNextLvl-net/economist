@@ -112,13 +112,13 @@ public class EconomistEconomyController implements EconomyController {
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteAccount(UUID uuid) {
-        return delete(uuid, null);
+    public CompletableFuture<Boolean> deleteAccounts(List<UUID> accounts) {
+        return delete(accounts, null);
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteAccount(UUID uuid, World world) {
-        return delete(uuid, world);
+    public CompletableFuture<Boolean> deleteAccounts(List<UUID> accounts, World world) {
+        return delete(accounts, world);
     }
 
     private CompletableFuture<@Unmodifiable List<Account>> ordered(@Nullable World world, int start, int limit) {
@@ -151,10 +151,10 @@ public class EconomistEconomyController implements EconomyController {
         });
     }
 
-    private CompletableFuture<Boolean> delete(UUID uuid, @Nullable World world) {
+    private CompletableFuture<Boolean> delete(List<UUID> accounts, @Nullable World world) {
         return CompletableFuture.supplyAsync(() -> {
-            cache.remove(new Identifier(uuid, world));
-            return dataController().deleteAccount(uuid, world);
+            accounts.forEach(uuid -> cache.remove(new Identifier(uuid, world)));
+            return dataController().deleteAccounts(accounts, world);
         });
     }
 
