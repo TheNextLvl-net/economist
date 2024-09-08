@@ -267,7 +267,9 @@ public interface EconomyController {
      * @param uuid the uuid of the account to be deleted
      * @return a CompletableFuture that will complete when the account is deleted
      */
-    CompletableFuture<Boolean> deleteAccount(UUID uuid);
+    default CompletableFuture<Boolean> deleteAccount(UUID uuid) {
+        return deleteAccounts(List.of(uuid));
+    }
 
     /**
      * Deletes the account with the specified uuid in the specified world.
@@ -276,7 +278,26 @@ public interface EconomyController {
      * @param world the world in which the account exists
      * @return a CompletableFuture that will complete when the account is deleted
      */
-    CompletableFuture<Boolean> deleteAccount(UUID uuid, World world);
+    default CompletableFuture<Boolean> deleteAccount(UUID uuid, World world) {
+        return deleteAccounts(List.of(uuid), world);
+    }
+
+    /**
+     * Deletes multiple accounts based on the provided list of UUIDs.
+     *
+     * @param accounts a list of UUIDs corresponding to the accounts to be deleted
+     * @return a CompletableFuture that will complete when the accounts are deleted
+     */
+    CompletableFuture<Boolean> deleteAccounts(List<UUID> accounts);
+
+    /**
+     * Deletes multiple accounts based on the provided list of UUIDs and the specified world.
+     *
+     * @param accounts a list of UUIDs corresponding to the accounts to be deleted
+     * @param world the world in which the accounts are located
+     * @return a CompletableFuture that will complete when the accounts are deleted
+     */
+    CompletableFuture<Boolean> deleteAccounts(List<UUID> accounts, World world);
 
     /**
      * Retrieves the number of fractional digits used for formatting currency amounts.
