@@ -12,10 +12,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class SQLController implements DataController {
     private final Connection connection;
@@ -61,6 +58,22 @@ public class SQLController implements DataController {
         executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
                 uuid, world != null ? world.key().asString() : null, balance);
         return new EconomistAccount(BigDecimal.valueOf(balance), world, uuid);
+    }
+
+    @Override
+    @SneakyThrows
+    public List<UUID> getAccounts(@Nullable World world) {
+        var name = world != null ? world.key().asString() : null;
+        return Objects.requireNonNull(executeQuery("""
+                SELECT uuid FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
+                """, resultSet -> {
+            var accounts = new ArrayList<UUID>();
+            while (resultSet.next()) {
+                var owner = UUID.fromString(resultSet.getString("uuid"));
+                accounts.add(owner);
+            }
+            return accounts;
+        }, name, name));
     }
 
     @Override
