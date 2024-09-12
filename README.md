@@ -48,8 +48,3 @@ Economist is highly configurable. Every message can be changed, and full localiz
 - `economist.bank`: Permission to create and manage banks.
 - `economist.account`: Permission to manage user accounts.
 - `economist.pay`: Permission to use the `/pay` command.
-
-## Support
-
-For support, please visit our [support page](https://example.com/support) or join our community on [Discord](https://discord.com/invite/example).
-
