@@ -140,7 +140,7 @@ paper {
                 "economist.bank.balance.others",
                 "economist.bank.movements.others",
                 "economist.bank.info",
-                "economist.bank.top"
+                "economist.bank-top"
             )
         }
         register("economist.bank.balance.others") {
@@ -190,10 +190,10 @@ paper {
             )
         }
 
-        register("economist.bank.top") {
+        register("economist.bank-top") {
             default = BukkitPluginDescription.Permission.Default.OP
             description = "Allows players to view the bank top list."
-            children = listOf("economist.bank.balance")
+            children = listOf("economist.bank.balance.others")
         }
 
         register("economist.bank.info") {
@@ -267,7 +267,7 @@ paper {
             description = "Allows players to see the balance top list of specific worlds."
         }
         register("economist.balance-top") {
-            children = listOf("economist.balance")
+            children = listOf("economist.balance.others")
             description = "Allows players to see the balance top list."
         }
 
