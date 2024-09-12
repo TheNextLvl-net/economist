@@ -1,22 +1,26 @@
 # Economist
 
-**Economist** is a powerful economy management plugin for game servers. It supports both global and per-world economies, offering a comprehensive and realistic banking system with no limits on user wealth. The plugin is built on a robust, thread-safe API, ensuring stability and reliability in high-traffic environments.
+**Economist** is a powerful economy management plugin for game servers.
+It supports both global and per-world economies,
+offering a comprehensive and realistic banking system with no limits on user wealth.
+The plugin is built on a robust,
+thread-safe API, ensuring stability and reliability in high-traffic environments.
 
 ## Features
 
 - **Global and Per-World Economy**: Manage economies globally or separately for each world.
 - **Banking System**:
-  - Manage banks with the `/bank` command.
-  - Banks can have multiple members, with one owner.
-  - Each user can own only one bank but may be a member of several.
-  - Banks are uniquely identified by their names.
+    - Manage banks with the `/bank` command.
+    - Banks can have multiple members, with one owner.
+    - Each user can own only one bank but may be a member of several.
+    - Banks are uniquely identified by their names.
 - **User Account Management**:
-  - Use the `/Account` command to manage user accounts.
+    - Use the `/Account` command to manage user accounts.
 - **Currency Management**:
-  - `/economy`: Give or take money from users.
-  - `/Pay`: Players can transfer money to other players.
+    - `/economy`: Give or take money from users.
+    - `/Pay`: Players can transfer money to other players.
 - **Richest Players Ranking**:
-  - `/baltop`: View a paginated, sorted list of the richest players.
+    - `/baltop`: View a paginated, sorted list of the richest players.
 - **Customizable and Localized Messages**: All messages can be customized and localized.
 - **Thread-Safe API**: Ensures stability in high-traffic environments.
 - **Number Formatting Options**: Supports large numbers with scientific notation or suffixes up to 1e306.
@@ -39,7 +43,9 @@
 
 ## Configuration
 
-Economist is highly configurable. Every message can be changed, and full localization is supported. Check the configuration files located in the `Economist` directory for all available settings.
+Economist is highly configurable.
+Every message can be changed, and full localization is supported.
+Check the configuration files located in the `Economist` directory for all available settings.
 
 ## Permissions
 
