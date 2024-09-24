@@ -37,7 +37,7 @@ dependencies {
     implementation("net.thenextlvl.core:files:1.0.5")
     implementation("net.thenextlvl.core:i18n:1.0.19")
     implementation("net.thenextlvl.core:paper:1.5.1")
-    implementation("org.bstats:bstats-bukkit:3.0.3")
+    implementation("org.bstats:bstats-bukkit:3.1.0")
     implementation(project(":api"))
 
     testImplementation(platform("org.junit:junit-bom:5.11.0"))
