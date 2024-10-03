@@ -30,13 +30,13 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly("net.thenextlvl.core:annotations:2.0.1")
-    compileOnly("net.thenextlvl.services:service-io:1.0.5")
+    compileOnly("net.thenextlvl.services:service-io:2.0.0")
     compileOnly("org.jetbrains:annotations:25.0.0")
     compileOnly("org.projectlombok:lombok:1.18.34")
 
     implementation("net.thenextlvl.core:files:1.0.5")
     implementation("net.thenextlvl.core:i18n:1.0.19")
-    implementation("net.thenextlvl.core:paper:1.5.1")
+    implementation("net.thenextlvl.core:paper:1.5.2")
     implementation("org.bstats:bstats-bukkit:3.1.0")
     implementation(project(":api"))
 
