@@ -33,11 +33,6 @@ public class ServiceEconomyController implements EconomyController {
     }
 
     @Override
-    public Optional<BankController> getBankController() {
-        return Optional.ofNullable(bankController);
-    }
-
-    @Override
     public String format(Number amount) {
         return economyController().format(amount, Locale.US);
     }
