@@ -85,7 +85,7 @@ public class SQLController implements DataController {
     @SneakyThrows
     public @Nullable Account getAccount(UUID uuid, @Nullable World world) {
         var name = world != null ? world.key().asString() : null;
-        return executeQuery("SELECT * FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
+        return executeQuery("SELECT balance FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
                 resultSet -> {
                     if (!resultSet.next()) return null;
                     var balance = resultSet.getBigDecimal("balance");
