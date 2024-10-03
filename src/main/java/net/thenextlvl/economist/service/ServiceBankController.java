@@ -3,7 +3,7 @@ package net.thenextlvl.economist.service;
 import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.controller.EconomistBankController;
-import net.thenextlvl.economist.service.mode.ServiceBank;
+import net.thenextlvl.economist.service.model.ServiceBank;
 import net.thenextlvl.service.api.economy.bank.Bank;
 import net.thenextlvl.service.api.economy.bank.BankController;
 import org.bukkit.World;

@@ -1,4 +1,4 @@
-package net.thenextlvl.economist.service.mode;
+package net.thenextlvl.economist.service.model;
 
 import lombok.RequiredArgsConstructor;
 import net.thenextlvl.service.api.economy.Account;
