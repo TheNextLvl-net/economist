@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT")
     compileOnly("net.thenextlvl.core:annotations:2.0.1")
     compileOnly("net.thenextlvl.services:service-io:2.0.0")
     compileOnly("org.jetbrains:annotations:26.0.1")
