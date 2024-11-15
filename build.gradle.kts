@@ -32,7 +32,7 @@ dependencies {
     compileOnly("net.thenextlvl.core:annotations:2.0.1")
     compileOnly("net.thenextlvl.services:service-io:2.0.0")
     compileOnly("org.jetbrains:annotations:26.0.1")
-    compileOnly("org.projectlombok:lombok:1.18.34")
+    compileOnly("org.projectlombok:lombok:1.18.36")
 
     implementation("net.thenextlvl.core:i18n:1.0.20")
     implementation("net.thenextlvl.core:files:2.0.0")
@@ -43,7 +43,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.11.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 
-    annotationProcessor("org.projectlombok:lombok:1.18.34")
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
 }
 
 tasks.shadowJar {
