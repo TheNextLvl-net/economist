@@ -70,11 +70,11 @@ public class BalanceTopCommand {
         var totalBalance = plugin.dataController().getTotalBalance(world).doubleValue();
 
         plugin.bundle().sendMessage(sender, world != null ? "balance.top-list.header.world" : "balance.top-list.header",
-                Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
+                Placeholder.parsed("world", world != null ? world.getName() : "null"));
         plugin.bundle().sendMessage(sender, world != null ? "balance.top-list.total.world" : "balance.top-list.total",
                 Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()),
                 Placeholder.parsed("total", plugin.economyController().format(totalBalance, locale)),
-                Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
+                Placeholder.parsed("world", world != null ? world.getName() : "null"));
 
         for (int i = 0; i < accounts.size(); i++) {
             var account = accounts.get(i);

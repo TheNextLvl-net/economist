@@ -144,7 +144,7 @@ public class AccountCommand {
     @SneakyThrows
     private void prune(CommandContext<CommandSourceStack> context, List<OfflinePlayer> players, @Nullable World world) {
         var sender = context.getSource().getSender();
-        var placeholder = Placeholder.parsed("world", world != null ? world.key().asString() : "null");
+        var placeholder = Placeholder.parsed("world", world != null ? world.getName() : "null");
         deleteAccounts(players.stream().map(OfflinePlayer::getUniqueId).toList(), world).thenAccept(success -> {
             var message = players.isEmpty()
                     ? (world != null ? "account.prune.none.world" : "account.prune.none")
@@ -163,14 +163,14 @@ public class AccountCommand {
                     : (player.equals(sender) ? "account.created.self" : "account.created.other");
             plugin.bundle().sendMessage(sender, message,
                     Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
-                    Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
+                    Placeholder.parsed("world", world != null ? world.getName() : "null"));
         }).exceptionally(throwable -> {
             var message = world != null
                     ? (player.equals(sender) ? "account.exists.world.self" : "account.exists.world.other")
                     : (player.equals(sender) ? "account.exists.self" : "account.exists.other");
             plugin.bundle().sendMessage(sender, message,
                     Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
-                    Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
+                    Placeholder.parsed("world", world != null ? world.getName() : "null"));
             return null;
         }));
         return Command.SINGLE_SUCCESS;
@@ -188,7 +188,7 @@ public class AccountCommand {
                     : (player.equals(sender) ? "account.not-found.self" : "account.not-found.other"));
             plugin.bundle().sendMessage(sender, message,
                     Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
-                    Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
+                    Placeholder.parsed("world", world != null ? world.getName() : "null"));
         }).exceptionally(throwable -> {
             plugin.getComponentLogger().error("Failed to delete account for {}", player.getName(), throwable);
             return null;

@@ -115,7 +115,7 @@ public class EconomyCommand {
                 .thenAccept(optional -> optional.ifPresentOrElse(account -> {
                     var balance = function.apply(account, amount);
                     plugin.bundle().sendMessage(sender, successMessage,
-                            Placeholder.parsed("world", world != null ? world.key().asString() : "null"),
+                            Placeholder.parsed("world", world != null ? world.getName() : "null"),
                             Placeholder.parsed("player", String.valueOf(player.getName())),
                             Placeholder.parsed("balance", plugin.economyController().format(balance, locale)),
                             Placeholder.parsed("amount", plugin.economyController().format(amount, locale)),
@@ -124,7 +124,7 @@ public class EconomyCommand {
                                 ? (sender.equals(player) ? "account.not-found.world.self" : "account.not-found.world.other")
                                 : (sender.equals(player) ? "account.not-found.self" : "account.not-found.other"),
                         Placeholder.parsed("player", String.valueOf(player.getName())),
-                        Placeholder.parsed("world", world != null ? world.key().asString() : "null")))));
+                        Placeholder.parsed("world", world != null ? world.getName() : "null")))));
         else plugin.bundle().sendMessage(sender, "player.define");
         return Command.SINGLE_SUCCESS;
     }

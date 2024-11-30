@@ -115,6 +115,6 @@ public class PayCommand {
                         ? (player.equals(sender) ? "account.not-found.world.self" : "account.not-found.world.other")
                         : (player.equals(sender) ? "account.not-found.self" : "account.not-found.other"),
                 Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
-                Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
+                Placeholder.parsed("world", world != null ? world.getName() : "null"));
     }
 }
