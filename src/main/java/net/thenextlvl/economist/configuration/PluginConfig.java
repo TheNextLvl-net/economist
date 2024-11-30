@@ -40,7 +40,7 @@ public class PluginConfig {
     @Accessors(fluent = true)
     public static class BalanceTopConfig {
         private @SerializedName("entries-per-page") int entriesPerPage = 10;
-        private @SerializedName("load-unknown-player-names") boolean loadUnknownPlayerNames = false;
+        private @SerializedName("show-empty-accounts") boolean showEmptyAccounts = false;
     }
 
     @Getter

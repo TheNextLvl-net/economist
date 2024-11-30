@@ -49,9 +49,11 @@ public class SQLController implements DataController {
     @SneakyThrows
     public List<Account> getOrdered(@Nullable World world, int start, int limit) {
         var name = world != null ? world.key().asString() : null;
+        var zero = plugin.config().balanceTop().showEmptyAccounts();
         return Objects.requireNonNull(executeQuery("""
                 SELECT balance, uuid FROM accounts WHERE
                 (world = ? OR (? IS NULL AND world IS NULL))
+                """ + (zero ? "" : "AND balance != 0 ") + """
                 ORDER BY balance DESC LIMIT ? OFFSET ?""", resultSet -> {
             var accounts = new LinkedList<Account>();
             while (resultSet.next()) {
@@ -185,7 +187,8 @@ public class SQLController implements DataController {
 
     @FunctionalInterface
     protected interface ThrowingFunction<T, R> {
-        @Nullable R apply(T t) throws SQLException;
+        @Nullable
+        R apply(T t) throws SQLException;
 
         static <T, R> ThrowingFunction<T, R> unchecked(ThrowingFunction<T, R> f) {
             return f;
