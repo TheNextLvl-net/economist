@@ -12,7 +12,12 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public class SQLController implements DataController {
     private final Connection connection;
@@ -30,8 +35,8 @@ public class SQLController implements DataController {
     public boolean deleteAccounts(List<UUID> accounts, @Nullable World world) {
         var name = world != null ? world.key().asString() : null;
         var statement = "DELETE FROM accounts WHERE uuid IN (" +
-                     String.join(",", Collections.nCopies(accounts.size(), "?")) +
-                     ") AND (world = ? OR (? IS NULL AND world IS NULL))";
+                        String.join(",", Collections.nCopies(accounts.size(), "?")) +
+                        ") AND (world = ? OR (? IS NULL AND world IS NULL))";
         var params = new ArrayList<@Nullable Object>(accounts);
         params.add(name);
         params.add(name);
@@ -63,6 +68,18 @@ public class SQLController implements DataController {
         executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
                 uuid, world != null ? world.key().asString() : null, balance);
         return new EconomistAccount(BigDecimal.valueOf(balance), world, uuid);
+    }
+
+    @Override
+    @SneakyThrows
+    public BigDecimal getTotalBalance(@Nullable World world) {
+        var name = world != null ? world.key().asString() : null;
+        return Objects.requireNonNull(executeQuery("""
+                SELECT SUM(balance) as total_balance FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
+                """, resultSet -> {
+            if (!resultSet.next()) return BigDecimal.ZERO;
+            return resultSet.getBigDecimal("total_balance");
+        }, name, name));
     }
 
     @Override

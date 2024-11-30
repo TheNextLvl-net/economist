@@ -4,6 +4,7 @@ import net.thenextlvl.economist.api.Account;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,9 +13,11 @@ public interface DataController {
 
     Account createAccount(UUID uuid, @Nullable World world);
 
-    List<UUID> getAccounts(@Nullable World world);
+    BigDecimal getTotalBalance(@Nullable World world);
 
     List<Account> getOrdered(@Nullable World world, int start, int limit);
+
+    List<UUID> getAccounts(@Nullable World world);
 
     boolean deleteAccounts(List<UUID> accounts, @Nullable World world);
 

@@ -65,18 +65,26 @@ public class TopListCommand {
             return;
         }
 
+        var locale = sender instanceof Player player ? player.locale() : Locale.US;
+        var totalBalance = plugin.dataController().getTotalBalance(world).doubleValue();
+
         plugin.bundle().sendMessage(sender, world != null ? "balance.top-list.header.world" : "balance.top-list.header",
                 Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
+        plugin.bundle().sendMessage(sender, world != null ? "balance.top-list.total.world" : "balance.top-list.total",
+                Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()),
+                Placeholder.parsed("total", plugin.economyController().format(totalBalance, locale)),
+                Placeholder.parsed("world", world != null ? world.key().asString() : "null"));
 
-        var locale = sender instanceof Player player ? player.locale() : Locale.US;
         for (int i = 0; i < accounts.size(); i++) {
             var account = accounts.get(i);
             var player = plugin.getServer().getOfflinePlayer(account.getOwner());
+            var worth = totalBalance == 0 ? 0d : (account.getBalance().doubleValue() / totalBalance) * 100d;
             plugin.bundle().sendMessage(sender, "balance.top-list",
                     Placeholder.parsed("balance", plugin.economyController().format(account.getBalance(), locale)),
                     Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
                     Placeholder.parsed("rank", String.valueOf(index + (i + 1))),
-                    Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()));
+                    Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()),
+                    Placeholder.parsed("worth", String.format(locale, "%.2f%%", worth)));
         }
     }
 
