@@ -6,6 +6,9 @@ offering a comprehensive and realistic banking system with no limits on user wea
 The plugin is built on a robust,
 thread-safe API, ensuring stability and reliability in high-traffic environments.
 
+> [!IMPORTANT]
+> Bank support does not work yet and will be introduced properly in v1
+
 ## Features
 
 - **Global and Per-World Economy**: Manage economies globally or separately for each world.
