@@ -9,6 +9,15 @@ thread-safe API, ensuring stability and reliability in high-traffic environments
 > [!IMPORTANT]
 > Bank support does not work yet and will be introduced properly in v1
 
+## Pictures
+
+![baltop](https://github.com/user-attachments/assets/9cc270a2-9292-4e99-85bc-093139c065b3)
+![transactions](https://github.com/user-attachments/assets/cd63b2c9-e35d-4b55-b280-e64f4cc12010)
+![multi-world-accounts](https://github.com/user-attachments/assets/7cf8fb8d-12d4-4213-ba39-4fe3f6cec057)
+
+
+
+
 ## Features
 
 - **Global and Per-World Economy**: Manage economies globally or separately for each world.
