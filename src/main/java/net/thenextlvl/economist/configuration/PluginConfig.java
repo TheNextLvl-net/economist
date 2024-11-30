@@ -3,10 +3,12 @@ package net.thenextlvl.economist.configuration;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Set;
 
 @Getter
+@NullMarked
 @Accessors(fluent = true)
 public class PluginConfig {
     private @SerializedName("storage-type") StorageType storageType = StorageType.SQLite;

@@ -14,13 +14,14 @@ import net.thenextlvl.economist.EconomistPlugin;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Optional;
 
+@NullMarked
 @RequiredArgsConstructor
-@SuppressWarnings("UnstableApiUsage")
 public class BalanceCommand {
     private final EconomistPlugin plugin;
 

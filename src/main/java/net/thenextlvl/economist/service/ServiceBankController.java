@@ -8,6 +8,7 @@ import net.thenextlvl.service.api.economy.bank.Bank;
 import net.thenextlvl.service.api.economy.bank.BankController;
 import org.bukkit.World;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Optional;
 import java.util.Set;
@@ -15,6 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@NullMarked
 @RequiredArgsConstructor
 public class ServiceBankController implements BankController {
     private final EconomistPlugin plugin;

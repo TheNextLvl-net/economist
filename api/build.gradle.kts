@@ -23,8 +23,6 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT")
-    compileOnly("net.thenextlvl.core:annotations:2.0.1")
-    compileOnly("org.jetbrains:annotations:26.0.1")
     compileOnly("org.projectlombok:lombok:1.18.36")
 
     annotationProcessor("org.projectlombok:lombok:1.18.36")

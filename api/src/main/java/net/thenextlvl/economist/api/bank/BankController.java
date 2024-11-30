@@ -3,12 +3,14 @@ package net.thenextlvl.economist.api.bank;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@NullMarked
 public interface BankController {
     /**
      * Creates a bank for the specified player with the given name.

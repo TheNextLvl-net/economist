@@ -5,14 +5,16 @@ import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.bank.Bank;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
 @Getter
+@NullMarked
 public class EconomistBank extends EconomistAccount implements Bank {
     private static final EconomistPlugin plugin = JavaPlugin.getPlugin(EconomistPlugin.class);
 

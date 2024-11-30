@@ -28,12 +28,14 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.NullMarked;
 
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Locale;
 
 @Getter
+@NullMarked
 @Accessors(fluent = true)
 public class EconomistPlugin extends JavaPlugin {
     private final PluginVersionChecker versionChecker = new PluginVersionChecker(this);

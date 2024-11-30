@@ -6,14 +6,16 @@ import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.controller.data.DataController;
 import org.bukkit.World;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+@NullMarked
 @RequiredArgsConstructor
 public class EconomistEconomyController implements EconomyController {
     private final Map<Identifier, Account> cache = new HashMap<>();
@@ -53,14 +55,12 @@ public class EconomistEconomyController implements EconomyController {
     }
 
     @Override
-    @SuppressWarnings("UnstableApiUsage")
     public String getCurrencyNamePlural(Locale locale) {
         var format = plugin.bundle().format(locale, "currency.name.plural");
         return format != null ? format : "currency.name.plural";
     }
 
     @Override
-    @SuppressWarnings("UnstableApiUsage")
     public String getCurrencyNameSingular(Locale locale) {
         var format = plugin.bundle().format(locale, "currency.name.singular");
         return format != null ? format : "currency.name.singular";

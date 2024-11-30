@@ -6,12 +6,14 @@ import net.thenextlvl.economist.api.bank.Bank;
 import net.thenextlvl.economist.api.bank.BankController;
 import org.bukkit.World;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@NullMarked
 @RequiredArgsConstructor
 public class EconomistBankController implements BankController {
     private final EconomistPlugin plugin;

@@ -17,7 +17,8 @@ import net.thenextlvl.economist.api.Account;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -25,8 +26,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.BiFunction;
 
+@NullMarked
 @RequiredArgsConstructor
-@SuppressWarnings("UnstableApiUsage")
 public class EconomyCommand {
     private final EconomistPlugin plugin;
 

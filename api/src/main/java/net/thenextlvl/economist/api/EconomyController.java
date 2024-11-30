@@ -3,6 +3,7 @@ package net.thenextlvl.economist.api;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -10,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * The AccountController interface provides methods to create, retrieve and delete accounts.
  */
+@NullMarked
 public interface EconomyController {
     /**
      * Formats the specified amount as a string.

@@ -3,10 +3,12 @@ package net.thenextlvl.economist.api.bank;
 import net.thenextlvl.economist.api.Account;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Set;
 import java.util.UUID;
 
+@NullMarked
 public interface Bank extends Account {
     @Unmodifiable
     Set<UUID> getMembers();

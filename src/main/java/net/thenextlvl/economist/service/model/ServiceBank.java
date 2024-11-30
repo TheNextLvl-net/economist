@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import net.thenextlvl.service.api.economy.bank.Bank;
 import org.bukkit.World;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@NullMarked
 @RequiredArgsConstructor
 public class ServiceBank implements Bank {
     private final net.thenextlvl.economist.api.bank.Bank bank;

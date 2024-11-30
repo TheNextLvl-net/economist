@@ -4,9 +4,10 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 @RequiredArgsConstructor
-@SuppressWarnings("UnstableApiUsage")
 public class BankCommand {
     private final EconomistPlugin plugin;
 

@@ -2,6 +2,7 @@ package net.thenextlvl.economist.controller;
 
 import net.thenextlvl.economist.EconomistPlugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.NullMarked;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+@NullMarked
 @SuppressWarnings("ALL")
 class Abbreviation {
     private static final EconomistPlugin plugin = JavaPlugin.getPlugin(EconomistPlugin.class);

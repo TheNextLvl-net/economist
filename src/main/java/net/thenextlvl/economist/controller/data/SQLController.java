@@ -6,7 +6,8 @@ import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.model.EconomistAccount;
 import org.bukkit.World;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+@NullMarked
 public class SQLController implements DataController {
     private final Connection connection;
     private final EconomistPlugin plugin;

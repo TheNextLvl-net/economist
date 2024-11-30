@@ -1,10 +1,12 @@
 package net.thenextlvl.economist.controller.data;
 
 import net.thenextlvl.economist.EconomistPlugin;
+import org.jspecify.annotations.NullMarked;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
+@NullMarked
 public class PostgreSQLController extends SQLController {
     public PostgreSQLController(Connection connection, EconomistPlugin plugin) throws SQLException {
         super(connection, plugin);

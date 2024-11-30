@@ -9,13 +9,15 @@ import net.thenextlvl.service.api.economy.EconomyController;
 import net.thenextlvl.service.api.economy.bank.BankController;
 import org.bukkit.World;
 import org.bukkit.plugin.ServicePriority;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@NullMarked
 @RequiredArgsConstructor
 public class ServiceEconomyController implements EconomyController {
     private final @Nullable ServiceBankController bankController;

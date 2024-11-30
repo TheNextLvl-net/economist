@@ -9,13 +9,14 @@ import core.paper.command.ComponentCommandExceptionType;
 import core.paper.command.WrappedArgumentType;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
+import org.jspecify.annotations.NullMarked;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@SuppressWarnings("UnstableApiUsage")
+@NullMarked
 public class DurationArgument extends WrappedArgumentType<String, Duration> {
     private static final Map<String, ChronoUnit> UNITS = new LinkedHashMap<>();
 

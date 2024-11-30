@@ -4,13 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.thenextlvl.economist.api.Account;
 import org.bukkit.World;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
 @Getter
+@NullMarked
 @AllArgsConstructor
 public class EconomistAccount implements Account {
     private BigDecimal balance;

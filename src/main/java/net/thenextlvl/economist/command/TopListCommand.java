@@ -13,15 +13,16 @@ import net.thenextlvl.economist.api.Account;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
+@NullMarked
 @RequiredArgsConstructor
-@SuppressWarnings("UnstableApiUsage")
 public class TopListCommand {
     private final EconomistPlugin plugin;
 

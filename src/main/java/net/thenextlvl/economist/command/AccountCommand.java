@@ -18,7 +18,8 @@ import net.thenextlvl.economist.command.argument.DurationArgument;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -27,8 +28,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@NullMarked
 @RequiredArgsConstructor
-@SuppressWarnings("UnstableApiUsage")
 public class AccountCommand {
     private final EconomistPlugin plugin;
 

@@ -2,12 +2,14 @@ package net.thenextlvl.economist.controller.data;
 
 import net.thenextlvl.economist.api.Account;
 import org.bukkit.World;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+@NullMarked
 public interface DataController {
     @Nullable Account getAccount(UUID uuid, @Nullable World world);
 
