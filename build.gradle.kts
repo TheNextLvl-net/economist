@@ -302,6 +302,11 @@ hangarPublish { // docs - https://docs.papermc.io/misc/hangar-publishing
         platforms.register(Platforms.PAPER) {
             jar.set(tasks.shadowJar.flatMap { it.archiveFile })
             platformVersions.set(versions)
+            dependencies {
+                url("ServiceIO", "https://hangar.papermc.io/TheNextLvl/ServiceIO") {
+                    required.set(false)
+                }
+            }
         }
     }
 }
