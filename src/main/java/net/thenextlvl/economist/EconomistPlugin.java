@@ -10,7 +10,11 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.api.bank.BankController;
-import net.thenextlvl.economist.command.*;
+import net.thenextlvl.economist.command.AccountCommand;
+import net.thenextlvl.economist.command.BalanceCommand;
+import net.thenextlvl.economist.command.EconomyCommand;
+import net.thenextlvl.economist.command.PayCommand;
+import net.thenextlvl.economist.command.TopListCommand;
 import net.thenextlvl.economist.configuration.PluginConfig;
 import net.thenextlvl.economist.controller.EconomistBankController;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
@@ -99,7 +103,7 @@ public class EconomistPlugin extends JavaPlugin {
     }
 
     private void registerCommands() {
-        if (config().banks().enabled()) new BankCommand(this).register();
+        // if (config().banks().enabled()) new BankCommand(this).register();
         new AccountCommand(this).register();
         new BalanceCommand(this).register();
         new EconomyCommand(this).register();
