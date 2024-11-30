@@ -14,7 +14,7 @@ import net.thenextlvl.economist.command.AccountCommand;
 import net.thenextlvl.economist.command.BalanceCommand;
 import net.thenextlvl.economist.command.EconomyCommand;
 import net.thenextlvl.economist.command.PayCommand;
-import net.thenextlvl.economist.command.TopListCommand;
+import net.thenextlvl.economist.command.BalanceTopCommand;
 import net.thenextlvl.economist.configuration.PluginConfig;
 import net.thenextlvl.economist.controller.EconomistBankController;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
@@ -110,6 +110,6 @@ public class EconomistPlugin extends JavaPlugin {
         new BalanceCommand(this).register();
         new EconomyCommand(this).register();
         new PayCommand(this).register();
-        new TopListCommand(this).register();
+        new BalanceTopCommand(this).register();
     }
 }

@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 
 @NullMarked
 @RequiredArgsConstructor
-public class TopListCommand {
+public class BalanceTopCommand {
     private final EconomistPlugin plugin;
 
     public void register() {
