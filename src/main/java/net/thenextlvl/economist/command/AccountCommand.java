@@ -133,7 +133,7 @@ public class AccountCommand {
 
     private int prune(CommandContext<CommandSourceStack> context, @Nullable World world) {
         var duration = context.getArgument("time", Duration.class);
-        CompletableFuture.supplyAsync(() -> plugin.dataController().getAccounts(world))
+        CompletableFuture.supplyAsync(() -> plugin.dataController().getAccountOwners(world))
                 .thenApply(accounts -> accounts.stream().map(plugin.getServer()::getOfflinePlayer))
                 .thenApply(players -> players.filter(player -> !player.isConnected())
                         .filter(player -> player.getLastSeen() < Instant.now().minus(duration).toEpochMilli()))
