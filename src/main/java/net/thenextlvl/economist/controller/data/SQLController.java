@@ -15,9 +15,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @NullMarked
@@ -88,12 +90,12 @@ public class SQLController implements DataController {
 
     @Override
     @SneakyThrows
-    public List<UUID> getAccounts(@Nullable World world) {
+    public Set<UUID> getAccountOwners(@Nullable World world) {
         var name = world != null ? world.key().asString() : null;
         return Objects.requireNonNull(executeQuery("""
                 SELECT uuid FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
                 """, resultSet -> {
-            var accounts = new ArrayList<UUID>();
+            var accounts = new HashSet<UUID>();
             while (resultSet.next()) {
                 var owner = UUID.fromString(resultSet.getString("uuid"));
                 accounts.add(owner);
@@ -112,6 +114,23 @@ public class SQLController implements DataController {
                     var balance = resultSet.getBigDecimal("balance");
                     return balance != null ? new EconomistAccount(balance, world, uuid) : null;
                 }, uuid, name, name);
+    }
+
+    @Override
+    @SneakyThrows
+    public Set<Account> getAccounts(@Nullable World world) {
+        var name = world != null ? world.key().asString() : null;
+        return Objects.requireNonNull(executeQuery("""
+                SELECT uuid, balance FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
+                """, resultSet -> {
+            var accounts = new HashSet<Account>();
+            while (resultSet.next()) {
+                var owner = UUID.fromString(resultSet.getString("uuid"));
+                var balance = resultSet.getBigDecimal("balance");
+                accounts.add(new EconomistAccount(balance, world, owner));
+            }
+            return accounts;
+        }, name, name));
     }
 
     @Override

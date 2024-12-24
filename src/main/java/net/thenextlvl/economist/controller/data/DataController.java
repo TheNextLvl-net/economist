@@ -7,11 +7,15 @@ import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @NullMarked
 public interface DataController {
-    @Nullable Account getAccount(UUID uuid, @Nullable World world);
+    @Nullable
+    Account getAccount(UUID uuid, @Nullable World world);
+
+    Set<Account> getAccounts(@Nullable World world);
 
     Account createAccount(UUID uuid, @Nullable World world);
 
@@ -19,7 +23,7 @@ public interface DataController {
 
     List<Account> getOrdered(@Nullable World world, int start, int limit);
 
-    List<UUID> getAccounts(@Nullable World world);
+    Set<UUID> getAccountOwners(@Nullable World world);
 
     boolean deleteAccounts(List<UUID> accounts, @Nullable World world);
 

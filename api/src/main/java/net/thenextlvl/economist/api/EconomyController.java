@@ -46,6 +46,22 @@ public interface EconomyController {
     String getCurrencySymbol();
 
     /**
+     * Loads all accounts asynchronously.
+     *
+     * @return a {@link CompletableFuture} that, when completed, will provide a {@link Set} of {@link Account} objects representing
+     * all the accounts available.
+     */
+    CompletableFuture<@Unmodifiable Set<Account>> loadAccounts();
+
+    /**
+     * Retrieves all the accounts currently available.
+     *
+     * @return a set of accounts
+     */
+    @Unmodifiable
+    Set<Account> getAccounts();
+
+    /**
      * Retrieve the account for the specified player.
      *
      * @param player the player for whom the account will be retrieved
