@@ -12,7 +12,13 @@ import org.jspecify.annotations.Nullable;
 
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @NullMarked
@@ -69,6 +75,16 @@ public class EconomistEconomyController implements EconomyController {
     @Override
     public String getCurrencySymbol() {
         return plugin.config().currency().symbol();
+    }
+
+    @Override
+    public CompletableFuture<@Unmodifiable Set<Account>> loadAccounts() {
+        return CompletableFuture.supplyAsync(() -> dataController().getAccounts(null));
+    }
+
+    @Override
+    public @Unmodifiable Set<Account> getAccounts() {
+        return Set.copyOf(cache.values());
     }
 
     @Override

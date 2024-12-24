@@ -9,13 +9,16 @@ import net.thenextlvl.service.api.economy.EconomyController;
 import net.thenextlvl.service.api.economy.bank.BankController;
 import org.bukkit.World;
 import org.bukkit.plugin.ServicePriority;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @NullMarked
 @RequiredArgsConstructor
@@ -52,6 +55,20 @@ public class ServiceEconomyController implements EconomyController {
     @Override
     public String getCurrencySymbol() {
         return economyController().getCurrencySymbol();
+    }
+
+    @Override
+    public CompletableFuture<@Unmodifiable Set<Account>> loadAccounts() {
+        return economyController().loadAccounts().thenApply(accounts -> accounts.stream()
+                .map(ServiceAccount::new)
+                .collect(Collectors.toUnmodifiableSet()));
+    }
+
+    @Override
+    public @Unmodifiable Set<Account> getAccounts() {
+        return economyController().getAccounts().stream()
+                .map(ServiceAccount::new)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
