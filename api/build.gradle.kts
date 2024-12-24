@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("maven-publish")
 }
 
 group = rootProject.group
@@ -26,4 +27,18 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.36")
 
     annotationProcessor("org.projectlombok:lombok:1.18.36")
+}
+
+publishing {
+    publications.create<MavenPublication>("maven") {
+        from(components["java"])
+    }
+    repositories.maven {
+        val channel = if ((version as String).contains("-pre")) "snapshots" else "releases"
+        url = uri("https://repo.thenextlvl.net/$channel")
+        credentials {
+            username = System.getenv("REPOSITORY_USER")
+            password = System.getenv("REPOSITORY_TOKEN")
+        }
+    }
 }
