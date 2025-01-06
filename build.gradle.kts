@@ -24,7 +24,7 @@ tasks.compileJava {
 repositories {
     mavenCentral()
     maven("https://repo.thenextlvl.net/releases")
-    maven("https://papermc.io/repo/repository/maven-public/")
+    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
@@ -33,7 +33,7 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.36")
 
     implementation("net.thenextlvl.core:i18n:1.0.20")
-    implementation("net.thenextlvl.core:files:2.0.0")
+    implementation("net.thenextlvl.core:files:2.0.1")
     implementation("net.thenextlvl.core:paper:2.0.3")
     implementation("org.bstats:bstats-bukkit:3.1.0")
     implementation(project(":api"))
