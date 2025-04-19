@@ -8,7 +8,6 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
@@ -24,12 +23,15 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @NullMarked
-@RequiredArgsConstructor
 public class PayCommand {
     private final EconomistPlugin plugin;
 
+    public PayCommand(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     public void register() {
-        var amountArgument = DoubleArgumentType.doubleArg(plugin.config().minimumPayment());
+        var amountArgument = DoubleArgumentType.doubleArg(plugin.config.minimumPayment);
         var command = Commands.literal("pay")
                 .requires(stack -> stack.getSender() instanceof Player player && player.hasPermission("economist.pay"))
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
@@ -63,7 +65,7 @@ public class PayCommand {
         var sender = (Player) context.getSource().getSender();
 
         var amount = context.getArgument("amount", Double.class);
-        var minimum = sender.hasPermission("economist.loan") ? -plugin.config().maxLoanAmount() : 0;
+        var minimum = sender.hasPermission("economist.loan") ? -plugin.config.maxLoanAmount : 0;
 
         if (players.isEmpty()) {
             plugin.bundle().sendMessage(sender, "player.define");

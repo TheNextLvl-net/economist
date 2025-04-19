@@ -1,6 +1,5 @@
 package net.thenextlvl.economist.controller.data;
 
-import lombok.SneakyThrows;
 import net.kyori.adventure.key.Key;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
@@ -35,8 +34,7 @@ public class SQLController implements DataController {
     }
 
     @Override
-    @SneakyThrows
-    public boolean deleteAccounts(List<UUID> accounts, @Nullable World world) {
+    public boolean deleteAccounts(List<UUID> accounts, @Nullable World world) throws SQLException {
         var name = world != null ? world.key().asString() : null;
         var statement = "DELETE FROM accounts WHERE uuid IN (" +
                         String.join(",", Collections.nCopies(accounts.size(), "?")) +
@@ -48,10 +46,9 @@ public class SQLController implements DataController {
     }
 
     @Override
-    @SneakyThrows
-    public List<Account> getOrdered(@Nullable World world, int start, int limit) {
+    public List<Account> getOrdered(@Nullable World world, int start, int limit) throws SQLException {
         var name = world != null ? world.key().asString() : null;
-        var zero = plugin.config().balanceTop().showEmptyAccounts();
+        var zero = plugin.config.balanceTop.showEmptyAccounts;
         return Objects.requireNonNull(executeQuery("""
                 SELECT balance, uuid FROM accounts WHERE
                 (world = ? OR (? IS NULL AND world IS NULL))
@@ -68,17 +65,15 @@ public class SQLController implements DataController {
     }
 
     @Override
-    @SneakyThrows
-    public Account createAccount(UUID uuid, @Nullable World world) {
-        var balance = plugin.config().startBalance();
+    public Account createAccount(UUID uuid, @Nullable World world) throws SQLException {
+        var balance = plugin.config.startBalance;
         executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
                 uuid, world != null ? world.key().asString() : null, balance);
         return new EconomistAccount(BigDecimal.valueOf(balance), world, uuid);
     }
 
     @Override
-    @SneakyThrows
-    public BigDecimal getTotalBalance(@Nullable World world) {
+    public BigDecimal getTotalBalance(@Nullable World world) throws SQLException {
         var name = world != null ? world.key().asString() : null;
         return Objects.requireNonNull(executeQuery("""
                 SELECT SUM(balance) as total_balance FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
@@ -89,8 +84,7 @@ public class SQLController implements DataController {
     }
 
     @Override
-    @SneakyThrows
-    public Set<UUID> getAccountOwners(@Nullable World world) {
+    public Set<UUID> getAccountOwners(@Nullable World world) throws SQLException {
         var name = world != null ? world.key().asString() : null;
         return Objects.requireNonNull(executeQuery("""
                 SELECT uuid FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
@@ -105,8 +99,7 @@ public class SQLController implements DataController {
     }
 
     @Override
-    @SneakyThrows
-    public @Nullable Account getAccount(UUID uuid, @Nullable World world) {
+    public @Nullable Account getAccount(UUID uuid, @Nullable World world) throws SQLException {
         var name = world != null ? world.key().asString() : null;
         return executeQuery("SELECT balance FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
                 resultSet -> {
@@ -117,8 +110,7 @@ public class SQLController implements DataController {
     }
 
     @Override
-    @SneakyThrows
-    public Set<Account> getAccounts(@Nullable World world) {
+    public Set<Account> getAccounts(@Nullable World world) throws SQLException {
         var name = world != null ? world.key().asString() : null;
         return Objects.requireNonNull(executeQuery("""
                 SELECT uuid, balance FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
@@ -134,8 +126,7 @@ public class SQLController implements DataController {
     }
 
     @Override
-    @SneakyThrows
-    public boolean save(Account account) {
+    public boolean save(Account account) throws SQLException {
         var name = account.getWorld().map(World::key).map(Key::asString).orElse(null);
         return executeUpdate("UPDATE accounts SET balance = ? WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
                 account.getBalance(), account.getOwner(), name, name) == 1;

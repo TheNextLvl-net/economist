@@ -1,6 +1,5 @@
 package net.thenextlvl.economist.service;
 
-import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.controller.EconomistBankController;
 import net.thenextlvl.economist.service.model.ServiceBank;
@@ -17,9 +16,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @NullMarked
-@RequiredArgsConstructor
 public class ServiceBankController implements BankController {
     private final EconomistPlugin plugin;
+
+    public ServiceBankController(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     private EconomistBankController bankController() {
         return plugin.bankController();

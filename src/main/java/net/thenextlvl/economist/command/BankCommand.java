@@ -2,14 +2,16 @@ package net.thenextlvl.economist.command;
 
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-@RequiredArgsConstructor
 public class BankCommand {
     private final EconomistPlugin plugin;
+
+    public BankCommand(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     public void register() {
         var command = Commands.literal("bank")

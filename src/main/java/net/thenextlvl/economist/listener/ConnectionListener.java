@@ -1,6 +1,5 @@
 package net.thenextlvl.economist.listener;
 
-import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -10,13 +9,16 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-@RequiredArgsConstructor
 public class ConnectionListener implements Listener {
     private final EconomistPlugin plugin;
 
+    public ConnectionListener(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!plugin.config().accounts().autoCreate()) return;
+        if (!plugin.config.accounts.autoCreate) return;
         plugin.economyController().tryGetAccount(event.getPlayer()).thenAccept(optional -> {
             if (optional.isEmpty()) plugin.economyController().createAccount(event.getPlayer());
         });

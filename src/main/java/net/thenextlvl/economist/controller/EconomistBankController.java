@@ -1,6 +1,5 @@
 package net.thenextlvl.economist.controller;
 
-import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.bank.Bank;
 import net.thenextlvl.economist.api.bank.BankController;
@@ -14,9 +13,12 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @NullMarked
-@RequiredArgsConstructor
 public class EconomistBankController implements BankController {
     private final EconomistPlugin plugin;
+
+    public EconomistBankController(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public CompletableFuture<Bank> createBank(UUID uuid, String name) throws IllegalStateException {

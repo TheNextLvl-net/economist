@@ -1,6 +1,5 @@
 package net.thenextlvl.economist.service.model;
 
-import lombok.RequiredArgsConstructor;
 import net.thenextlvl.service.api.economy.Account;
 import org.bukkit.World;
 import org.jspecify.annotations.NullMarked;
@@ -10,9 +9,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @NullMarked
-@RequiredArgsConstructor
 public class ServiceAccount implements Account {
     private final net.thenextlvl.economist.api.Account account;
+
+    public ServiceAccount(net.thenextlvl.economist.api.Account account) {
+        this.account = account;
+    }
 
     @Override
     public BigDecimal deposit(Number amount) {

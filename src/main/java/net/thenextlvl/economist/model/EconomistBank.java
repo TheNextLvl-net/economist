@@ -1,6 +1,5 @@
 package net.thenextlvl.economist.model;
 
-import lombok.Getter;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.bank.Bank;
 import org.bukkit.World;
@@ -13,7 +12,6 @@ import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
-@Getter
 @NullMarked
 public class EconomistBank extends EconomistAccount implements Bank {
     private static final EconomistPlugin plugin = JavaPlugin.getPlugin(EconomistPlugin.class);
@@ -32,6 +30,16 @@ public class EconomistBank extends EconomistAccount implements Bank {
     @Override
     public @Unmodifiable Set<UUID> getMembers() {
         return Set.copyOf(members);
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public UUID getOwner() {
+        return owner;
     }
 
     @Override
