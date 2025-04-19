@@ -7,7 +7,6 @@ import core.paper.command.CustomArgumentTypes;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import org.bukkit.OfflinePlayer;
@@ -21,18 +20,7 @@ import java.util.Optional;
 
 @NullMarked
 public class BalanceCommand {
-    private final EconomistPlugin plugin;
-
-    public BalanceCommand(EconomistPlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    public void register() {
-        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
-                event.registrar().register(create(), "Display a players balance", plugin.config.balanceAliases)));
-    }
-
-    LiteralCommandNode<CommandSourceStack> create() {
+    public static LiteralCommandNode<CommandSourceStack> create(EconomistPlugin plugin) {
         return Commands.literal("balance")
                 .requires(stack -> stack.getSender().hasPermission("economist.balance"))
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
@@ -42,22 +30,22 @@ public class BalanceCommand {
                                 .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var world = context.getArgument("world", World.class);
-                                    return balance(context, player, world);
+                                    return balance(context, player, world, plugin);
                                 }))
                         .executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
-                            return balance(context, player, null);
+                            return balance(context, player, null, plugin);
                         }))
                 .executes(context -> {
                     var sender = context.getSource().getSender();
-                    if (sender instanceof Player player) return balance(context, player, null);
+                    if (sender instanceof Player player) return balance(context, player, null, plugin);
                     plugin.bundle().sendMessage(sender, "player.define");
                     return 0;
                 })
                 .build();
     }
 
-    private int balance(CommandContext<CommandSourceStack> context, OfflinePlayer player, @Nullable World world) {
+    private static int balance(CommandContext<CommandSourceStack> context, OfflinePlayer player, @Nullable World world, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         var controller = plugin.economyController();
         Optional.ofNullable(world)
