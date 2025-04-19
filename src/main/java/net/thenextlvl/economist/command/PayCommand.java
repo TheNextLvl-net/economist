@@ -2,12 +2,12 @@ package net.thenextlvl.economist.command;
 
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import core.paper.command.CustomArgumentTypes;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
@@ -24,44 +24,36 @@ import java.util.concurrent.CompletableFuture;
 
 @NullMarked
 public class PayCommand {
-    private final EconomistPlugin plugin;
-
-    public PayCommand(EconomistPlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    public void register() {
+    public static LiteralCommandNode<CommandSourceStack> create(EconomistPlugin plugin) {
         var amountArgument = DoubleArgumentType.doubleArg(plugin.config.minimumPayment);
-        var command = Commands.literal("pay")
+        return Commands.literal("pay")
                 .requires(stack -> stack.getSender() instanceof Player player && player.hasPermission("economist.pay"))
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .then(Commands.argument("amount", amountArgument).executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
-                            return pay(context, List.of(player), null);
+                            return pay(context, List.of(player), null, plugin);
                         }).then(Commands.argument("world", ArgumentTypes.world())
                                 .requires(stack -> stack.getSender().hasPermission("economist.pay.world"))
                                 .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var world = context.getArgument("world", World.class);
-                                    return pay(context, List.of(player), world);
+                                    return pay(context, List.of(player), world, plugin);
                                 }))))
                 .then(Commands.argument("players", ArgumentTypes.players())
                         .then(Commands.argument("amount", amountArgument).executes(context -> {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
-                            return pay(context, new ArrayList<>(players.resolve(context.getSource())), null);
+                            return pay(context, new ArrayList<>(players.resolve(context.getSource())), null, plugin);
                         }).then(Commands.argument("world", ArgumentTypes.world())
                                 .requires(stack -> stack.getSender().hasPermission("economist.pay.world"))
                                 .executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var world = context.getArgument("world", World.class);
-                                    return pay(context, new ArrayList<>(players.resolve(context.getSource())), world);
+                                    return pay(context, new ArrayList<>(players.resolve(context.getSource())), world, plugin);
                                 }))))
                 .build();
-        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
-                event.registrar().register(command, "Pay another player")));
     }
 
-    private int pay(CommandContext<CommandSourceStack> context, List<? extends OfflinePlayer> players, @Nullable World world) {
+    private static int pay(CommandContext<CommandSourceStack> context, List<? extends OfflinePlayer> players, @Nullable World world, EconomistPlugin plugin) {
         var sender = (Player) context.getSource().getSender();
 
         var amount = context.getArgument("amount", Double.class);
@@ -75,23 +67,23 @@ public class PayCommand {
             return 0;
         } else if (players.size() > 1) players.remove(sender);
 
-        getAccount(sender, world).thenAccept(optional -> optional.ifPresentOrElse(account ->
-                        players.forEach(player -> getAccount(player, world).thenAccept(optional1 ->
+        getAccount(sender, world, plugin).thenAccept(optional -> optional.ifPresentOrElse(account ->
+                        players.forEach(player -> getAccount(player, world, plugin).thenAccept(optional1 ->
                                 optional1.ifPresentOrElse(target ->
-                                                pay(sender, player, account, target, amount, minimum),
-                                        () -> missingAccount(world, sender, player)
+                                                pay(sender, player, account, target, amount, minimum, plugin),
+                                        () -> missingAccount(world, sender, player, plugin)
                                 ))),
-                () -> missingAccount(world, sender, sender)));
+                () -> missingAccount(world, sender, sender, plugin)));
 
         return players.size();
     }
 
-    private CompletableFuture<Optional<Account>> getAccount(OfflinePlayer player, @Nullable World world) {
+    private static CompletableFuture<Optional<Account>> getAccount(OfflinePlayer player, @Nullable World world, EconomistPlugin plugin) {
         if (world == null) return plugin.economyController().tryGetAccount(player);
         return plugin.economyController().tryGetAccount(player, world);
     }
 
-    private void pay(Player sender, OfflinePlayer player, Account source, Account target, double amount, double minimum) {
+    private static void pay(Player sender, OfflinePlayer player, Account source, Account target, double amount, double minimum, EconomistPlugin plugin) {
         if (source.getBalance().doubleValue() - amount < minimum) {
             plugin.bundle().sendMessage(sender, "account.funds");
             return;
@@ -112,7 +104,7 @@ public class PayCommand {
                 Placeholder.parsed("player", sender.getName()));
     }
 
-    private void missingAccount(@Nullable World world, Player sender, OfflinePlayer player) {
+    private static void missingAccount(@Nullable World world, Player sender, OfflinePlayer player, EconomistPlugin plugin) {
         plugin.bundle().sendMessage(sender, world != null
                         ? (player.equals(sender) ? "account.not-found.world.self" : "account.not-found.world.other")
                         : (player.equals(sender) ? "account.not-found.self" : "account.not-found.other"),

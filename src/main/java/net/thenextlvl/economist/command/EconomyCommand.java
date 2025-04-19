@@ -4,12 +4,12 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import core.paper.command.CustomArgumentTypes;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
@@ -27,58 +27,54 @@ import java.util.function.BiFunction;
 
 @NullMarked
 public class EconomyCommand {
-    private final EconomistPlugin plugin;
-
-    public EconomyCommand(EconomistPlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    public void register() {
-        var command = Commands.literal("economy")
+    public static LiteralCommandNode<CommandSourceStack> create(EconomistPlugin plugin) {
+        return Commands.literal("economy")
                 .requires(stack -> stack.getSender().hasPermission("economist.admin"))
-                .then(give()).then(reset()).then(set()).then(take()).build();
-        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
-                event.registrar().register(command, "Manage the economy", List.of("eco"))));
+                .then(give(plugin))
+                .then(reset(plugin))
+                .then(set(plugin))
+                .then(take(plugin))
+                .build();
     }
 
-    private ArgumentBuilder<CommandSourceStack, ?> give() {
-        return create("give", "balance.deposited", "balance.deposited.world", Account::deposit, plugin.config.minimumPayment);
+    private static ArgumentBuilder<CommandSourceStack, ?> give(EconomistPlugin plugin) {
+        return create("give", "balance.deposited", "balance.deposited.world", Account::deposit, plugin.config.minimumPayment, plugin);
     }
 
-    private ArgumentBuilder<CommandSourceStack, ?> take() {
-        return create("take", "balance.withdrawn", "balance.withdrawn.world", Account::withdraw, plugin.config.minimumPayment);
+    private static ArgumentBuilder<CommandSourceStack, ?> take(EconomistPlugin plugin) {
+        return create("take", "balance.withdrawn", "balance.withdrawn.world", Account::withdraw, plugin.config.minimumPayment, plugin);
     }
 
-    private ArgumentBuilder<CommandSourceStack, ?> set() {
-        return create("set", "balance.set", "balance.set.world", Account::setBalance, -Double.MAX_VALUE);
+    private static ArgumentBuilder<CommandSourceStack, ?> set(EconomistPlugin plugin) {
+        return create("set", "balance.set", "balance.set.world", Account::setBalance, -Double.MAX_VALUE, plugin);
     }
 
-    private ArgumentBuilder<CommandSourceStack, ?> reset() {
+    private static ArgumentBuilder<CommandSourceStack, ?> reset(EconomistPlugin plugin) {
         return Commands.literal("reset")
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
                             var world = context.getArgument("world", World.class);
-                            return execute(context, "balance.reset.world", List.of(player), plugin.config.startBalance, world, Account::setBalance);
+                            return execute(context, "balance.reset.world", List.of(player), plugin.config.startBalance, world, Account::setBalance, plugin);
                         })).executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
-                            return execute(context, "balance.reset", List.of(player), plugin.config.startBalance, null, Account::setBalance);
+                            return execute(context, "balance.reset", List.of(player), plugin.config.startBalance, null, Account::setBalance, plugin);
                         }))
                 .then(Commands.argument("players", ArgumentTypes.players())
                         .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                             var resolve = players.resolve(context.getSource());
                             var world = context.getArgument("world", World.class);
-                            return execute(context, "balance.reset.world", resolve, plugin.config.startBalance, world, Account::setBalance);
+                            return execute(context, "balance.reset.world", resolve, plugin.config.startBalance, world, Account::setBalance, plugin);
                         })).executes(context -> {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                             var resolve = players.resolve(context.getSource());
-                            return execute(context, "balance.reset", resolve, plugin.config.startBalance, null, Account::setBalance);
+                            return execute(context, "balance.reset", resolve, plugin.config.startBalance, null, Account::setBalance, plugin);
                         }));
     }
 
-    private ArgumentBuilder<CommandSourceStack, ?> create(String command, String successMessage, String successMessageWorld,
-                                                          BiFunction<Account, Number, BigDecimal> function, Double minimum) {
+    private static ArgumentBuilder<CommandSourceStack, ?> create(String command, String successMessage, String successMessageWorld,
+                                                          BiFunction<Account, Number, BigDecimal> function, Double minimum, EconomistPlugin plugin) {
         return Commands.literal(command)
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
@@ -86,11 +82,11 @@ public class EconomyCommand {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var amount = context.getArgument("amount", Double.class);
                                     var world = context.getArgument("world", World.class);
-                                    return execute(context, successMessageWorld, List.of(player), amount, world, function);
+                                    return execute(context, successMessageWorld, List.of(player), amount, world, function, plugin);
                                 })).executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var amount = context.getArgument("amount", Double.class);
-                                    return execute(context, successMessage, List.of(player), amount, null, function);
+                                    return execute(context, successMessage, List.of(player), amount, null, function, plugin);
                                 })))
                 .then(Commands.argument("players", ArgumentTypes.players())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
@@ -98,17 +94,17 @@ public class EconomyCommand {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var amount = context.getArgument("amount", Double.class);
                                     var world = context.getArgument("world", World.class);
-                                    return execute(context, successMessageWorld, List.copyOf(players.resolve(context.getSource())), amount, world, function);
+                                    return execute(context, successMessageWorld, List.copyOf(players.resolve(context.getSource())), amount, world, function, plugin);
                                 })).executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var amount = context.getArgument("amount", Double.class);
-                                    return execute(context, successMessage, List.copyOf(players.resolve(context.getSource())), amount, null, function);
+                                    return execute(context, successMessage, List.copyOf(players.resolve(context.getSource())), amount, null, function, plugin);
                                 })));
     }
 
-    private int execute(CommandContext<CommandSourceStack> context, String successMessage,
+    private static int execute(CommandContext<CommandSourceStack> context, String successMessage,
                         Collection<? extends OfflinePlayer> players, Number amount, @Nullable World world,
-                        BiFunction<Account, Number, BigDecimal> function) {
+                        BiFunction<Account, Number, BigDecimal> function, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         var locale = sender instanceof Player p ? p.locale() : Locale.US;
         if (!players.isEmpty()) players.forEach(player -> (world != null

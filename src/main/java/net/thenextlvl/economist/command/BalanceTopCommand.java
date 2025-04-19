@@ -2,10 +2,10 @@ package net.thenextlvl.economist.command;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
@@ -24,14 +24,8 @@ import java.util.concurrent.CompletableFuture;
 
 @NullMarked
 public class BalanceTopCommand {
-    private final EconomistPlugin plugin;
-
-    public BalanceTopCommand(EconomistPlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    public void register() {
-        var command = Commands.literal("balance-top")
+    public static LiteralCommandNode<CommandSourceStack> create(EconomistPlugin plugin) {
+        return Commands.literal("balance-top")
                 .requires(stack -> stack.getSender().hasPermission("economist.balance-top"))
                 .then(Commands.argument("page", IntegerArgumentType.integer(1))
                         .then(Commands.argument("world", ArgumentTypes.world())
@@ -39,24 +33,22 @@ public class BalanceTopCommand {
                                 .executes(context -> {
                                     var world = context.getArgument("world", World.class);
                                     var page = context.getArgument("page", int.class);
-                                    return top(context, world, page);
+                                    return top(context, world, page, plugin);
                                 }))
                         .executes(context -> {
                             var page = context.getArgument("page", int.class);
-                            return top(context, null, page);
+                            return top(context, null, page, plugin);
                         }))
-                .executes(context -> top(context, null, 1))
+                .executes(context -> top(context, null, 1, plugin))
                 .build();
-        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
-                event.registrar().register(command, "Shows the balance top-list", List.of("baltop"))));
     }
 
-    private int top(CommandContext<CommandSourceStack> context, @Nullable World world, int page) {
+    private static int top(CommandContext<CommandSourceStack> context, @Nullable World world, int page, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         int pageEntryCount = plugin.config.balanceTop.entriesPerPage;
         var index = pageEntryCount * (page - 1);
-        getOrdered(world, index, pageEntryCount)
-                .thenAccept(accounts -> top(sender, accounts, index, world))
+        getOrdered(world, index, pageEntryCount, plugin)
+                .thenAccept(accounts -> top(sender, accounts, index, world, plugin))
                 .exceptionally(throwable -> {
                     plugin.getComponentLogger().error("Failed to retrieve top-list", throwable);
                     return null;
@@ -64,7 +56,7 @@ public class BalanceTopCommand {
         return 0;
     }
 
-    private void top(CommandSender sender, List<Account> accounts, int index, @Nullable World world) {
+    private static void top(CommandSender sender, List<Account> accounts, int index, @Nullable World world, EconomistPlugin plugin) {
         if (accounts.isEmpty()) {
             plugin.bundle().sendMessage(sender, "balance.top-list.empty");
             return;
@@ -99,7 +91,7 @@ public class BalanceTopCommand {
         }
     }
 
-    private CompletableFuture<@Unmodifiable List<Account>> getOrdered(@Nullable World world, int start, int limit) {
+    private static CompletableFuture<@Unmodifiable List<Account>> getOrdered(@Nullable World world, int start, int limit, EconomistPlugin plugin) {
         if (world == null) return plugin.economyController().tryGetOrdered(start, limit);
         return plugin.economyController().tryGetOrdered(world, start, limit);
     }

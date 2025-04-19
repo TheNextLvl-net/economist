@@ -3,6 +3,7 @@ package net.thenextlvl.economist;
 import core.file.format.GsonFile;
 import core.i18n.file.ComponentBundle;
 import core.io.IO;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -10,9 +11,9 @@ import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.api.bank.BankController;
 import net.thenextlvl.economist.command.AccountCommand;
 import net.thenextlvl.economist.command.BalanceCommand;
+import net.thenextlvl.economist.command.BalanceTopCommand;
 import net.thenextlvl.economist.command.EconomyCommand;
 import net.thenextlvl.economist.command.PayCommand;
-import net.thenextlvl.economist.command.BalanceTopCommand;
 import net.thenextlvl.economist.configuration.PluginConfig;
 import net.thenextlvl.economist.controller.EconomistBankController;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
@@ -30,6 +31,7 @@ import org.jspecify.annotations.NullMarked;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Locale;
 
 @NullMarked
@@ -101,12 +103,16 @@ public class EconomistPlugin extends JavaPlugin {
     }
 
     private void registerCommands() {
-        // if (config().banks().enabled()) new BankCommand(this).register();
-        new AccountCommand(this).register();
-        new BalanceCommand(this).register();
-        new EconomyCommand(this).register();
-        new PayCommand(this).register();
-        new BalanceTopCommand(this).register();
+        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event -> {
+            // if (config().banks().enabled()) {
+            //     event.registrar().register(BankCommand.create(this), "Manage user accounts");
+            // }
+            event.registrar().register(AccountCommand.create(this), "Manage user accounts");
+            event.registrar().register(BalanceCommand.create(this), "Display a players balance", config.balanceAliases);
+            event.registrar().register(EconomyCommand.create(this), "Manage the economy", List.of("eco"));
+            event.registrar().register(PayCommand.create(this), "Pay another player");
+            event.registrar().register(BalanceTopCommand.create(this), "Shows the balance top-list", List.of("baltop"));
+        }));
     }
 
     public ComponentBundle abbreviations() {
