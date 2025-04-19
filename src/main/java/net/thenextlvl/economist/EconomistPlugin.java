@@ -3,8 +3,6 @@ package net.thenextlvl.economist;
 import core.file.format.GsonFile;
 import core.i18n.file.ComponentBundle;
 import core.io.IO;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -34,14 +32,12 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.Locale;
 
-@Getter
 @NullMarked
-@Accessors(fluent = true)
 public class EconomistPlugin extends JavaPlugin {
     private final PluginVersionChecker versionChecker = new PluginVersionChecker(this);
     private final Metrics metrics = new Metrics(this, 23261);
 
-    private final PluginConfig config = new GsonFile<>(
+    public final PluginConfig config = new GsonFile<>(
             IO.of(getDataFolder(), "config.json"),
             new PluginConfig()
     ).validate().save().getRoot();
@@ -67,15 +63,15 @@ public class EconomistPlugin extends JavaPlugin {
     private final DataController dataController;
 
     public EconomistPlugin() throws SQLException {
-        this.dataController = switch (config().storageType()) {
+        this.dataController = switch (config.storageType) {
             case SQLite -> new SQLiteController(this);
-            default -> throw new IllegalStateException("Unexpected value: " + config().storageType());
+            default -> throw new IllegalStateException("Unexpected value: " + config.storageType);
         };
     }
 
     @Override
     public void onLoad() {
-        versionChecker().checkVersion();
+        versionChecker.checkVersion();
         registerServices();
         registerCommands();
     }
@@ -89,17 +85,17 @@ public class EconomistPlugin extends JavaPlugin {
     public void onDisable() {
         economyController().save();
         bankController().save();
-        metrics().shutdown();
+        metrics.shutdown();
     }
 
     private void registerServices() {
         var services = getServer().getServicesManager();
-        if (config().banks().enabled())
+        if (config.banks.enabled)
             services.register(BankController.class, bankController, this, ServicePriority.Highest);
         services.register(EconomyController.class, economyController, this, ServicePriority.Highest);
 
         if (getServer().getPluginManager().getPlugin("ServiceIO") == null) return;
-        var banks = config().banks().enabled() ? new ServiceBankController(this) : null;
+        var banks = config.banks.enabled ? new ServiceBankController(this) : null;
         new ServiceEconomyController(banks, this).register();
         getComponentLogger().info("Registered ServiceIO support");
     }
@@ -111,5 +107,25 @@ public class EconomistPlugin extends JavaPlugin {
         new EconomyCommand(this).register();
         new PayCommand(this).register();
         new BalanceTopCommand(this).register();
+    }
+
+    public ComponentBundle abbreviations() {
+        return abbreviations;
+    }
+
+    public ComponentBundle bundle() {
+        return bundle;
+    }
+
+    public EconomistBankController bankController() {
+        return bankController;
+    }
+
+    public EconomistEconomyController economyController() {
+        return economyController;
+    }
+
+    public DataController dataController() {
+        return dataController;
     }
 }

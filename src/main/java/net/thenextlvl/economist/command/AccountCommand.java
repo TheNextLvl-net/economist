@@ -9,8 +9,6 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
@@ -21,17 +19,22 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @NullMarked
-@RequiredArgsConstructor
 public class AccountCommand {
     private final EconomistPlugin plugin;
+
+    public AccountCommand(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     public void register() {
         var command = Commands.literal("account")
@@ -122,7 +125,7 @@ public class AccountCommand {
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> prune() {
-        var min = Duration.ofDays(plugin.config().minimumPruneDays());
+        var min = Duration.ofDays(plugin.config.minimumPruneDays);
         return Commands.literal("prune")
                 .requires(stack -> stack.getSender().hasPermission("economist.account.prune"))
                 .then(Commands.argument("time", DurationArgument.duration(min))
@@ -133,7 +136,14 @@ public class AccountCommand {
 
     private int prune(CommandContext<CommandSourceStack> context, @Nullable World world) {
         var duration = context.getArgument("time", Duration.class);
-        CompletableFuture.supplyAsync(() -> plugin.dataController().getAccountOwners(world))
+        CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return plugin.dataController().getAccountOwners(world);
+                    } catch (SQLException e) {
+                        plugin.getComponentLogger().error("Failed to load account owners", e);
+                        return new HashSet<UUID>();
+                    }
+                })
                 .thenApply(accounts -> accounts.stream().map(plugin.getServer()::getOfflinePlayer))
                 .thenApply(players -> players.filter(player -> !player.isConnected())
                         .filter(player -> player.getLastSeen() < Instant.now().minus(duration).toEpochMilli()))
@@ -141,7 +151,6 @@ public class AccountCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    @SneakyThrows
     private void prune(CommandContext<CommandSourceStack> context, List<OfflinePlayer> players, @Nullable World world) {
         var sender = context.getSource().getSender();
         var placeholder = Placeholder.parsed("world", world != null ? world.getName() : "null");

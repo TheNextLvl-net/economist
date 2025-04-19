@@ -1,6 +1,5 @@
 package net.thenextlvl.economist.controller;
 
-import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.EconomyController;
@@ -11,6 +10,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.math.RoundingMode;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -22,32 +22,45 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @NullMarked
-@RequiredArgsConstructor
 public class EconomistEconomyController implements EconomyController {
     private final Map<Identifier, Account> cache = new HashMap<>();
     private final EconomistPlugin plugin;
+
+    public EconomistEconomyController(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     private record Identifier(UUID uuid, @Nullable World world) {
     }
 
     public void save() {
-        cache.values().forEach(dataController()::save);
+        cache.values().forEach(account -> {
+            try {
+                dataController().save(account);
+            } catch (SQLException e) {
+                plugin.getComponentLogger().error("Failed to save account {}", account.getOwner(), e);
+            }
+        });
         cache.clear();
     }
 
     public void save(Account account) {
-        dataController().save(account);
-        cache.remove(new Identifier(account.getOwner(), account.getWorld().orElse(null)));
+        try {
+            dataController().save(account);
+            cache.remove(new Identifier(account.getOwner(), account.getWorld().orElse(null)));
+        } catch (SQLException e) {
+            plugin.getComponentLogger().error("Failed to save account {}", account.getOwner(), e);
+        }
     }
 
     @Override
     public String format(Number amount, Locale locale) {
-        if (plugin.config().scientificNumbers()) return scientificFormat(amount);
+        if (plugin.config.scientificNumbers) return scientificFormat(amount);
         var format = NumberFormat.getInstance(locale);
         format.setRoundingMode(RoundingMode.DOWN);
-        format.setMaximumFractionDigits(plugin.config().currency().maxFractionalDigits());
-        format.setMinimumFractionDigits(plugin.config().currency().minFractionalDigits());
-        if (!plugin.config().abbreviateBalance()) return format.format(amount);
+        format.setMaximumFractionDigits(plugin.config.currency.maxFractionalDigits);
+        format.setMinimumFractionDigits(plugin.config.currency.minFractionalDigits);
+        if (!plugin.config.abbreviateBalance) return format.format(amount);
         return Abbreviation.format(amount.doubleValue(), format, locale);
     }
 
@@ -74,12 +87,19 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public String getCurrencySymbol() {
-        return plugin.config().currency().symbol();
+        return plugin.config.currency.symbol;
     }
 
     @Override
     public CompletableFuture<@Unmodifiable Set<Account>> loadAccounts() {
-        return CompletableFuture.supplyAsync(() -> dataController().getAccounts(null));
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return dataController().getAccounts(null);
+            } catch (SQLException e) {
+                plugin.getComponentLogger().error("Failed to load accounts", e);
+                return Set.of();
+            }
+        });
     }
 
     @Override
@@ -139,43 +159,60 @@ public class EconomistEconomyController implements EconomyController {
 
     private CompletableFuture<@Unmodifiable List<Account>> ordered(@Nullable World world, int start, int limit) {
         return CompletableFuture.supplyAsync(() -> {
-            var accounts = dataController().getOrdered(world, start, limit);
-            accounts.forEach(account -> {
-                var identifier = new Identifier(account.getOwner(), world);
-                cache.compute(identifier, (key, value) -> {
-                    if (value != null) account.setBalance(value.getBalance());
-                    return account;
+            try {
+                var accounts = dataController().getOrdered(world, start, limit);
+                accounts.forEach(account -> {
+                    var identifier = new Identifier(account.getOwner(), world);
+                    cache.compute(identifier, (key, value) -> {
+                        if (value != null) account.setBalance(value.getBalance());
+                        return account;
+                    });
                 });
-            });
-            return accounts;
+                return accounts;
+            } catch (SQLException e) {
+                plugin.getComponentLogger().error("Failed to load accounts", e);
+                return List.of();
+            }
         });
     }
 
     private CompletableFuture<Account> create(UUID uuid, @Nullable World world) {
         return CompletableFuture.supplyAsync(() -> {
-            var account = dataController().createAccount(uuid, world);
-            cache.put(new Identifier(uuid, world), account);
-            return account;
+            try {
+                var account = dataController().createAccount(uuid, world);
+                cache.put(new Identifier(uuid, world), account);
+                return account;
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to create account", e);
+            }
         });
     }
 
     private CompletableFuture<Optional<Account>> load(UUID uuid, @Nullable World world) {
         return CompletableFuture.supplyAsync(() -> {
-            var optional = Optional.ofNullable(dataController().getAccount(uuid, world));
-            optional.ifPresent(account -> cache.put(new Identifier(uuid, world), account));
-            return optional;
+            try {
+                var optional = Optional.ofNullable(dataController().getAccount(uuid, world));
+                optional.ifPresent(account -> cache.put(new Identifier(uuid, world), account));
+                return optional;
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to load account", e);
+            }
         });
     }
 
     private CompletableFuture<Boolean> delete(List<UUID> accounts, @Nullable World world) {
         return CompletableFuture.supplyAsync(() -> {
-            accounts.forEach(uuid -> cache.remove(new Identifier(uuid, world)));
-            return dataController().deleteAccounts(accounts, world);
+            try {
+                accounts.forEach(uuid -> cache.remove(new Identifier(uuid, world)));
+                return dataController().deleteAccounts(accounts, world);
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to delete accounts", e);
+            }
         });
     }
 
     @Override
     public int fractionalDigits() {
-        return plugin.config().currency().maxFractionalDigits();
+        return plugin.config.currency.maxFractionalDigits;
     }
 }

@@ -6,6 +6,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -13,19 +14,19 @@ import java.util.UUID;
 @NullMarked
 public interface DataController {
     @Nullable
-    Account getAccount(UUID uuid, @Nullable World world);
+    Account getAccount(UUID uuid, @Nullable World world) throws SQLException;
 
-    Set<Account> getAccounts(@Nullable World world);
+    Set<Account> getAccounts(@Nullable World world) throws SQLException;
 
-    Account createAccount(UUID uuid, @Nullable World world);
+    Account createAccount(UUID uuid, @Nullable World world) throws SQLException;
 
-    BigDecimal getTotalBalance(@Nullable World world);
+    BigDecimal getTotalBalance(@Nullable World world) throws SQLException;
 
-    List<Account> getOrdered(@Nullable World world, int start, int limit);
+    List<Account> getOrdered(@Nullable World world, int start, int limit) throws SQLException;
 
-    Set<UUID> getAccountOwners(@Nullable World world);
+    Set<UUID> getAccountOwners(@Nullable World world) throws SQLException;
 
-    boolean deleteAccounts(List<UUID> accounts, @Nullable World world);
+    boolean deleteAccounts(List<UUID> accounts, @Nullable World world) throws SQLException;
 
-    boolean save(Account account);
+    boolean save(Account account) throws SQLException;
 }

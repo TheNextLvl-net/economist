@@ -1,6 +1,5 @@
 package net.thenextlvl.economist.service;
 
-import lombok.RequiredArgsConstructor;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.service.model.ServiceAccount;
@@ -21,10 +20,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @NullMarked
-@RequiredArgsConstructor
 public class ServiceEconomyController implements EconomyController {
     private final @Nullable ServiceBankController bankController;
     private final EconomistPlugin plugin;
+
+    public ServiceEconomyController(@Nullable ServiceBankController bankController, EconomistPlugin plugin) {
+        this.bankController = bankController;
+        this.plugin = plugin;
+    }
 
     public void register() {
         var services = plugin.getServer().getServicesManager();

@@ -6,7 +6,6 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
@@ -17,14 +16,19 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 @NullMarked
-@RequiredArgsConstructor
 public class BalanceTopCommand {
     private final EconomistPlugin plugin;
+
+    public BalanceTopCommand(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     public void register() {
         var command = Commands.literal("balance-top")
@@ -49,7 +53,7 @@ public class BalanceTopCommand {
 
     private int top(CommandContext<CommandSourceStack> context, @Nullable World world, int page) {
         var sender = context.getSource().getSender();
-        int pageEntryCount = plugin.config().balanceTop().entriesPerPage();
+        int pageEntryCount = plugin.config.balanceTop.entriesPerPage;
         var index = pageEntryCount * (page - 1);
         getOrdered(world, index, pageEntryCount)
                 .thenAccept(accounts -> top(sender, accounts, index, world))
@@ -67,7 +71,13 @@ public class BalanceTopCommand {
         }
 
         var locale = sender instanceof Player player ? player.locale() : Locale.US;
-        var totalBalance = plugin.dataController().getTotalBalance(world).doubleValue();
+        var decimal = BigDecimal.ZERO;
+        try {
+            decimal = plugin.dataController().getTotalBalance(world);
+        } catch (SQLException e) {
+            plugin.getComponentLogger().error("Failed to calculate total balance", e);
+        }
+        var totalBalance = decimal.doubleValue();
 
         plugin.bundle().sendMessage(sender, world != null ? "balance.top-list.header.world" : "balance.top-list.header",
                 Placeholder.parsed("world", world != null ? world.getName() : "null"));

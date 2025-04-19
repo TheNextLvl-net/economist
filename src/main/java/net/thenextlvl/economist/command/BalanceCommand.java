@@ -8,7 +8,6 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import org.bukkit.OfflinePlayer;
@@ -21,13 +20,16 @@ import java.util.Locale;
 import java.util.Optional;
 
 @NullMarked
-@RequiredArgsConstructor
 public class BalanceCommand {
     private final EconomistPlugin plugin;
 
+    public BalanceCommand(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     public void register() {
         plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event ->
-                event.registrar().register(create(), "Display a players balance", plugin.config().balanceAliases())));
+                event.registrar().register(create(), "Display a players balance", plugin.config.balanceAliases)));
     }
 
     LiteralCommandNode<CommandSourceStack> create() {

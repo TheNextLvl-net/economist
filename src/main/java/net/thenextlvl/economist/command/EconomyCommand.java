@@ -10,7 +10,6 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
@@ -27,9 +26,12 @@ import java.util.Locale;
 import java.util.function.BiFunction;
 
 @NullMarked
-@RequiredArgsConstructor
 public class EconomyCommand {
     private final EconomistPlugin plugin;
+
+    public EconomyCommand(EconomistPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     public void register() {
         var command = Commands.literal("economy")
@@ -40,11 +42,11 @@ public class EconomyCommand {
     }
 
     private ArgumentBuilder<CommandSourceStack, ?> give() {
-        return create("give", "balance.deposited", "balance.deposited.world", Account::deposit, plugin.config().minimumPayment());
+        return create("give", "balance.deposited", "balance.deposited.world", Account::deposit, plugin.config.minimumPayment);
     }
 
     private ArgumentBuilder<CommandSourceStack, ?> take() {
-        return create("take", "balance.withdrawn", "balance.withdrawn.world", Account::withdraw, plugin.config().minimumPayment());
+        return create("take", "balance.withdrawn", "balance.withdrawn.world", Account::withdraw, plugin.config.minimumPayment);
     }
 
     private ArgumentBuilder<CommandSourceStack, ?> set() {
@@ -57,21 +59,21 @@ public class EconomyCommand {
                         .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
                             var world = context.getArgument("world", World.class);
-                            return execute(context, "balance.reset.world", List.of(player), plugin.config().startBalance(), world, Account::setBalance);
+                            return execute(context, "balance.reset.world", List.of(player), plugin.config.startBalance, world, Account::setBalance);
                         })).executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
-                            return execute(context, "balance.reset", List.of(player), plugin.config().startBalance(), null, Account::setBalance);
+                            return execute(context, "balance.reset", List.of(player), plugin.config.startBalance, null, Account::setBalance);
                         }))
                 .then(Commands.argument("players", ArgumentTypes.players())
                         .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                             var resolve = players.resolve(context.getSource());
                             var world = context.getArgument("world", World.class);
-                            return execute(context, "balance.reset.world", resolve, plugin.config().startBalance(), world, Account::setBalance);
+                            return execute(context, "balance.reset.world", resolve, plugin.config.startBalance, world, Account::setBalance);
                         })).executes(context -> {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                             var resolve = players.resolve(context.getSource());
-                            return execute(context, "balance.reset", resolve, plugin.config().startBalance(), null, Account::setBalance);
+                            return execute(context, "balance.reset", resolve, plugin.config.startBalance, null, Account::setBalance);
                         }));
     }
 
