@@ -34,7 +34,7 @@ dependencies {
 
     implementation("net.thenextlvl.core:i18n:1.0.20")
     implementation("net.thenextlvl.core:files:2.0.1")
-    implementation("net.thenextlvl.core:paper:2.0.3")
+    implementation("net.thenextlvl.core:paper:2.0.4")
     implementation("org.bstats:bstats-bukkit:3.1.0")
     implementation(project(":api"))
 
