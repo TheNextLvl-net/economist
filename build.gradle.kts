@@ -32,7 +32,7 @@ dependencies {
     compileOnly("net.thenextlvl.services:service-io:2.2.0")
     compileOnly("org.projectlombok:lombok:1.18.36")
 
-    implementation("net.thenextlvl.core:i18n:1.0.20")
+    implementation("net.thenextlvl.core:i18n:1.0.21")
     implementation("net.thenextlvl.core:files:2.0.1")
     implementation("net.thenextlvl.core:paper:2.0.4")
     implementation("org.bstats:bstats-bukkit:3.1.0")
