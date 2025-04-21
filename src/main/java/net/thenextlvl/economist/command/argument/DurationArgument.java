@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @NullMarked
 public class DurationArgument extends WrappedArgumentType<String, Duration> {
@@ -73,13 +74,13 @@ public class DurationArgument extends WrappedArgumentType<String, Duration> {
             if (duration.compareTo(min) < 0) throw LONG_TOO_SMALL.createWithContext(reader, duration, min);
             if (duration.compareTo(max) > 0) throw LONG_TOO_BIG.createWithContext(reader, duration, max);
             return duration;
-        }, (context, builder) -> {
+        }, (context, builder) -> CompletableFuture.supplyAsync(() -> {
             var reader = new StringReader(builder.getRemaining());
 
             try {
                 reader.readLong();
             } catch (CommandSyntaxException var5) {
-                return builder.buildFuture();
+                return builder.build();
             }
 
             var offset = builder.createOffset(builder.getStart() + reader.getCursor());
@@ -91,8 +92,8 @@ public class DurationArgument extends WrappedArgumentType<String, Duration> {
                 }
             }
 
-            return offset.buildFuture();
-        });
+            return offset.build();
+        }));
     }
 
     private static boolean matchesSubStr(String remaining, String candidate) {
