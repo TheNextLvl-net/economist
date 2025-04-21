@@ -26,7 +26,7 @@ public class BalanceCommand {
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .requires(stack -> stack.getSender().hasPermission("economist.balance.others"))
                         .then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.balance.world"))
+                                .requires(stack -> stack.getSender().hasPermission("economist.balance.world") && plugin.config.accounts.perWorld)
                                 .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var world = context.getArgument("world", World.class);

@@ -52,21 +52,25 @@ public class EconomyCommand {
     private static ArgumentBuilder<CommandSourceStack, ?> reset(EconomistPlugin plugin) {
         return Commands.literal("reset")
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
-                        .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
-                            var player = context.getArgument("player", OfflinePlayer.class);
-                            var world = context.getArgument("world", World.class);
-                            return execute(context, "balance.reset.world", List.of(player), plugin.config.startBalance, world, Account::setBalance, plugin);
-                        })).executes(context -> {
+                        .then(Commands.argument("world", ArgumentTypes.world())
+                                .requires(stack -> plugin.config.accounts.perWorld)
+                                .executes(context -> {
+                                    var player = context.getArgument("player", OfflinePlayer.class);
+                                    var world = context.getArgument("world", World.class);
+                                    return execute(context, "balance.reset.world", List.of(player), plugin.config.startBalance, world, Account::setBalance, plugin);
+                                })).executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
                             return execute(context, "balance.reset", List.of(player), plugin.config.startBalance, null, Account::setBalance, plugin);
                         }))
                 .then(Commands.argument("players", ArgumentTypes.players())
-                        .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
-                            var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
-                            var resolve = players.resolve(context.getSource());
-                            var world = context.getArgument("world", World.class);
-                            return execute(context, "balance.reset.world", resolve, plugin.config.startBalance, world, Account::setBalance, plugin);
-                        })).executes(context -> {
+                        .then(Commands.argument("world", ArgumentTypes.world())
+                                .requires(stack -> plugin.config.accounts.perWorld)
+                                .executes(context -> {
+                                    var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
+                                    var resolve = players.resolve(context.getSource());
+                                    var world = context.getArgument("world", World.class);
+                                    return execute(context, "balance.reset.world", resolve, plugin.config.startBalance, world, Account::setBalance, plugin);
+                                })).executes(context -> {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                             var resolve = players.resolve(context.getSource());
                             return execute(context, "balance.reset", resolve, plugin.config.startBalance, null, Account::setBalance, plugin);
@@ -74,28 +78,32 @@ public class EconomyCommand {
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> create(String command, String successMessage, String successMessageWorld,
-                                                          BiFunction<Account, Number, BigDecimal> function, Double minimum, EconomistPlugin plugin) {
+                                                                 BiFunction<Account, Number, BigDecimal> function, Double minimum, EconomistPlugin plugin) {
         return Commands.literal(command)
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
-                                .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
-                                    var player = context.getArgument("player", OfflinePlayer.class);
-                                    var amount = context.getArgument("amount", Double.class);
-                                    var world = context.getArgument("world", World.class);
-                                    return execute(context, successMessageWorld, List.of(player), amount, world, function, plugin);
-                                })).executes(context -> {
+                                .then(Commands.argument("world", ArgumentTypes.world())
+                                        .requires(stack -> plugin.config.accounts.perWorld)
+                                        .executes(context -> {
+                                            var player = context.getArgument("player", OfflinePlayer.class);
+                                            var amount = context.getArgument("amount", Double.class);
+                                            var world = context.getArgument("world", World.class);
+                                            return execute(context, successMessageWorld, List.of(player), amount, world, function, plugin);
+                                        })).executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var amount = context.getArgument("amount", Double.class);
                                     return execute(context, successMessage, List.of(player), amount, null, function, plugin);
                                 })))
                 .then(Commands.argument("players", ArgumentTypes.players())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
-                                .then(Commands.argument("world", ArgumentTypes.world()).executes(context -> {
-                                    var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
-                                    var amount = context.getArgument("amount", Double.class);
-                                    var world = context.getArgument("world", World.class);
-                                    return execute(context, successMessageWorld, List.copyOf(players.resolve(context.getSource())), amount, world, function, plugin);
-                                })).executes(context -> {
+                                .then(Commands.argument("world", ArgumentTypes.world())
+                                        .requires(stack -> plugin.config.accounts.perWorld)
+                                        .executes(context -> {
+                                            var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
+                                            var amount = context.getArgument("amount", Double.class);
+                                            var world = context.getArgument("world", World.class);
+                                            return execute(context, successMessageWorld, List.copyOf(players.resolve(context.getSource())), amount, world, function, plugin);
+                                        })).executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var amount = context.getArgument("amount", Double.class);
                                     return execute(context, successMessage, List.copyOf(players.resolve(context.getSource())), amount, null, function, plugin);
@@ -103,8 +111,8 @@ public class EconomyCommand {
     }
 
     private static int execute(CommandContext<CommandSourceStack> context, String successMessage,
-                        Collection<? extends OfflinePlayer> players, Number amount, @Nullable World world,
-                        BiFunction<Account, Number, BigDecimal> function, EconomistPlugin plugin) {
+                               Collection<? extends OfflinePlayer> players, Number amount, @Nullable World world,
+                               BiFunction<Account, Number, BigDecimal> function, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         var locale = sender instanceof Player p ? p.locale() : Locale.US;
         if (!players.isEmpty()) players.forEach(player -> (world != null

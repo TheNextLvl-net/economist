@@ -29,7 +29,7 @@ public class BalanceTopCommand {
                 .requires(stack -> stack.getSender().hasPermission("economist.balance-top"))
                 .then(Commands.argument("page", IntegerArgumentType.integer(1))
                         .then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.balance-top.world"))
+                                .requires(stack -> stack.getSender().hasPermission("economist.balance-top.world") && plugin.config.accounts.perWorld)
                                 .executes(context -> {
                                     var world = context.getArgument("world", World.class);
                                     var page = context.getArgument("page", int.class);

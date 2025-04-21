@@ -46,7 +46,7 @@ public class AccountCommand {
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .requires(stack -> stack.getSender().hasPermission("economist.account.create.others"))
                         .then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.account.create.world"))
+                                .requires(stack -> stack.getSender().hasPermission("economist.account.create.world") && plugin.config.accounts.perWorld)
                                 .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var world = context.getArgument("world", World.class);
@@ -59,7 +59,7 @@ public class AccountCommand {
                 .then(Commands.argument("players", ArgumentTypes.players())
                         .requires(stack -> stack.getSender().hasPermission("economist.account.create.others"))
                         .then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.account.create.world"))
+                                .requires(stack -> stack.getSender().hasPermission("economist.account.create.world") && plugin.config.accounts.perWorld)
                                 .executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var world = context.getArgument("world", World.class);
@@ -84,7 +84,7 @@ public class AccountCommand {
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .requires(stack -> stack.getSender().hasPermission("economist.account.delete.others"))
                         .then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.account.delete.world"))
+                                .requires(stack -> stack.getSender().hasPermission("economist.account.delete.world") && plugin.config.accounts.perWorld)
                                 .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var world = context.getArgument("world", World.class);
@@ -97,7 +97,7 @@ public class AccountCommand {
                 .then(Commands.argument("players", ArgumentTypes.players())
                         .requires(stack -> stack.getSender().hasPermission("economist.account.delete.others"))
                         .then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.account.delete.world"))
+                                .requires(stack -> stack.getSender().hasPermission("economist.account.delete.world") && plugin.config.accounts.perWorld)
                                 .executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var world = context.getArgument("world", World.class);

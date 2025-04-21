@@ -33,7 +33,7 @@ public class PayCommand {
                             var player = context.getArgument("player", OfflinePlayer.class);
                             return pay(context, List.of(player), null, plugin);
                         }).then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.pay.world"))
+                                .requires(stack -> stack.getSender().hasPermission("economist.pay.world") && plugin.config.accounts.perWorld)
                                 .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var world = context.getArgument("world", World.class);
@@ -44,7 +44,7 @@ public class PayCommand {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                             return pay(context, new ArrayList<>(players.resolve(context.getSource())), null, plugin);
                         }).then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.pay.world"))
+                                .requires(stack -> stack.getSender().hasPermission("economist.pay.world") && plugin.config.accounts.perWorld)
                                 .executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var world = context.getArgument("world", World.class);
