@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "net.thenextlvl.economist"
-version = "0.2.1"
+version = "0.2.2"
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
