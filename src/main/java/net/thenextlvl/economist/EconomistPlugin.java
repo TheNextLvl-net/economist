@@ -52,13 +52,13 @@ public class EconomistPlugin extends JavaPlugin {
 
     private final ComponentBundle bundle = ComponentBundle.builder(translationsKey, translations)
             .placeholder("prefix", "prefix")
-            .resource("economist", Locale.US)
-            .resource("economist_german", Locale.GERMANY)
+            .resource("economist.properties", Locale.US)
+            .resource("economist_german.properties", Locale.GERMANY)
             .build();
 
     private final ComponentBundle abbreviations = ComponentBundle.builder(abbreviationsKey, translations)
-            .resource("abbreviations", Locale.US)
-            .resource("abbreviations_german", Locale.GERMANY)
+            .resource("abbreviations.properties", Locale.US)
+            .resource("abbreviations_german.properties", Locale.GERMANY)
             .build();
 
     private final EconomistBankController bankController = new EconomistBankController(this);
