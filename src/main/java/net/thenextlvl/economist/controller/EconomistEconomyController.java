@@ -1,5 +1,6 @@
 package net.thenextlvl.economist.controller;
 
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.EconomyController;
@@ -75,14 +76,14 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public String getCurrencyNamePlural(Locale locale) {
-        var format = plugin.bundle().format(locale, "currency.name.plural");
-        return format != null ? format : "currency.name.plural";
+        var translation = plugin.bundle().component("currency.name.plural", locale);
+        return PlainTextComponentSerializer.plainText().serialize(translation);
     }
 
     @Override
     public String getCurrencyNameSingular(Locale locale) {
-        var format = plugin.bundle().format(locale, "currency.name.singular");
-        return format != null ? format : "currency.name.singular";
+        var translation = plugin.bundle().component("currency.name.singular", locale);
+        return PlainTextComponentSerializer.plainText().serialize(translation);
     }
 
     @Override
