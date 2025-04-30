@@ -4,6 +4,7 @@ import core.file.format.GsonFile;
 import core.i18n.file.ComponentBundle;
 import core.io.IO;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -30,6 +31,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NullMarked;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
@@ -44,21 +46,20 @@ public class EconomistPlugin extends JavaPlugin {
             new PluginConfig()
     ).validate().save().getRoot();
 
-    private final File translations = new File(getDataFolder(), "translations");
+    private final Key abbreviationsKey = Key.key("economist", "translations");
+    private final Key translationsKey = Key.key("economist", "translations");
+    private final Path translations = getDataPath().resolve("translations");
 
-    private final ComponentBundle bundle = new ComponentBundle(translations,
-            audience -> audience instanceof Player player ? player.locale() : Locale.US)
-            .register("economist", Locale.US)
-            .register("economist_german", Locale.GERMANY)
-            .miniMessage(bundle -> MiniMessage.builder().tags(TagResolver.resolver(
-                    TagResolver.standard(),
-                    Placeholder.component("prefix", bundle.component(Locale.US, "prefix"))
-            )).build());
+    private final ComponentBundle bundle = ComponentBundle.builder(translationsKey, translations)
+            .placeholder("prefix", "prefix")
+            .resource("economist", Locale.US)
+            .resource("economist_german", Locale.GERMANY)
+            .build();
 
-    private final ComponentBundle abbreviations = new ComponentBundle(translations,
-            audience -> audience instanceof Player player ? player.locale() : Locale.US)
-            .register("abbreviations", Locale.US)
-            .register("abbreviations_german", Locale.GERMANY);
+    private final ComponentBundle abbreviations = ComponentBundle.builder(abbreviationsKey, translations)
+            .resource("abbreviations", Locale.US)
+            .resource("abbreviations_german", Locale.GERMANY)
+            .build();
 
     private final EconomistBankController bankController = new EconomistBankController(this);
     private final EconomistEconomyController economyController = new EconomistEconomyController(this);

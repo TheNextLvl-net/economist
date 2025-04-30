@@ -1,5 +1,6 @@
 package net.thenextlvl.economist.controller;
 
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.thenextlvl.economist.EconomistPlugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NullMarked;
@@ -155,8 +156,9 @@ class Abbreviation {
                 .max((entry, other) -> entry.getKey().compareTo(other.getKey()))
                 .map(entry -> {
                     var prefix = negative ? "-" : "";
-                    var abbreviation = plugin.abbreviations().format(locale, entry.getValue());
+                    var translation = plugin.abbreviations().component(entry.getValue(), locale);
                     var formatted = format.format(positive / entry.getKey().doubleValue());
+                    var abbreviation = PlainTextComponentSerializer.plainText().serialize(translation);
                     return prefix + formatted + abbreviation;
                 }).orElseGet(() -> format.format(amount));
     }
