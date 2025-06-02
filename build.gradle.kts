@@ -6,8 +6,9 @@ plugins {
     id("java")
 
     id("com.gradleup.shadow") version "9.0.0-beta15"
-    id("io.papermc.hangar-publish-plugin") version "0.1.3"
+    id("com.modrinth.minotaur") version "2.+"
     id("de.eldoria.plugin-yml.paper") version "0.7.1"
+    id("io.papermc.hangar-publish-plugin") version "0.1.3"
 }
 
 group = "net.thenextlvl.economist"
@@ -298,5 +299,17 @@ hangarPublish { // docs - https://docs.papermc.io/misc/hangar-publishing
                 }
             }
         }
+    }
+}
+
+modrinth {
+    token.set(System.getenv("MODRINTH_TOKEN"))
+    projectId.set("oeBa7ep1")
+    versionType = if (isRelease) "release" else "beta"
+    uploadFile.set(tasks.shadowJar)
+    gameVersions.set(versions)
+    loaders.add("paper")
+    dependencies {
+        optional.project("ServiceIO")
     }
 }
