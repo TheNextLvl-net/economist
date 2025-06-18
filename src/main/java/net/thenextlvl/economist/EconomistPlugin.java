@@ -5,9 +5,6 @@ import core.i18n.file.ComponentBundle;
 import core.io.IO;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.api.bank.BankController;
 import net.thenextlvl.economist.command.AccountCommand;
@@ -19,18 +16,18 @@ import net.thenextlvl.economist.configuration.PluginConfig;
 import net.thenextlvl.economist.controller.EconomistBankController;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.controller.data.DataController;
+import net.thenextlvl.economist.controller.data.MySQLController;
+import net.thenextlvl.economist.controller.data.PostgreSQLController;
 import net.thenextlvl.economist.controller.data.SQLiteController;
 import net.thenextlvl.economist.listener.ConnectionListener;
 import net.thenextlvl.economist.service.ServiceBankController;
 import net.thenextlvl.economist.service.ServiceEconomyController;
 import net.thenextlvl.economist.version.PluginVersionChecker;
 import org.bstats.bukkit.Metrics;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NullMarked;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
@@ -66,9 +63,10 @@ public class EconomistPlugin extends JavaPlugin {
     private final DataController dataController;
 
     public EconomistPlugin() throws SQLException {
-        this.dataController = switch (config.storageType) {
+        this.dataController = switch (config.database.storageType) {
             case SQLite -> new SQLiteController(this);
-            default -> throw new IllegalStateException("Unexpected value: " + config.storageType);
+            case PostgreSQL -> new PostgreSQLController(this);
+            case MySQL -> new MySQLController(this);
         };
     }
 

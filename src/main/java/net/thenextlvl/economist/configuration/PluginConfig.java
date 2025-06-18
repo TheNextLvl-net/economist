@@ -7,7 +7,7 @@ import java.util.Set;
 
 @NullMarked
 public class PluginConfig {
-    public @SerializedName("storage-type") StorageType storageType = StorageType.SQLite;
+    public @SerializedName("database") Database database = new Database();
 
     public @SerializedName("abbreviate-balance") boolean abbreviateBalance = true;
     public @SerializedName("scientific-numbers") boolean scientificNumbers = false;
@@ -43,5 +43,13 @@ public class PluginConfig {
         public @SerializedName("currency-symbol") String symbol = "$";
         public @SerializedName("minimum-fractional-digits") int minFractionalDigits = 0;
         public @SerializedName("maximum-fractional-digits") int maxFractionalDigits = 2;
+    }
+
+    public static class Database {
+        public @SerializedName("storage-type") StorageType storageType = StorageType.SQLite;
+    
+        public @SerializedName("url") String url = "localhost:3306/economist";
+        public @SerializedName("user") String user = "economist";
+        public @SerializedName("password") String password = "password";
     }
 }
