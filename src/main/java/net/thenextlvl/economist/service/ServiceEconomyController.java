@@ -120,6 +120,11 @@ public class ServiceEconomyController implements EconomyController {
     }
 
     @Override
+    public EconomistPlugin getPlugin() {
+        return plugin;
+    }
+
+    @Override
     public String getName() {
         return "Economist";
     }
