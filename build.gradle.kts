@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.6-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT")
     compileOnly("net.thenextlvl.services:service-io:2.2.0")
 
     implementation("org.postgresql:postgresql:42.7.7")
@@ -37,7 +37,7 @@ dependencies {
     implementation("net.thenextlvl.core:i18n:3.2.0")
     implementation("net.thenextlvl.core:files:3.0.0")
     implementation("net.thenextlvl.core:paper:2.2.1")
-    implementation("org.bstats:bstats-bukkit:3.1.0")
+    implementation("org.bstats:bstats-bukkit:3.1.1-SNAPSHOT")
     implementation(project(":api"))
 }
 
