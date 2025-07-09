@@ -313,6 +313,6 @@ modrinth {
     syncBodyFrom.set(rootProject.file("README.md").readText())
     loaders.add("paper")
     dependencies {
-        optional.project("ServiceIO")
+        optional.project("service-io")
     }
 }
