@@ -109,6 +109,11 @@ public class ServiceBankController implements BankController {
     }
 
     @Override
+    public EconomistPlugin getPlugin() {
+        return plugin;
+    }
+
+    @Override
     public String getName() {
         return "Economist Banks";
     }
