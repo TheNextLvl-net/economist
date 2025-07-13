@@ -9,6 +9,7 @@ import org.bukkit.World;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -25,6 +26,16 @@ public class ServiceBankController implements BankController {
 
     private EconomistBankController bankController() {
         return plugin.bankController();
+    }
+
+    @Override
+    public String format(Number number) {
+        return plugin.economyController().format(number, Locale.US);
+    }
+
+    @Override
+    public int fractionalDigits() {
+        return plugin.economyController().fractionalDigits();
     }
 
     @Override
