@@ -18,8 +18,9 @@ import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.controller.data.DataController;
 import net.thenextlvl.economist.controller.data.SQLiteController;
 import net.thenextlvl.economist.listener.ConnectionListener;
-import net.thenextlvl.economist.service.ServiceBankController;
-import net.thenextlvl.economist.service.ServiceEconomyController;
+import net.thenextlvl.economist.model.EconomistCurrencyHolder;
+import net.thenextlvl.economist.service.BankControllerDelegate;
+import net.thenextlvl.economist.service.EconomyControllerDelegate;
 import net.thenextlvl.economist.version.PluginVersionChecker;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.ServicePriority;
@@ -58,6 +59,7 @@ public class EconomistPlugin extends JavaPlugin {
 
     private final EconomistBankController bankController = new EconomistBankController(this);
     private final EconomistEconomyController economyController = new EconomistEconomyController(this);
+    private final EconomistCurrencyHolder currencyHolder = new EconomistCurrencyHolder(this);
     private final DataController dataController;
 
     public EconomistPlugin() throws SQLException {
@@ -93,8 +95,9 @@ public class EconomistPlugin extends JavaPlugin {
         services.register(EconomyController.class, economyController, this, ServicePriority.Highest);
 
         if (getServer().getPluginManager().getPlugin("ServiceIO") == null) return;
-        var banks = config.banks.enabled ? new ServiceBankController(this) : null;
-        new ServiceEconomyController(banks, this).register();
+        var economy = new EconomyControllerDelegate(this);
+        var banks = config.banks.enabled ? new BankControllerDelegate(economy, this) : null;
+        economy.register(banks);
         getComponentLogger().info("Registered ServiceIO support");
     }
 
@@ -121,6 +124,10 @@ public class EconomistPlugin extends JavaPlugin {
 
     public EconomistBankController bankController() {
         return bankController;
+    }
+
+    public EconomistCurrencyHolder currencyHolder() {
+        return currencyHolder;
     }
 
     public EconomistEconomyController economyController() {
