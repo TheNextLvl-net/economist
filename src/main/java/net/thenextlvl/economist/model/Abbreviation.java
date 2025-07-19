@@ -1,4 +1,4 @@
-package net.thenextlvl.economist.controller;
+package net.thenextlvl.economist.model;
 
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.thenextlvl.economist.EconomistPlugin;
