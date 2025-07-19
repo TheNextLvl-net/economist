@@ -18,13 +18,9 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.sql.SQLException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @NullMarked
@@ -127,31 +123,19 @@ public class AccountCommand {
 
     private static int prune(CommandContext<CommandSourceStack> context, @Nullable World world, EconomistPlugin plugin) {
         var duration = context.getArgument("time", Duration.class);
-        CompletableFuture.supplyAsync(() -> {
-                    try {
-                        return plugin.dataController().getAccountOwners(world);
-                    } catch (SQLException e) {
-                        plugin.getComponentLogger().error("Failed to load account owners", e);
-                        return new HashSet<UUID>();
-                    }
-                })
-                .thenApply(accounts -> accounts.stream().map(plugin.getServer()::getOfflinePlayer))
-                .thenApply(players -> players.filter(player -> !player.isConnected())
-                        .filter(player -> player.getLastSeen() < Instant.now().minus(duration).toEpochMilli()))
-                .thenAcceptAsync(players -> prune(context, players.toList(), world, plugin));
+        CompletableFuture.runAsync(() -> prune(context, duration, world, plugin));
         return Command.SINGLE_SUCCESS;
     }
 
-    private static void prune(CommandContext<CommandSourceStack> context, List<OfflinePlayer> players, @Nullable World world, EconomistPlugin plugin) {
+    private static void prune(CommandContext<CommandSourceStack> context, Duration duration, @Nullable World world, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         var placeholder = Placeholder.parsed("world", world != null ? world.getName() : "null");
-        plugin.economyController().deleteAccounts(players.stream().map(OfflinePlayer::getUniqueId).toList(), world).thenAccept(success -> {
-            var message = players.isEmpty()
-                    ? (world != null ? "account.prune.none.world" : "account.prune.none")
-                    : (world != null ? "account.prune.success.world" : "account.prune.success");
-            plugin.bundle().sendMessage(sender, message, placeholder,
-                    Placeholder.parsed("pruned", String.valueOf(players.size())));
-        });
+        var pruned = plugin.dataController().prune(duration, world);
+        var message = pruned == 0
+                ? (world != null ? "account.prune.none.world" : "account.prune.none")
+                : (world != null ? "account.prune.success.world" : "account.prune.success");
+        plugin.bundle().sendMessage(sender, message, placeholder,
+                Placeholder.parsed("pruned", String.valueOf(pruned)));
     }
 
     private static int create(CommandContext<CommandSourceStack> context, Collection<? extends OfflinePlayer> players, @Nullable World world, EconomistPlugin plugin) {

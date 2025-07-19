@@ -141,16 +141,4 @@ public class EconomistEconomyController implements EconomyController {
     public CompletableFuture<Boolean> deleteAccount(UUID uuid, @Nullable World world) {
         return null; // todo: implement
     }
-
-    @Override
-    public CompletableFuture<Boolean> deleteAccounts(List<UUID> accounts, @Nullable World world) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                accounts.forEach(uuid -> cache.remove(new Identifier(uuid, world)));
-                return dataController().deleteAccounts(accounts, world);
-            } catch (SQLException e) {
-                throw new RuntimeException("Failed to delete accounts", e);
-            }
-        });
-    }
 }
