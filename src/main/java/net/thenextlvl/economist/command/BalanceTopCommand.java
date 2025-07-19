@@ -67,7 +67,7 @@ public class BalanceTopCommand {
         var locale = sender instanceof Player player ? player.locale() : Locale.US;
         var decimal = BigDecimal.ZERO;
         try {
-            decimal = plugin.dataController().getTotalBalance(world);
+            decimal = plugin.dataController().getTotalBalance(currency, world);
         } catch (SQLException e) {
             plugin.getComponentLogger().error("Failed to calculate total balance", e);
         }

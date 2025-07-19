@@ -7,6 +7,7 @@ import core.paper.command.CustomArgumentTypes;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.currency.Currency;
@@ -15,8 +16,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-
-import java.util.Locale;
 
 @NullMarked
 public class BalanceCommand {
@@ -50,18 +49,16 @@ public class BalanceCommand {
         var controller = plugin.economyController();
         Currency currency = null; // fixme
         controller.tryGetAccount(player, world).thenAccept(optional -> optional.ifPresentOrElse(account -> {
-            var locale = sender instanceof Player p ? p.locale() : Locale.US;
-
             var message = world != null
                     ? (player.equals(sender) ? "account.balance.world.self" : "account.balance.world.other")
                     : (player.equals(sender) ? "account.balance.self" : "account.balance.other");
 
             plugin.bundle().sendMessage(sender, message,
                     Placeholder.parsed("player", String.valueOf(player.getName())),
-                    Placeholder.component("balance", currency.format(account.getBalance(currency), locale)),
-                    Placeholder.parsed("currency", account.getBalance(currency).intValue() == 1
-                            ? controller.getCurrencyNameSingular(locale)
-                            : controller.getCurrencyNamePlural(locale)),
+                    Placeholder.component("balance", currency.format(account.getBalance(currency), sender)),
+                    Placeholder.component("currency", account.getBalance(currency).intValue() == 1
+                            ? currency.getDisplayNameSingular(sender).orElse(Component.empty())
+                            : currency.getDisplayNamePlural(sender).orElse(Component.empty())),
                     Placeholder.component("symbol", currency.getSymbol()),
                     Placeholder.parsed("world", world != null ? world.getName() : "null"));
 

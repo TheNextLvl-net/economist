@@ -3,6 +3,7 @@ package net.thenextlvl.economist.controller.data;
 import net.kyori.adventure.key.Key;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
+import net.thenextlvl.economist.api.currency.Currency;
 import net.thenextlvl.economist.model.EconomistAccount;
 import org.bukkit.World;
 import org.jspecify.annotations.NullMarked;
@@ -46,7 +47,29 @@ public class SQLController implements DataController {
     }
 
     @Override
-    public List<Account> getOrdered(@Nullable World world, int start, int limit) throws SQLException {
+    public Account createAccount(UUID uuid, @Nullable World world) throws SQLException {
+        var balance = plugin.config.startBalance;
+        executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
+                uuid, world != null ? world.key().asString() : null, balance);
+        // todo: initialize balances
+        return new EconomistAccount(world, uuid);
+    }
+
+    @Override
+    public BigDecimal getTotalBalance(Currency currency, @Nullable World world) throws SQLException {
+        // todo: respect currency
+        var name = world != null ? world.key().asString() : null;
+        return Objects.requireNonNull(executeQuery("""
+                SELECT SUM(balance) as total_balance FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
+                """, resultSet -> {
+            if (!resultSet.next()) return BigDecimal.ZERO;
+            return resultSet.getBigDecimal("total_balance");
+        }, name, name));
+    }
+
+    @Override
+    public List<Account> getOrdered(Currency currency, @Nullable World world, int start, int limit) throws SQLException {
+        // todo: respect currency
         var name = world != null ? world.key().asString() : null;
         var zero = plugin.config.balanceTop.showEmptyAccounts;
         return Objects.requireNonNull(executeQuery("""
@@ -63,26 +86,6 @@ public class SQLController implements DataController {
             }
             return accounts;
         }, name, name, limit, start));
-    }
-
-    @Override
-    public Account createAccount(UUID uuid, @Nullable World world) throws SQLException {
-        var balance = plugin.config.startBalance;
-        executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
-                uuid, world != null ? world.key().asString() : null, balance);
-        // todo: initialize balances
-        return new EconomistAccount(world, uuid);
-    }
-
-    @Override
-    public BigDecimal getTotalBalance(@Nullable World world) throws SQLException {
-        var name = world != null ? world.key().asString() : null;
-        return Objects.requireNonNull(executeQuery("""
-                SELECT SUM(balance) as total_balance FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
-                """, resultSet -> {
-            if (!resultSet.next()) return BigDecimal.ZERO;
-            return resultSet.getBigDecimal("total_balance");
-        }, name, name));
     }
 
     @Override
