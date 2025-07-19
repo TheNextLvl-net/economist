@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -25,9 +26,7 @@ public interface DataController {
 
     List<Account> getOrdered(Currency currency, @Nullable World world, int start, int limit) throws SQLException;
 
-    Set<UUID> getAccountOwners(@Nullable World world) throws SQLException;
-
-    boolean deleteAccounts(List<UUID> accounts, @Nullable World world) throws SQLException;
+    int prune(Duration duration, @Nullable World world);
 
     boolean save(Account account) throws SQLException;
 }
