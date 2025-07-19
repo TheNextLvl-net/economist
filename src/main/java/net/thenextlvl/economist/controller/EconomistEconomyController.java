@@ -1,6 +1,5 @@
 package net.thenextlvl.economist.controller;
 
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.EconomyController;
@@ -15,7 +14,6 @@ import org.jspecify.annotations.Nullable;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -25,7 +23,7 @@ import java.util.stream.Collectors;
 
 @NullMarked
 public class EconomistEconomyController implements EconomyController {
-    private final Map<Identifier, Account> cache = new HashMap<>();
+    private final Map<Identifier, Account> cache = new HashMap<>(); // fixme: has always been cursed
     private final EconomistPlugin plugin;
 
     public EconomistEconomyController(EconomistPlugin plugin) {
@@ -57,18 +55,6 @@ public class EconomistEconomyController implements EconomyController {
 
     private DataController dataController() {
         return plugin.dataController();
-    }
-
-    // fixme
-    public String getCurrencyNamePlural(Locale locale) {
-        var translation = plugin.bundle().component("currency.name.plural", locale);
-        return PlainTextComponentSerializer.plainText().serialize(translation);
-    }
-
-    // fixme
-    public String getCurrencyNameSingular(Locale locale) {
-        var translation = plugin.bundle().component("currency.name.singular", locale);
-        return PlainTextComponentSerializer.plainText().serialize(translation);
     }
 
     @Override
@@ -109,7 +95,7 @@ public class EconomistEconomyController implements EconomyController {
     public CompletableFuture<@Unmodifiable List<Account>> tryGetOrdered(Currency currency, @Nullable World world, int start, int limit) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                var accounts = dataController().getOrdered(world, start, limit); // fixme - use currency
+                var accounts = dataController().getOrdered(currency, world, start, limit); // fixme - use currency
                 accounts.forEach(account -> {
                     var identifier = new Identifier(account.getOwner(), world);
                     cache.compute(identifier, (key, value) -> {
