@@ -11,7 +11,6 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
-import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.command.argument.DurationArgument;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -146,7 +145,7 @@ public class AccountCommand {
     private static void prune(CommandContext<CommandSourceStack> context, List<OfflinePlayer> players, @Nullable World world, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         var placeholder = Placeholder.parsed("world", world != null ? world.getName() : "null");
-        deleteAccounts(players.stream().map(OfflinePlayer::getUniqueId).toList(), world, plugin).thenAccept(success -> {
+        plugin.economyController().deleteAccounts(players.stream().map(OfflinePlayer::getUniqueId).toList(), world).thenAccept(success -> {
             var message = players.isEmpty()
                     ? (world != null ? "account.prune.none.world" : "account.prune.none")
                     : (world != null ? "account.prune.success.world" : "account.prune.success");
@@ -158,7 +157,7 @@ public class AccountCommand {
     private static int create(CommandContext<CommandSourceStack> context, Collection<? extends OfflinePlayer> players, @Nullable World world, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         if (players.isEmpty()) plugin.bundle().sendMessage(sender, "player.define");
-        else players.forEach(player -> createAccount(player, world, plugin).thenAccept(account -> {
+        else players.forEach(player -> plugin.economyController().createAccount(player, world).thenAccept(account -> {
             var message = world != null
                     ? (player.equals(sender) ? "account.created.world.self" : "account.created.world.other")
                     : (player.equals(sender) ? "account.created.self" : "account.created.other");
@@ -180,7 +179,7 @@ public class AccountCommand {
     private static int delete(CommandContext<CommandSourceStack> context, Collection<? extends OfflinePlayer> players, @Nullable World world, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         if (players.isEmpty()) plugin.bundle().sendMessage(sender, "player.define");
-        else players.forEach(player -> deleteAccount(player, world, plugin).thenAccept(success -> {
+        else players.forEach(player -> plugin.economyController().deleteAccount(player, world).thenAccept(success -> {
             var message = success ? (world != null
                     ? (player.equals(sender) ? "account.deleted.world.self" : "account.deleted.world.other")
                     : (player.equals(sender) ? "account.deleted.self" : "account.deleted.other"))
@@ -195,20 +194,5 @@ public class AccountCommand {
             return null;
         }));
         return Command.SINGLE_SUCCESS;
-    }
-
-    private static CompletableFuture<Account> createAccount(OfflinePlayer player, @Nullable World world, EconomistPlugin plugin) {
-        if (world == null) return plugin.economyController().createAccount(player);
-        return plugin.economyController().createAccount(player, world);
-    }
-
-    private static CompletableFuture<Boolean> deleteAccount(OfflinePlayer player, @Nullable World world, EconomistPlugin plugin) {
-        if (world == null) return plugin.economyController().deleteAccount(player);
-        return plugin.economyController().deleteAccount(player, world);
-    }
-
-    private static CompletableFuture<Boolean> deleteAccounts(List<UUID> accounts, @Nullable World world, EconomistPlugin plugin) {
-        if (world == null) return plugin.economyController().deleteAccounts(accounts);
-        return plugin.economyController().deleteAccounts(accounts, world);
     }
 }

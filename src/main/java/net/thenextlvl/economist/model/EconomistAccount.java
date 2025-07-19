@@ -1,24 +1,31 @@
 package net.thenextlvl.economist.model;
 
 import net.thenextlvl.economist.api.Account;
+import net.thenextlvl.economist.api.currency.Currency;
 import org.bukkit.World;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 @NullMarked
 public class EconomistAccount implements Account {
-    private BigDecimal balance;
-    private final @Nullable World world;
-    private final UUID owner;
+    protected final Map<Currency, BigDecimal> balances = new WeakHashMap<>();
+    protected final @Nullable World world;
+    protected UUID owner;
 
-    public EconomistAccount(BigDecimal balance, @Nullable World world, UUID owner) {
-        this.balance = balance;
+    public EconomistAccount(@Nullable World world, UUID owner) {
         this.world = world;
         this.owner = owner;
+    }
+
+    @Override
+    public BigDecimal getBalance(Currency currency) {
+        return balances.get(currency);
     }
 
     @Override
@@ -32,12 +39,9 @@ public class EconomistAccount implements Account {
     }
 
     @Override
-    public synchronized BigDecimal setBalance(BigDecimal balance) {
-        return this.balance = balance;
-    }
-
-    @Override
-    public synchronized BigDecimal getBalance() {
-        return balance;
+    public BigDecimal setBalance(Number balance, Currency currency) {
+        var decimal = BigDecimal.valueOf(balance.doubleValue());
+        balances.put(currency, decimal);
+        return decimal;
     }
 }

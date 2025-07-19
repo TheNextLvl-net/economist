@@ -9,10 +9,10 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
+import net.thenextlvl.economist.api.currency.Currency;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 
 @NullMarked
 public class BalanceTopCommand {
@@ -47,7 +46,8 @@ public class BalanceTopCommand {
         var sender = context.getSource().getSender();
         int pageEntryCount = plugin.config.balanceTop.entriesPerPage;
         var index = pageEntryCount * (page - 1);
-        getOrdered(world, index, pageEntryCount, plugin)
+        Currency currency = null; // fixme
+        plugin.economyController().tryGetOrdered(currency, world, index, pageEntryCount)
                 .thenAccept(accounts -> top(sender, accounts, index, world, plugin))
                 .exceptionally(throwable -> {
                     plugin.getComponentLogger().error("Failed to retrieve top-list", throwable);
@@ -57,6 +57,8 @@ public class BalanceTopCommand {
     }
 
     private static void top(CommandSender sender, List<Account> accounts, int index, @Nullable World world, EconomistPlugin plugin) {
+        Currency currency = null; // fixme
+        
         if (accounts.isEmpty()) {
             plugin.bundle().sendMessage(sender, "balance.top-list.empty");
             return;
@@ -74,25 +76,20 @@ public class BalanceTopCommand {
         plugin.bundle().sendMessage(sender, world != null ? "balance.top-list.header.world" : "balance.top-list.header",
                 Placeholder.parsed("world", world != null ? world.getName() : "null"));
         plugin.bundle().sendMessage(sender, world != null ? "balance.top-list.total.world" : "balance.top-list.total",
-                Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()),
-                Placeholder.parsed("total", plugin.economyController().format(totalBalance, locale)),
+                Placeholder.component("symbol", currency.getSymbol()),
+                Placeholder.component("total", currency.format(totalBalance, locale)),
                 Placeholder.parsed("world", world != null ? world.getName() : "null"));
 
         for (int i = 0; i < accounts.size(); i++) {
             var account = accounts.get(i);
             var player = plugin.getServer().getOfflinePlayer(account.getOwner());
-            var worth = totalBalance == 0 ? 0d : (account.getBalance().doubleValue() / totalBalance) * 100d;
+            var worth = totalBalance == 0 ? 0d : (account.getBalance(currency).doubleValue() / totalBalance) * 100d;
             plugin.bundle().sendMessage(sender, "balance.top-list",
-                    Placeholder.parsed("balance", plugin.economyController().format(account.getBalance(), locale)),
+                    Placeholder.component("balance", currency.format(account.getBalance(currency), locale)),
                     Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
                     Placeholder.parsed("rank", String.valueOf(index + (i + 1))),
-                    Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()),
+                    Placeholder.component("symbol", currency.getSymbol()),
                     Placeholder.parsed("worth", String.format(locale, "%.2f%%", worth)));
         }
-    }
-
-    private static CompletableFuture<@Unmodifiable List<Account>> getOrdered(@Nullable World world, int start, int limit, EconomistPlugin plugin) {
-        if (world == null) return plugin.economyController().tryGetOrdered(start, limit);
-        return plugin.economyController().tryGetOrdered(world, start, limit);
     }
 }

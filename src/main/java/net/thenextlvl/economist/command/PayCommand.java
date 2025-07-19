@@ -11,6 +11,7 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
+import net.thenextlvl.economist.api.currency.Currency;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -84,23 +85,25 @@ public class PayCommand {
     }
 
     private static void pay(Player sender, OfflinePlayer player, Account source, Account target, double amount, double minimum, EconomistPlugin plugin) {
-        if (source.getBalance().doubleValue() - amount < minimum) {
+        Currency currency = null; // fixme
+
+        if (source.getBalance(currency).doubleValue() - amount < minimum) {
             plugin.bundle().sendMessage(sender, "account.funds");
             return;
         }
 
-        source.withdraw(amount);
-        target.deposit(amount);
+        source.withdraw(amount, currency);
+        target.deposit(amount, currency);
 
         plugin.bundle().sendMessage(sender, "player.pay.outgoing",
-                Placeholder.parsed("amount", plugin.economyController().format(amount, sender.locale())),
-                Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),
-                Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()));
+                Placeholder.component("amount", currency.format(amount, sender.locale())),
+                Placeholder.component("symbol", currency.getSymbol()),
+                Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()));
 
         var online = player.getPlayer();
         if (online != null) plugin.bundle().sendMessage(online, "player.pay.incoming",
-                Placeholder.parsed("amount", plugin.economyController().format(amount, online.locale())),
-                Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()),
+                Placeholder.component("amount", currency.format(amount, online.locale())),
+                Placeholder.component("symbol", currency.getSymbol()),
                 Placeholder.parsed("player", sender.getName()));
     }
 

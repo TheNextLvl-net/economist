@@ -23,6 +23,7 @@ tasks.compileJava {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://repo.thenextlvl.net/releases")
     maven("https://repo.papermc.io/repository/maven-public/")
@@ -30,7 +31,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("net.thenextlvl.services:service-io:2.3.1")
+    compileOnly("net.thenextlvl.services:service-io:3.0.0-pre5")
 
     implementation("net.thenextlvl.core:i18n:3.2.1")
     implementation("net.thenextlvl.core:files:3.0.0")

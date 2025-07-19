@@ -58,7 +58,8 @@ public class SQLController implements DataController {
             while (resultSet.next()) {
                 var balance = resultSet.getBigDecimal("balance");
                 var owner = UUID.fromString(resultSet.getString("uuid"));
-                accounts.add(new EconomistAccount(balance, world, owner));
+                // todo: initialize balances
+                accounts.add(new EconomistAccount(world, owner));
             }
             return accounts;
         }, name, name, limit, start));
@@ -69,7 +70,8 @@ public class SQLController implements DataController {
         var balance = plugin.config.startBalance;
         executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
                 uuid, world != null ? world.key().asString() : null, balance);
-        return new EconomistAccount(BigDecimal.valueOf(balance), world, uuid);
+        // todo: initialize balances
+        return new EconomistAccount(world, uuid);
     }
 
     @Override
@@ -105,7 +107,8 @@ public class SQLController implements DataController {
                 resultSet -> {
                     if (!resultSet.next()) return null;
                     var balance = resultSet.getBigDecimal("balance");
-                    return balance != null ? new EconomistAccount(balance, world, uuid) : null;
+                    // fixme: initialize balance
+                    return balance != null ? new EconomistAccount(world, uuid) : null;
                 }, uuid, name, name);
     }
 
@@ -119,7 +122,8 @@ public class SQLController implements DataController {
             while (resultSet.next()) {
                 var owner = UUID.fromString(resultSet.getString("uuid"));
                 var balance = resultSet.getBigDecimal("balance");
-                accounts.add(new EconomistAccount(balance, world, owner));
+                // fixme: initialize balance
+                accounts.add(new EconomistAccount(world, owner));
             }
             return accounts;
         }, name, name));
@@ -129,7 +133,8 @@ public class SQLController implements DataController {
     public boolean save(Account account) throws SQLException {
         var name = account.getWorld().map(World::key).map(Key::asString).orElse(null);
         return executeUpdate("UPDATE accounts SET balance = ? WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
-                account.getBalance(), account.getOwner(), name, name) == 1;
+                // fixme: save balances
+                account.getBalance(null), account.getOwner(), name, name) == 1;
     }
 
     protected void createAccountTable() throws SQLException {
