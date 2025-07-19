@@ -315,23 +315,4 @@ public interface EconomyController {
      * @return a {@code CompletableFuture} completing with a boolean indicating whether the account was deleted
      */
     CompletableFuture<Boolean> deleteAccount(UUID uuid, @Nullable World world);
-
-    /**
-     * Deletes multiple accounts based on the provided list of UUIDs.
-     *
-     * @param accounts a list of UUIDs corresponding to the accounts to be deleted
-     * @return a CompletableFuture that will complete when any account was deleted
-     */
-    default CompletableFuture<Boolean> deleteAccounts(List<UUID> accounts) {
-        return deleteAccounts(accounts, null);
-    }
-
-    /**
-     * Deletes multiple accounts based on the provided list of UUIDs and the specified world.
-     *
-     * @param accounts a list of UUIDs corresponding to the accounts to be deleted
-     * @param world    the world in which the accounts are located
-     * @return a CompletableFuture that will complete when any account was deleted
-     */
-    CompletableFuture<Boolean> deleteAccounts(List<UUID> accounts, @Nullable World world);
 }
