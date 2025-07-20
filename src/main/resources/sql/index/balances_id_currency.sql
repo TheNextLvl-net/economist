@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_balances_id_currency ON balances (id, currency);

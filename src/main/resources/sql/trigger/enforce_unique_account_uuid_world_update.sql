@@ -1,4 +1,4 @@
-CREATE TRIGGER IF NOT EXISTS enforce_unique_uuid_world_update
+CREATE TRIGGER IF NOT EXISTS enforce_unique_account_uuid_world_update
     BEFORE UPDATE
     ON accounts
     FOR EACH ROW

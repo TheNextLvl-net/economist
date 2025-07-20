@@ -32,7 +32,8 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
     compileOnly("net.thenextlvl.services:service-io:3.0.0-pre5")
-
+    compileOnly("org.xerial:sqlite-jdbc:3.50.2.0")
+    
     implementation("net.thenextlvl.core:i18n:3.2.1")
     implementation("net.thenextlvl.core:files:3.0.0")
     implementation("net.thenextlvl.core:paper:2.2.1")
