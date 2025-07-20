@@ -16,8 +16,6 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 
@@ -65,25 +63,19 @@ public class BalanceTopCommand {
         }
 
         var locale = sender instanceof Player player ? player.locale() : Locale.US;
-        var decimal = BigDecimal.ZERO;
-        try {
-            decimal = plugin.dataController().getTotalBalance(currency, world);
-        } catch (SQLException e) {
-            plugin.getComponentLogger().error("Failed to calculate total balance", e);
-        }
-        var totalBalance = decimal.doubleValue();
+        var balance = plugin.dataController().getTotalBalance(currency, world).doubleValue();
 
         plugin.bundle().sendMessage(sender, world != null ? "balance.top-list.header.world" : "balance.top-list.header",
                 Placeholder.parsed("world", world != null ? world.getName() : "null"));
         plugin.bundle().sendMessage(sender, world != null ? "balance.top-list.total.world" : "balance.top-list.total",
                 Placeholder.component("symbol", currency.getSymbol()),
-                Placeholder.component("total", currency.format(totalBalance, locale)),
+                Placeholder.component("total", currency.format(balance, locale)),
                 Placeholder.parsed("world", world != null ? world.getName() : "null"));
 
         for (int i = 0; i < accounts.size(); i++) {
             var account = accounts.get(i);
             var player = plugin.getServer().getOfflinePlayer(account.getOwner());
-            var worth = totalBalance == 0 ? 0d : (account.getBalance(currency).doubleValue() / totalBalance) * 100d;
+            var worth = balance == 0 ? 0d : (account.getBalance(currency).doubleValue() / balance) * 100d;
             plugin.bundle().sendMessage(sender, "balance.top-list",
                     Placeholder.component("balance", currency.format(account.getBalance(currency), locale)),
                     Placeholder.parsed("player", player.getName() != null ? player.getName() : player.getUniqueId().toString()),

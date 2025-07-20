@@ -16,6 +16,8 @@ public class PluginConfig {
     public @SerializedName("max-loan-amount") double maxLoanAmount = 250;
     public @SerializedName("start-balance") double startBalance = 0;
 
+    public @SerializedName("auto-save-minutes") int autoSaveMinutes = 1;
+    public @SerializedName("cache-eviction-minutes") int cacheEvictionMinutes = 5;
     public @SerializedName("minimum-prune-days") int minimumPruneDays = 30;
 
     public @SerializedName("balance-aliases") Set<String> balanceAliases = Set.of("bal", "money");
