@@ -1,7 +1,10 @@
 CREATE TABLE IF NOT EXISTS banks
 (
-    name    TEXT            NOT NULL UNIQUE PRIMARY KEY,
-    balance DECIMAL(65, 20) NOT NULL,
-    owner   TEXT            NOT NULL UNIQUE,
-    members LIST            NOT NULL
-)
+    id          INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    name        TEXT      NOT NULL UNIQUE PRIMARY KEY,
+    owner       TEXT      NOT NULL,
+    world       TEXT      NULL,
+    members     LIST      NOT NULL,
+    last_update TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (owner, world)
+);
