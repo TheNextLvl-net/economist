@@ -65,6 +65,11 @@ public class EconomistAccount implements Account {
         return decimal;
     }
 
+    @Override
+    public boolean canHold(Currency currency) {
+        return true; // todo: something better
+    }
+
     protected void markDirty() {
         plugin.economyController().markDirty(this);
         lastUpdate = Instant.now();

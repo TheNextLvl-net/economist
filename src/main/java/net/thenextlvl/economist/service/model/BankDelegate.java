@@ -1,6 +1,7 @@
 package net.thenextlvl.economist.service.model;
 
 import net.thenextlvl.service.api.economy.bank.Bank;
+import net.thenextlvl.service.api.economy.currency.Currency;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 
@@ -44,5 +45,15 @@ public class BankDelegate extends AccountDelegate implements Bank {
     @Override
     public boolean setOwner(UUID uuid) {
         return delegate.setOwner(uuid);
+    }
+
+    @Override
+    public boolean canDeposit(UUID uuid, Number number, Currency currency) {
+        return delegate.canDeposit(uuid, number, delegate(currency));
+    }
+
+    @Override
+    public boolean canWithdraw(UUID uuid, Number number, Currency currency) {
+        return delegate.canWithdraw(uuid, number, delegate(currency));
     }
 }
