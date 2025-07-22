@@ -9,9 +9,11 @@ import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @NullMarked
 public interface DataController {
@@ -26,6 +28,8 @@ public interface DataController {
     BigDecimal getTotalBalance(Currency currency, @Nullable World world);
 
     List<Account> getOrdered(Currency currency, @Nullable World world, int offset, int limit);
+    
+    Stream<Account> getAccountsUpdatedSince(Instant lastSync);
 
     int prune(Duration duration, @Nullable World world);
 

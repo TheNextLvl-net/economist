@@ -12,9 +12,11 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @NullMarked
 public class PostgreSQLController extends SQLController {
@@ -46,6 +48,11 @@ public class PostgreSQLController extends SQLController {
     @Override
     public List<Account> getOrdered(Currency currency, @Nullable World world, int offset, int limit) {
         return List.of();
+    }
+
+    @Override
+    public Stream<Account> getAccountsUpdatedSince(Instant lastSync) {
+        return Stream.of();
     }
 
     @Override
