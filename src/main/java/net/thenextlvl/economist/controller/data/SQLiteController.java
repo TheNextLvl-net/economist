@@ -1,5 +1,6 @@
 package net.thenextlvl.economist.controller.data;
 
+import net.kyori.adventure.key.Key;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.currency.Currency;
@@ -16,12 +17,14 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @NullMarked
 public class SQLiteController extends SQLController {
@@ -32,6 +35,7 @@ public class SQLiteController extends SQLController {
 
     private static final String GET_ACCOUNTS = statement("sql/query/get_accounts.sql");
     private static final String GET_BALANCES = statement("sql/query/get_balances.sql");
+    private static final String GET_UPDATED_ACCOUNTS = statement("sql/query/get_updated_accounts.sql");
     private static final String LIST_ORDERED = statement("sql/query/list_ordered.sql");
     private static final String TOTAL_BALANCE = statement("sql/query/total_balance.sql");
 
@@ -43,11 +47,13 @@ public class SQLiteController extends SQLController {
     public @Nullable Account getAccount(UUID uuid, @Nullable World world) {
         try {
             return executeQuery(GET_BALANCES, resultSet -> {
-                var currencies = new HashMap<String, BigDecimal>();
+                var currencies = new HashMap<Currency, BigDecimal>();
                 while (resultSet.next()) {
                     var balance = resultSet.getBigDecimal("balance");
                     var currency = resultSet.getString("currency");
-                    currencies.put(currency, balance);
+                    plugin.currencyHolder().getCurrency(currency).ifPresentOrElse(currency1 -> {
+                        currencies.put(currency1, balance);
+                    }, () -> plugin.getComponentLogger().warn("Unknown currency {} in database", currency));
                 }
                 if (currencies.isEmpty()) return null;
                 return new EconomistAccount(plugin, currencies, world, uuid);
@@ -62,12 +68,14 @@ public class SQLiteController extends SQLController {
     public @Unmodifiable Set<Account> getAccounts(@Nullable World world) {
         try {
             return executeQuery(GET_ACCOUNTS, resultSet -> {
-                var accounts = new HashMap<String, HashMap<String, BigDecimal>>();
+                var accounts = new HashMap<String, HashMap<Currency, BigDecimal>>();
                 while (resultSet.next()) {
                     var uuid = resultSet.getString("uuid");
                     var balance = resultSet.getBigDecimal("balance");
                     var currency = resultSet.getString("currency");
-                    accounts.computeIfAbsent(uuid, ignored -> new HashMap<>()).put(currency, balance);
+                    plugin.currencyHolder().getCurrency(currency).ifPresentOrElse(currency1 -> {
+                        accounts.computeIfAbsent(uuid, ignored -> new HashMap<>()).put(currency1, balance);
+                    }, () -> plugin.getComponentLogger().warn("Unknown currency {} in database", currency));
                 }
                 return accounts.entrySet().stream().map(entry -> {
                     var uuid = UUID.fromString(entry.getKey());
@@ -100,7 +108,7 @@ public class SQLiteController extends SQLController {
             return executeQuery(TOTAL_BALANCE, resultSet -> {
                 if (!resultSet.next()) return BigDecimal.ZERO;
                 return resultSet.getBigDecimal("total_balance");
-            }, world != null ? world.key().asString() : null);
+            }, world != null ? world.key().asString() : null, currency.getName());
         } catch (SQLException e) {
             plugin.getComponentLogger().error("Failed to get total balance", e);
             return BigDecimal.ZERO;
@@ -129,6 +137,37 @@ public class SQLiteController extends SQLController {
         }
     }
 
+    private record UnparsedIdentity(String uuid, @Nullable String world) {
+    }
+
+    @Override
+    public Stream<Account> getAccountsUpdatedSince(Instant lastSync) {
+        try {
+            return executeQuery(GET_UPDATED_ACCOUNTS, resultSet -> {
+                var accounts = new HashMap<UnparsedIdentity, HashMap<Currency, BigDecimal>>();
+                while (resultSet.next()) {
+                    var uuid = resultSet.getString("uuid");
+                    var world = resultSet.getString("world");
+                    var balance = resultSet.getBigDecimal("balance");
+                    var currency = resultSet.getString("currency");
+                    plugin.currencyHolder().getCurrency(currency).ifPresentOrElse(currency1 -> {
+                        var identity = new UnparsedIdentity(uuid, world);
+                        accounts.computeIfAbsent(identity, ignored -> new HashMap<>()).put(currency1, balance);
+                    }, () -> plugin.getComponentLogger().warn("Unknown currency {} in database", currency));
+                }
+                return accounts.entrySet().stream().map(entry -> {
+                    var identity = entry.getKey();
+                    var uuid = UUID.fromString(identity.uuid());
+                    var world = identity.world() != null ? plugin.getServer().getWorld(identity.world()) : null;
+                    return new EconomistAccount(plugin, entry.getValue(), world, uuid);
+                });
+            }, lastSync);
+        } catch (SQLException e) {
+            plugin.getComponentLogger().error("Failed to load accounts updated since {}", lastSync, e);
+            return Stream.of();
+        }
+    }
+
     @Override
     public int prune(Duration duration, @Nullable World world) {
         try {
@@ -153,11 +192,12 @@ public class SQLiteController extends SQLController {
     @Override
     public boolean save(Account account) {
         try {
-            var balances = ((EconomistAccount) account).getBalances();
+            var balances = account.getBalances();
             if (balances.isEmpty()) return true;
 
-            var batches = balances.entrySet().stream().map(entry -> new Object[]{
-                    account.getOwner(), entry.getKey(), entry.getValue()
+            var world = account.getWorld().map(World::key).map(Key::asString).orElse(null);
+            var batches = balances.entrySet().stream().map(entry -> new @Nullable Object[]{
+                    account.getOwner(), world, entry.getKey().getName(), entry.getValue()
             }).toList();
 
             for (int result : executeBatchUpdate(UPSERT_BALANCES, batches)) {
