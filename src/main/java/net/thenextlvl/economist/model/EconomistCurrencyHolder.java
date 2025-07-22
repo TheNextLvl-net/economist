@@ -38,7 +38,7 @@ public class EconomistCurrencyHolder implements CurrencyHolder {
 
     @Override
     public boolean hasCurrency(String name) {
-        return getCurrency(name).isPresent();
+        return currencies.stream().anyMatch(currency -> currency.getName().equals(name));
     }
 
     @Override
