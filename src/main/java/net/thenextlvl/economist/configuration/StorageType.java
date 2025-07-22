@@ -7,5 +7,5 @@ public enum StorageType {
     PostgreSQL,
     MongoDB,
     SQLite,
-    MySQL
+    MariaDB
 }
