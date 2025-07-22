@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -34,7 +35,9 @@ public class EconomistBank extends EconomistAccount implements Bank {
 
     @Override
     public boolean addMember(UUID uuid) {
-        return members.add(uuid);
+        if (!members.add(uuid)) return false;
+        plugin.bankController().markDirty(this);
+        return true;
     }
 
     @Override
@@ -44,14 +47,24 @@ public class EconomistBank extends EconomistAccount implements Bank {
 
     @Override
     public boolean removeMember(UUID uuid) {
-        return members.remove(uuid);
+        if (!members.remove(uuid)) return false;
+        plugin.bankController().markDirty(this);
+        return true;
     }
 
     @Override
     public boolean setOwner(UUID uuid) {
+        if (this.owner.equals(uuid)) return false;
         if (plugin.bankController().hasBank(uuid, world)) return false;
+        plugin.bankController().markDirty(this);
         this.owner = uuid;
         return true;
+    }
+
+    @Override
+    protected void markDirty() {
+        plugin.bankController().markDirty(this);
+        lastUpdate = Instant.now();
     }
 
     @Override
