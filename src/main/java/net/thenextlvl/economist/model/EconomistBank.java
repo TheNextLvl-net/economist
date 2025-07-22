@@ -2,6 +2,7 @@ package net.thenextlvl.economist.model;
 
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.bank.Bank;
+import net.thenextlvl.economist.api.currency.Currency;
 import org.bukkit.World;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
@@ -59,6 +60,16 @@ public class EconomistBank extends EconomistAccount implements Bank {
         plugin.bankController().markDirty(this);
         this.owner = uuid;
         return true;
+    }
+
+    @Override
+    public boolean canDeposit(UUID uuid, Number amount, Currency currency) {
+        return canHold(currency) && uuid.equals(owner); // todo: something better?
+    }
+
+    @Override
+    public boolean canWithdraw(UUID uuid, Number amount, Currency currency) {
+        return canHold(currency) && uuid.equals(owner); // todo: something better?
     }
 
     @Override

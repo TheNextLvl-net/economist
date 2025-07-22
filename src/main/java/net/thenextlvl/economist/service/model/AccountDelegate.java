@@ -18,7 +18,7 @@ public class AccountDelegate implements Account {
     public AccountDelegate(net.thenextlvl.economist.api.Account delegate) {
         this.delegate = delegate;
     }
- 
+
     @Override
     public BigDecimal getBalance(Currency currency) {
         return delegate.getBalance(delegate(currency));
@@ -38,11 +38,16 @@ public class AccountDelegate implements Account {
     public BigDecimal setBalance(Number balance, Currency currency) {
         return delegate.setBalance(balance, delegate(currency));
     }
-    
-    private net.thenextlvl.economist.api.currency.Currency delegate(Currency currency) {
+
+    @Override
+    public boolean canHold(Currency currency) {
+        return delegate.canHold(delegate(currency));
+    }
+
+    net.thenextlvl.economist.api.currency.Currency delegate(Currency currency) {
         var plugin = JavaPlugin.getPlugin(EconomistPlugin.class);
         return plugin.currencyHolder().getCurrency(currency.getName())
-               .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new IllegalArgumentException(
                         "Unknown currency '" + currency.getName() + "'"
                 ));
     }
