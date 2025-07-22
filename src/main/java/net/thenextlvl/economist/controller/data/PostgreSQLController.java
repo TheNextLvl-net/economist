@@ -21,8 +21,12 @@ import java.util.stream.Stream;
 @NullMarked
 public class PostgreSQLController extends SQLController {
     // todo: implement
-    public PostgreSQLController(Connection connection, EconomistPlugin plugin) throws SQLException {
-        super(connection, plugin);
+    public PostgreSQLController(EconomistPlugin plugin) throws SQLException {
+        super(createConnection(plugin), plugin);
+    }
+
+    private static Connection createConnection(EconomistPlugin plugin) throws SQLException {
+        return null;
     }
 
     @Override
