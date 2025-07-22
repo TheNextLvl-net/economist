@@ -22,6 +22,7 @@ public class EconomistCurrencyHolder implements CurrencyHolder {
     public EconomistCurrencyHolder(EconomistPlugin plugin) {
         this.plugin = plugin;
         this.defaultCurrency = new EconomistCurrency(plugin, new EconomistCurrency.Builder("default")); // todo: proper default
+        this.currencies.add(this.defaultCurrency);
     }
 
     @Override
@@ -58,6 +59,7 @@ public class EconomistCurrencyHolder implements CurrencyHolder {
 
     @Override
     public boolean deleteCurrency(String name) {
+        // todo: fail if default currency?
         return currencies.removeIf(currency -> currency.getName().equals(name));
     }
 
