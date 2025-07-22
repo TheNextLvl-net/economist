@@ -5,7 +5,6 @@ import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.EconomyController;
 import net.thenextlvl.economist.api.currency.Currency;
 import net.thenextlvl.economist.api.currency.CurrencyHolder;
-import net.thenextlvl.economist.controller.data.DataController;
 import org.bukkit.World;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
@@ -30,17 +29,30 @@ public class EconomistEconomyController implements EconomyController {
     private final Set<Account> dirtyAccounts = new HashSet<>();
     private final EconomistPlugin plugin;
 
+    private volatile Instant lastSyncTime = Instant.now();
+
     public EconomistEconomyController(EconomistPlugin plugin) {
         this.plugin = plugin;
+        startTasks(plugin);
+    }
+
+    private void startTasks(EconomistPlugin plugin) {
         var evictionMinutes = plugin.config.cacheEvictionMinutes;
-        var saveMinutes = plugin.config.autoSaveMinutes;
         plugin.getServer().getAsyncScheduler().runAtFixedRate(
                 plugin, ignored -> performCacheEviction(),
                 evictionMinutes, evictionMinutes, TimeUnit.MINUTES
         );
+
+        var saveSeconds = plugin.config.autoSaveSeconds;
         plugin.getServer().getAsyncScheduler().runAtFixedRate(
-                plugin, ignored -> saveAll(), // todo: save much more often but only dirty accounts
-                saveMinutes, saveMinutes, TimeUnit.MINUTES
+                plugin, ignored -> saveDirty(),
+                saveSeconds, saveSeconds, TimeUnit.SECONDS
+        );
+
+        var syncSeconds = plugin.config.syncIntervalSeconds;
+        plugin.getServer().getAsyncScheduler().runAtFixedRate(
+                plugin, ignored -> pullChangesFromDatabase(),
+                syncSeconds, syncSeconds, TimeUnit.SECONDS
         );
     }
 
@@ -51,7 +63,7 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public CompletableFuture<@Unmodifiable Set<Account>> loadAccounts(@Nullable World world) {
-        return CompletableFuture.supplyAsync(() -> dataController().getAccounts(world));
+        return CompletableFuture.supplyAsync(() -> plugin.dataController().getAccounts(world));
     }
 
     @Override
@@ -74,14 +86,13 @@ public class EconomistEconomyController implements EconomyController {
     @Override
     public CompletableFuture<@Unmodifiable List<Account>> tryGetOrdered(Currency currency, @Nullable World world, int start, int limit) {
         return CompletableFuture.supplyAsync(() -> {
-            var accounts = dataController().getOrdered(currency, world, start, limit);
+            var accounts = plugin.dataController().getOrdered(currency, world, start, limit);
             accounts.forEach(account -> {
-                // fixme: caching is cursed here
-                //  if a user moves out of the top list in cache the getOrdered will be wrong
-                // todo: add "ordered" accounts cache
-                var identifier = new Identifier(account.getOwner(), world);
+                var identifier = new Identifier(account);
                 cache.compute(identifier, (key, value) -> {
-                    return value != null ? value.touch() : new CacheEntry(account);
+                    if (value != null && value.account().getLastUpdate().isAfter(account.getLastUpdate())) {
+                        return new CacheEntry(value.account());
+                    } else return new CacheEntry(account);
                 });
             });
             return accounts;
@@ -91,8 +102,8 @@ public class EconomistEconomyController implements EconomyController {
     @Override
     public CompletableFuture<Account> createAccount(UUID uuid, @Nullable World world) {
         return CompletableFuture.supplyAsync(() -> {
-            var account = dataController().createAccount(uuid, world);
-            cache.put(new Identifier(uuid, world), new CacheEntry(account));
+            var account = plugin.dataController().createAccount(uuid, world);
+            cache.put(new Identifier(account), new CacheEntry(account));
             return account;
         });
     }
@@ -100,8 +111,8 @@ public class EconomistEconomyController implements EconomyController {
     @Override
     public CompletableFuture<Optional<Account>> loadAccount(UUID uuid, @Nullable World world) {
         return CompletableFuture.supplyAsync(() -> {
-            var optional = Optional.ofNullable(dataController().getAccount(uuid, world));
-            optional.ifPresent(account -> cache.put(new Identifier(uuid, world), new CacheEntry(account)));
+            var optional = Optional.ofNullable(plugin.dataController().getAccount(uuid, world));
+            optional.ifPresent(account -> cache.put(new Identifier(account), new CacheEntry(account)));
             return optional;
         });
     }
@@ -109,10 +120,22 @@ public class EconomistEconomyController implements EconomyController {
     @Override
     public CompletableFuture<Boolean> deleteAccount(UUID uuid, @Nullable World world) {
         return CompletableFuture.supplyAsync(() -> {
-            var success = dataController().deleteAccount(uuid, world);
-            if (success) cache.remove(new Identifier(uuid, world)); // todo: new?
+            var success = plugin.dataController().deleteAccount(uuid, world);
+            if (success) cache.remove(new Identifier(uuid, world));
             return success;
         });
+    }
+
+    private record CacheEntry(Account account, Instant lastAccessed) {
+        public CacheEntry(Account account) {
+            this(account, Instant.now());
+        }
+    }
+
+    private record Identifier(UUID uuid, @Nullable World world) {
+        public Identifier(Account account) {
+            this(account.getOwner(), account.getWorld().orElse(null));
+        }
     }
 
     private void performCacheEviction() {
@@ -130,13 +153,28 @@ public class EconomistEconomyController implements EconomyController {
         });
     }
 
-    private record CacheEntry(Account account, Instant lastAccessed) {
-        public CacheEntry(Account account) {
-            this(account, Instant.now());
-        }
+    private void pullChangesFromDatabase() {
+        var currentSyncTime = Instant.now();
+        try {
+            plugin.dataController().getAccountsUpdatedSince(lastSyncTime).forEach(account -> {
+                var identifier = new Identifier(account);
+                var existingEntry = cache.get(identifier);
 
-        public CacheEntry touch() {
-            return new CacheEntry(account, Instant.now());
+                if (existingEntry == null) {
+                    cache.put(identifier, new CacheEntry(account));
+                    return;
+                }
+
+                var cachedAccount = existingEntry.account();
+                if (account.getLastUpdate().isBefore(cachedAccount.getLastUpdate())) return;
+
+                dirtyAccounts.remove(cachedAccount);
+                cache.put(identifier, new CacheEntry(account));
+            });
+        } catch (Exception e) {
+            plugin.getComponentLogger().error("Failed to pull changes from database", e);
+        } finally {
+            this.lastSyncTime = currentSyncTime;
         }
     }
 
