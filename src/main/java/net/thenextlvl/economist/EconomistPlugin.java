@@ -83,8 +83,8 @@ public class EconomistPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        economyController().saveAll();
-        bankController().save();
+        economyController().saveDirty();
+        bankController().saveDirty();
         metrics.shutdown();
     }
 

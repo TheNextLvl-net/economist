@@ -9,12 +9,13 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-// todo
+// todo implement banks
 @NullMarked
 public class EconomistBankController implements BankController {
     private final EconomistPlugin plugin;
@@ -78,7 +79,15 @@ public class EconomistBankController implements BankController {
         return false;
     }
 
-    public void save() {
+    private final Set<Bank> dirtyBanks = new HashSet<>();
 
+    public boolean markDirty(Bank bank) {
+        return dirtyBanks.add(bank);
+    }
+
+    public void saveDirty() {
+        // todo: save dirty banks
+        //  dirtyBanks.forEach(this::save);
+        dirtyBanks.clear();
     }
 }

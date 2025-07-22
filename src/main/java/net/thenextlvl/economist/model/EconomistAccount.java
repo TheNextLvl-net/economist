@@ -23,8 +23,8 @@ public class EconomistAccount implements Account {
     protected final @Nullable World world;
     protected final Map<Currency, BigDecimal> balances;
     protected UUID owner;
-    
-    // todo: some kind of "dirty" marking to optimize saving?
+
+    protected Instant lastUpdate = Instant.now();
 
     public EconomistAccount(EconomistPlugin plugin, Map<Currency, BigDecimal> balances, @Nullable World world, UUID owner) {
         this.balances = balances;
@@ -61,8 +61,18 @@ public class EconomistAccount implements Account {
     @Override
     public BigDecimal setBalance(Number balance, Currency currency) {
         var decimal = BigDecimal.valueOf(balance.doubleValue());
-        balances.put(currency.getName(), decimal);
+        if (!decimal.equals(balances.put(currency, decimal))) markDirty();
         return decimal;
+    }
+
+    protected void markDirty() {
+        plugin.economyController().markDirty(this);
+        lastUpdate = Instant.now();
+    }
+
+    @Override
+    public Instant getLastUpdate() {
+        return lastUpdate;
     }
 
     @Override

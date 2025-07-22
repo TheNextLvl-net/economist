@@ -13,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 @NullMarked
 public class EconomistEconomyController implements EconomyController {
     private final Map<Identifier, CacheEntry> cache = new ConcurrentHashMap<>();
+    private final Set<Account> dirtyAccounts = new HashSet<>();
     private final EconomistPlugin plugin;
 
     public EconomistEconomyController(EconomistPlugin plugin) {
@@ -40,19 +42,6 @@ public class EconomistEconomyController implements EconomyController {
                 plugin, ignored -> saveAll(), // todo: save much more often but only dirty accounts
                 saveMinutes, saveMinutes, TimeUnit.MINUTES
         );
-        // todo: some kind of syncing to pull changes from the db to cache to support multiple db connections at once
-    }
-
-    public void saveAll() {
-        cache.values().forEach(cacheEntry -> save(cacheEntry.account()));
-    }
-
-    public void save(Account account) {
-        dataController().save(account);
-    }
-
-    private DataController dataController() {
-        return plugin.dataController();
     }
 
     @Override
@@ -137,7 +126,7 @@ public class EconomistEconomyController implements EconomyController {
             if (cacheEntry.lastAccessed().isAfter(evictionThreshold)) return false;
             if (plugin.getServer().getPlayer(identifier.uuid()) != null) return false;
 
-            return dataController().save(cacheEntry.account());
+            return plugin.dataController().save(cacheEntry.account());
         });
     }
 
@@ -151,6 +140,12 @@ public class EconomistEconomyController implements EconomyController {
         }
     }
 
-    private record Identifier(UUID uuid, @Nullable World world) {
+    public boolean markDirty(Account account) {
+        return dirtyAccounts.add(account);
+    }
+
+    public void saveDirty() {
+        dirtyAccounts.forEach(plugin.dataController()::save);
+        dirtyAccounts.clear();
     }
 }

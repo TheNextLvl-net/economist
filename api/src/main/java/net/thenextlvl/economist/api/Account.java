@@ -100,4 +100,12 @@ public interface Account {
      * @return the new balance after the operation
      */
     BigDecimal setBalance(Number balance, Currency currency);
+
+    /**
+     * Retrieves the timestamp of the account's last update.
+     *
+     * @return an {@code Instant} representing the time of the last update
+     */
+    @ApiStatus.Internal
+    Instant getLastUpdate();
 }
