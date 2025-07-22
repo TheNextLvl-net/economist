@@ -15,8 +15,8 @@ import java.sql.SQLException;
 import java.util.stream.Collectors;
 
 public abstract class SQLController implements AutoCloseable, DataController {
-    private final @NonNull Connection connection;
     protected final @NonNull EconomistPlugin plugin;
+    private final @NonNull Connection connection;
 
     public SQLController(@NonNull Connection connection, @NonNull EconomistPlugin plugin) throws SQLException {
         this.connection = connection;
@@ -26,7 +26,7 @@ public abstract class SQLController implements AutoCloseable, DataController {
     }
 
     protected abstract void setupDatabase() throws SQLException;
-    
+
     protected void migrateDatabase() throws SQLException {
     }
 
@@ -47,7 +47,7 @@ public abstract class SQLController implements AutoCloseable, DataController {
     }
 
     @SuppressWarnings("SqlSourceToSinkFlow")
-    protected int[] executeBatchUpdate(String sql, Iterable<Object[]> batches) throws SQLException {
+    protected int[] executeBatchUpdate(String sql, Iterable<@Nullable Object[]> batches) throws SQLException {
         try (var preparedStatement = connection.prepareStatement(sql)) {
             for (var parameters : batches) {
                 for (var i = 0; i < parameters.length; i++) preparedStatement.setObject(i + 1, parameters[i]);
