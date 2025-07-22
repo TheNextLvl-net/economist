@@ -3,9 +3,12 @@ package net.thenextlvl.economist.api;
 import net.thenextlvl.economist.api.currency.Currency;
 import org.bukkit.World;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +30,20 @@ public interface Account {
         setBalance(balance, currency);
         return balance;
     }
+
+    /**
+     * Retrieves all balances of the account.
+     * <p>
+     * The map contains only the currencies for which there is a defined balance.
+     * Currencies without an explicit balance will not be included in the map.
+     * <p>
+     * This behavior differs from {@link #getBalance(Currency)},
+     * which provides a balance for all currencies by defaulting to a starting balance.
+     *
+     * @return an unmodifiable map of currencies and account balance
+     */
+    @Unmodifiable
+    Map<Currency, BigDecimal> getBalances();
 
     /**
      * Retrieves the balance of the account for the specified currency.
