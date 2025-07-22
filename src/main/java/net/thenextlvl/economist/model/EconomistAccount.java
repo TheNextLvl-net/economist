@@ -4,10 +4,12 @@ import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.currency.Currency;
 import org.bukkit.World;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,21 +21,21 @@ public class EconomistAccount implements Account {
     protected final EconomistPlugin plugin;
 
     protected final @Nullable World world;
-    protected final Map<String, BigDecimal> balances;
+    protected final Map<Currency, BigDecimal> balances;
     protected UUID owner;
     
     // todo: some kind of "dirty" marking to optimize saving?
 
-    public EconomistAccount(EconomistPlugin plugin, Map<String, BigDecimal> balances, @Nullable World world, UUID owner) {
+    public EconomistAccount(EconomistPlugin plugin, Map<Currency, BigDecimal> balances, @Nullable World world, UUID owner) {
         this.balances = balances;
         this.plugin = plugin;
         this.world = world;
         this.owner = owner;
     }
 
-    //fixme: temp solution
-    public Map<String, BigDecimal> getBalances() {
-        return balances;
+    @Override
+    public @Unmodifiable Map<Currency, BigDecimal> getBalances() {
+        return Map.copyOf(balances);
     }
 
     public EconomistAccount(EconomistPlugin plugin, @Nullable World world, UUID owner) {
@@ -42,7 +44,7 @@ public class EconomistAccount implements Account {
 
     @Override
     public BigDecimal getBalance(Currency currency) {
-        return Objects.requireNonNullElseGet(balances.get(currency.getName()), () ->
+        return Objects.requireNonNullElseGet(balances.get(currency), () ->
                 BigDecimal.valueOf(plugin.config.startBalance));
     }
 
