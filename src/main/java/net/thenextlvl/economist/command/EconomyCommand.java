@@ -13,6 +13,7 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
+import net.thenextlvl.economist.api.currency.Currency;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -23,7 +24,6 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.BiFunction;
 
 @NullMarked
 public class EconomyCommand {
@@ -77,8 +77,12 @@ public class EconomyCommand {
                         }));
     }
 
+    interface Operation {
+        BigDecimal apply(Account account, Number amount, Currency currency);
+    }
+    
     private static ArgumentBuilder<CommandSourceStack, ?> create(String command, String successMessage, String successMessageWorld,
-                                                                 BiFunction<Account, Number, BigDecimal> function, Double minimum, EconomistPlugin plugin) {
+                                                                 Operation operation, Double minimum, EconomistPlugin plugin) {
         return Commands.literal(command)
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
@@ -88,11 +92,11 @@ public class EconomyCommand {
                                             var player = context.getArgument("player", OfflinePlayer.class);
                                             var amount = context.getArgument("amount", Double.class);
                                             var world = context.getArgument("world", World.class);
-                                            return execute(context, successMessageWorld, List.of(player), amount, world, function, plugin);
+                                            return execute(context, successMessageWorld, List.of(player), amount, world, operation, plugin);
                                         })).executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var amount = context.getArgument("amount", Double.class);
-                                    return execute(context, successMessage, List.of(player), amount, null, function, plugin);
+                                    return execute(context, successMessage, List.of(player), amount, null, operation, plugin);
                                 })))
                 .then(Commands.argument("players", ArgumentTypes.players())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
@@ -102,30 +106,31 @@ public class EconomyCommand {
                                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                             var amount = context.getArgument("amount", Double.class);
                                             var world = context.getArgument("world", World.class);
-                                            return execute(context, successMessageWorld, List.copyOf(players.resolve(context.getSource())), amount, world, function, plugin);
+                                            return execute(context, successMessageWorld, List.copyOf(players.resolve(context.getSource())), amount, world, operation, plugin);
                                         })).executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var amount = context.getArgument("amount", Double.class);
-                                    return execute(context, successMessage, List.copyOf(players.resolve(context.getSource())), amount, null, function, plugin);
+                                    return execute(context, successMessage, List.copyOf(players.resolve(context.getSource())), amount, null, operation, plugin);
                                 })));
     }
 
     private static int execute(CommandContext<CommandSourceStack> context, String successMessage,
                                Collection<? extends OfflinePlayer> players, Number amount, @Nullable World world,
-                               BiFunction<Account, Number, BigDecimal> function, EconomistPlugin plugin) {
+                               Operation operation, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         var locale = sender instanceof Player p ? p.locale() : Locale.US;
         if (!players.isEmpty()) players.forEach(player -> (world != null
                 ? plugin.economyController().tryGetAccount(player, world)
                 : plugin.economyController().tryGetAccount(player))
                 .thenAccept(optional -> optional.ifPresentOrElse(account -> {
-                    var balance = function.apply(account, amount);
+                    Currency currency = null; // fixme
+                    var balance = operation.apply(account, amount, currency);
                     plugin.bundle().sendMessage(sender, successMessage,
                             Placeholder.parsed("world", world != null ? world.getName() : "null"),
                             Placeholder.parsed("player", String.valueOf(player.getName())),
-                            Placeholder.parsed("balance", plugin.economyController().format(balance, locale)),
-                            Placeholder.parsed("amount", plugin.economyController().format(amount, locale)),
-                            Placeholder.parsed("symbol", plugin.economyController().getCurrencySymbol()));
+                            Placeholder.component("balance", currency.format(balance, locale)),
+                            Placeholder.component("amount", currency.format(amount, locale)),
+                            Placeholder.component("symbol", currency.getSymbol()));
                 }, () -> plugin.bundle().sendMessage(sender, world != null
                                 ? (sender.equals(player) ? "account.not-found.world.self" : "account.not-found.world.other")
                                 : (sender.equals(player) ? "account.not-found.self" : "account.not-found.other"),
