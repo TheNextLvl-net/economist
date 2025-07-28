@@ -33,10 +33,9 @@ public class EconomistEconomyController implements EconomyController {
 
     public EconomistEconomyController(EconomistPlugin plugin) {
         this.plugin = plugin;
-        startTasks(plugin);
     }
 
-    private void startTasks(EconomistPlugin plugin) {
+    public void scheduleTasks() {
         var evictionMinutes = plugin.config.cacheEvictionMinutes;
         plugin.getServer().getAsyncScheduler().runAtFixedRate(
                 plugin, ignored -> performCacheEviction(),
