@@ -59,7 +59,7 @@ public class EconomistCurrencyHolder implements CurrencyHolder {
 
     @Override
     public boolean deleteCurrency(String name) {
-        // todo: fail if default currency?
+        if (defaultCurrency.getName().equals(name)) return false;
         return currencies.removeIf(currency -> currency.getName().equals(name));
     }
 
