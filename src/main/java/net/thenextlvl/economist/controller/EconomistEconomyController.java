@@ -79,7 +79,7 @@ public class EconomistEconomyController implements EconomyController {
 
     @Override
     public Optional<Account> getAccount(UUID uuid, @Nullable World world) {
-        return Optional.ofNullable(cache.get(new Identifier(uuid, world))).map(CacheEntry::account); // todo: new?
+        return Optional.ofNullable(cache.get(new Identifier(uuid, world))).map(CacheEntry::account);
     }
 
     @Override
