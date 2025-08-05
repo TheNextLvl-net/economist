@@ -43,7 +43,7 @@ public interface CurrencyHolder {
     /**
      * Creates a new currency by configuring a {@link Currency.Builder}.
      *
-     * @param name    the name of the new currency
+     * @param name     the name of the new currency
      * @param consumer a consumer to configure the {@link Currency.Builder} for currency creation
      * @return the newly created {@link Currency}
      * @throws IllegalArgumentException if a currency with the same name already exists
@@ -65,6 +65,8 @@ public interface CurrencyHolder {
 
     /**
      * Deletes the specified currency.
+     * <p>
+     * Always returns false when invoked on {@link #getDefaultCurrency default currency}
      *
      * @param currency the currency to delete
      * @return {@code true} if the currency was successfully deleted, otherwise {@code false}
@@ -75,6 +77,8 @@ public interface CurrencyHolder {
 
     /**
      * Deletes a currency with the specified name.
+     * <p>
+     * Always returns false when invoked on {@link #getDefaultCurrency default currency}
      *
      * @param name the name of the currency to delete
      * @return {@code true} if the currency was successfully deleted, otherwise {@code false}
