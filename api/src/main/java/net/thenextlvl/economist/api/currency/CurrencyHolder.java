@@ -38,6 +38,7 @@ public interface CurrencyHolder {
      * @param name the name of the currency to check for existence
      * @return {@code true} if the currency exists, otherwise {@code false}
      */
+    @Contract(pure = true)
     boolean hasCurrency(String name);
 
     /**
@@ -48,7 +49,7 @@ public interface CurrencyHolder {
      * @return the newly created {@link Currency}
      * @throws IllegalArgumentException if a currency with the same name already exists
      */
-    @Contract("_, _ -> new")
+    @Contract(value = "_, _ -> new", mutates = "this")
     Currency createCurrency(String name, Consumer<Currency.Builder> consumer) throws IllegalArgumentException;
 
     /**
@@ -61,6 +62,7 @@ public interface CurrencyHolder {
      * @return the newly created {@link Currency}
      * @throws IllegalArgumentException if a currency with the same name already exists
      */
+    @Contract(value = "_ -> new", mutates = "this")
     Currency createCurrency(Currency.Builder builder);
 
     /**
@@ -71,6 +73,7 @@ public interface CurrencyHolder {
      * @param currency the currency to delete
      * @return {@code true} if the currency was successfully deleted, otherwise {@code false}
      */
+    @Contract(mutates = "this")
     default boolean deleteCurrency(Currency currency) {
         return deleteCurrency(currency.getName());
     }
@@ -83,6 +86,7 @@ public interface CurrencyHolder {
      * @param name the name of the currency to delete
      * @return {@code true} if the currency was successfully deleted, otherwise {@code false}
      */
+    @Contract(mutates = "this")
     boolean deleteCurrency(String name);
 
     /**
@@ -90,6 +94,5 @@ public interface CurrencyHolder {
      *
      * @return the default currency
      */
-    @Contract(pure = true)
     Currency getDefaultCurrency();
 }
