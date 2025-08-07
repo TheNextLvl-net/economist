@@ -49,6 +49,7 @@ paper {
     author = "NonSwag"
     apiVersion = "1.21"
     foliaSupported = true
+    description = "The next generation economy plugin with database and multiserver support"
 
     website = "https://thenextlvl.net"
 
