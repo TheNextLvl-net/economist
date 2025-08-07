@@ -16,6 +16,8 @@ import net.thenextlvl.economist.configuration.PluginConfig;
 import net.thenextlvl.economist.controller.EconomistBankController;
 import net.thenextlvl.economist.controller.EconomistEconomyController;
 import net.thenextlvl.economist.controller.data.DataController;
+import net.thenextlvl.economist.controller.data.MySQLController;
+import net.thenextlvl.economist.controller.data.PostgreSQLController;
 import net.thenextlvl.economist.controller.data.SQLiteController;
 import net.thenextlvl.economist.listener.ConnectionListener;
 import net.thenextlvl.economist.service.ServiceBankController;
@@ -61,9 +63,10 @@ public class EconomistPlugin extends JavaPlugin {
     private final DataController dataController;
 
     public EconomistPlugin() throws SQLException {
-        this.dataController = switch (config.storageType) {
+        this.dataController = switch (config.database.storageType) {
             case SQLite -> new SQLiteController(this);
-            default -> throw new IllegalStateException("Unexpected value: " + config.storageType);
+            case PostgreSQL -> new PostgreSQLController(this);
+            case MySQL -> new MySQLController(this);
         };
     }
 
