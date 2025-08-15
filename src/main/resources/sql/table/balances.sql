@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS balances
 (
-    id       INTEGER         NOT NULL PRIMARY KEY REFERENCES accounts (id),
+    id       INTEGER         NOT NULL PRIMARY KEY,
     balance  DECIMAL(65, 20) NOT NULL,
-    currency TEXT            NOT NULL FOREIGN KEY REFERENCES currencies (name),
+    currency TEXT            NOT NULL,
+    FOREIGN KEY (id) REFERENCES accounts (id),
+    FOREIGN KEY (currency) REFERENCES currencies (name),
     UNIQUE (id, currency)
 );

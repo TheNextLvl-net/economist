@@ -61,8 +61,12 @@ public class EconomistAccount implements Account {
     @Override
     public BigDecimal setBalance(Number balance, Currency currency) {
         var decimal = BigDecimal.valueOf(balance.doubleValue());
-        if (!decimal.equals(balances.put(currency, decimal))) markDirty();
+        if (!decimal.equals(setBalanceInternal(decimal, currency))) markDirty();
         return decimal;
+    }
+    
+    public @Nullable BigDecimal setBalanceInternal(BigDecimal balance, Currency currency) {
+        return balances.put(currency, BigDecimal.valueOf(balance.doubleValue()));
     }
 
     @Override
