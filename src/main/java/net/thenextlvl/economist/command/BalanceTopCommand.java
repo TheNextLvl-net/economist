@@ -10,6 +10,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.currency.Currency;
+import net.thenextlvl.economist.command.argument.CurrencyArgument;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -25,28 +26,34 @@ public class BalanceTopCommand {
         return Commands.literal("balance-top")
                 .requires(stack -> stack.getSender().hasPermission("economist.balance-top"))
                 .then(Commands.argument("page", IntegerArgumentType.integer(1))
-                        .then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.balance-top.world") && plugin.config.accounts.perWorld)
+                        .then(Commands.argument("currency", new CurrencyArgument(plugin))
+                                .then(Commands.argument("world", ArgumentTypes.world())
+                                        .requires(stack -> stack.getSender().hasPermission("economist.balance-top.world") && plugin.config.accounts.perWorld)
+                                        .executes(context -> {
+                                            var world = context.getArgument("world", World.class);
+                                            var currency = context.getArgument("currency", Currency.class);
+                                            var page = context.getArgument("page", int.class);
+                                            return top(context, currency, world, page, plugin);
+                                        }))
                                 .executes(context -> {
-                                    var world = context.getArgument("world", World.class);
+                                    var currency = context.getArgument("currency", Currency.class);
                                     var page = context.getArgument("page", int.class);
-                                    return top(context, world, page, plugin);
+                                    return top(context, currency, null, page, plugin);
                                 }))
                         .executes(context -> {
                             var page = context.getArgument("page", int.class);
-                            return top(context, null, page, plugin);
+                            return top(context, plugin.currencyHolder().getDefaultCurrency(), null, page, plugin);
                         }))
-                .executes(context -> top(context, null, 1, plugin))
+                .executes(context -> top(context, plugin.currencyHolder().getDefaultCurrency(), null, 1, plugin))
                 .build();
     }
 
-    private static int top(CommandContext<CommandSourceStack> context, @Nullable World world, int page, EconomistPlugin plugin) {
+    private static int top(CommandContext<CommandSourceStack> context, Currency currency, @Nullable World world, int page, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         int pageEntryCount = plugin.config.balanceTop.entriesPerPage;
         var index = pageEntryCount * (page - 1);
-        Currency currency = null; // fixme
         plugin.economyController().tryGetOrdered(currency, world, index, pageEntryCount)
-                .thenAccept(accounts -> top(sender, accounts, index, world, plugin))
+                .thenAccept(accounts -> top(sender, accounts, index, currency, world, plugin))
                 .exceptionally(throwable -> {
                     plugin.getComponentLogger().error("Failed to retrieve top-list", throwable);
                     return null;
@@ -54,9 +61,7 @@ public class BalanceTopCommand {
         return 0;
     }
 
-    private static void top(CommandSender sender, List<Account> accounts, int index, @Nullable World world, EconomistPlugin plugin) {
-        Currency currency = null; // fixme
-        
+    private static void top(CommandSender sender, List<Account> accounts, int index, Currency currency, @Nullable World world, EconomistPlugin plugin) {
         if (accounts.isEmpty()) {
             plugin.bundle().sendMessage(sender, "balance.top-list.empty");
             return;

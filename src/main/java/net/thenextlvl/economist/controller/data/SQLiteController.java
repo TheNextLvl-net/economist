@@ -31,7 +31,7 @@ public class SQLiteController extends SQLController {
     private static final String CREATE_ACCOUNT = statement("sql/update/create_account.sql");
     private static final String DELETE_ACCOUNT = statement("sql/update/delete_account.sql");
     private static final String PRUNE_ACCOUNTS = statement("sql/update/prune.sql");
-    private static final String UPSERT_BALANCES = statement("sql/update/upsert_balances.sql");
+    private static final String[] UPSERT_BALANCES = statements("sql/update/upsert_balances.sql");
 
     private static final String GET_ACCOUNTS = statement("sql/query/get_accounts.sql");
     private static final String GET_BALANCES = statement("sql/query/get_balances.sql");
@@ -126,7 +126,7 @@ public class SQLiteController extends SQLController {
                     var balance = resultSet.getBigDecimal("balance");
                     var owner = UUID.fromString(resultSet.getString("uuid"));
                     var account = new EconomistAccount(plugin, world, owner);
-                    account.setBalance(balance, currency);
+                    account.setBalanceInternal(balance, currency);
                     accounts.add(account);
                 }
                 return accounts;
@@ -198,9 +198,9 @@ public class SQLiteController extends SQLController {
             var world = account.getWorld().map(World::key).map(Key::asString).orElse(null);
             var batches = balances.entrySet().stream().map(entry -> new @Nullable Object[]{
                     account.getOwner(), world, entry.getKey().getName(), entry.getValue()
-            }).toList();
+            }).toArray();
 
-            for (int result : executeBatchUpdate(UPSERT_BALANCES, batches)) {
+            for (int result : executeUpdates(UPSERT_BALANCES, batches)) {
                 if (result >= 0 || result == Statement.SUCCESS_NO_INFO) continue;
                 plugin.getComponentLogger().error("Failed to save some balances for account {}", account);
                 return false;
@@ -214,8 +214,12 @@ public class SQLiteController extends SQLController {
 
     @Override
     protected void setupDatabase() throws SQLException {
+        executeUpdate(statement("sql/table/translations.sql"));
         executeUpdate(statement("sql/table/accounts.sql"));
-        executeUpdate(statement("sql/table/banks.sql"));
+        executeUpdate(statement("sql/table/currencies.sql"));
+        executeUpdate(statement("sql/table/balances.sql"));
+        //executeUpdate(statement("sql/table/banks.sql"));
+        executeUpdates(statements("sql/update/create_default_currency.sql"));
         executeUpdate(statement("sql/trigger/enforce_unique_account_uuid_world_insert.sql"));
         executeUpdate(statement("sql/trigger/enforce_unique_account_uuid_world_update.sql"));
         executeUpdate(statement("sql/index/balances_id_currency.sql"));
@@ -231,7 +235,7 @@ public class SQLiteController extends SQLController {
             return !resultSet.next() || resultSet.getInt(1) == 0;
         })) return;
         plugin.getComponentLogger().info("Migrating database from v0.1 to v1...");
-        executeUpdate(statement("sql/migration/v0.1_to_v1.sql"));
+        executeUpdates(statements("sql/migration/v0.1_to_v1.sql"));
         plugin.getComponentLogger().info("Migration complete");
     }
 }
