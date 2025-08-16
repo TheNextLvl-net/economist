@@ -8,6 +8,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -29,7 +30,7 @@ public interface DataController {
 
     List<Account> getOrdered(Currency currency, @Nullable World world, int offset, int limit);
     
-    Stream<Account> getAccountsUpdatedSince(Instant lastSync);
+    Stream<Account> getAccountsUpdatedSince(Instant lastSync) throws SQLException;
 
     int prune(Duration duration, @Nullable World world);
 
