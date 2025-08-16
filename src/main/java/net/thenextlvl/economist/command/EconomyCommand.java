@@ -14,6 +14,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.currency.Currency;
+import net.thenextlvl.economist.command.argument.CurrencyArgument;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -52,78 +53,116 @@ public class EconomyCommand {
     private static ArgumentBuilder<CommandSourceStack, ?> reset(EconomistPlugin plugin) {
         return Commands.literal("reset")
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
-                        .then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> plugin.config.accounts.perWorld)
+                        .then(Commands.argument("currency", new CurrencyArgument(plugin))
+                                .then(Commands.argument("world", ArgumentTypes.world())
+                                        .requires(stack -> plugin.config.accounts.perWorld)
+                                        .executes(context -> {
+                                            var player = context.getArgument("player", OfflinePlayer.class);
+                                            var world = context.getArgument("world", World.class);
+                                            var currency = context.getArgument("currency", Currency.class);
+                                            return execute(context, "balance.reset.world", List.of(player), plugin.config.startBalance, currency, world, Account::setBalance, plugin);
+                                        }))
                                 .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
-                                    var world = context.getArgument("world", World.class);
-                                    return execute(context, "balance.reset.world", List.of(player), plugin.config.startBalance, world, Account::setBalance, plugin);
-                                })).executes(context -> {
+                                    var currency = context.getArgument("currency", Currency.class);
+                                    return execute(context, "balance.reset", List.of(player), plugin.config.startBalance, currency, null, Account::setBalance, plugin);
+                                }))
+                        .executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
-                            return execute(context, "balance.reset", List.of(player), plugin.config.startBalance, null, Account::setBalance, plugin);
+                            var currency = plugin.currencyHolder().getDefaultCurrency();
+                            return execute(context, "balance.reset", List.of(player), plugin.config.startBalance, currency, null, Account::setBalance, plugin);
                         }))
                 .then(Commands.argument("players", ArgumentTypes.players())
-                        .then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> plugin.config.accounts.perWorld)
+                        .then(Commands.argument("currency", new CurrencyArgument(plugin))
+                                .then(Commands.argument("world", ArgumentTypes.world())
+                                        .requires(stack -> plugin.config.accounts.perWorld)
+                                        .executes(context -> {
+                                            var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
+                                            var resolve = players.resolve(context.getSource());
+                                            var world = context.getArgument("world", World.class);
+                                            var currency = context.getArgument("currency", Currency.class);
+                                            return execute(context, "balance.reset.world", resolve, plugin.config.startBalance, currency, world, Account::setBalance, plugin);
+                                        }))
                                 .executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var resolve = players.resolve(context.getSource());
-                                    var world = context.getArgument("world", World.class);
-                                    return execute(context, "balance.reset.world", resolve, plugin.config.startBalance, world, Account::setBalance, plugin);
-                                })).executes(context -> {
+                                    var currency = context.getArgument("currency", Currency.class);
+                                    return execute(context, "balance.reset", resolve, plugin.config.startBalance, currency, null, Account::setBalance, plugin);
+                                }))
+                        .executes(context -> {
                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                             var resolve = players.resolve(context.getSource());
-                            return execute(context, "balance.reset", resolve, plugin.config.startBalance, null, Account::setBalance, plugin);
+                            var currency = plugin.currencyHolder().getDefaultCurrency();
+                            return execute(context, "balance.reset", resolve, plugin.config.startBalance, currency, null, Account::setBalance, plugin);
                         }));
     }
 
     interface Operation {
         BigDecimal apply(Account account, Number amount, Currency currency);
     }
-    
+
     private static ArgumentBuilder<CommandSourceStack, ?> create(String command, String successMessage, String successMessageWorld,
                                                                  Operation operation, Double minimum, EconomistPlugin plugin) {
         return Commands.literal(command)
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
-                                .then(Commands.argument("world", ArgumentTypes.world())
-                                        .requires(stack -> plugin.config.accounts.perWorld)
+                                .then(Commands.argument("currency", new CurrencyArgument(plugin))
+                                        .then(Commands.argument("world", ArgumentTypes.world())
+                                                .requires(stack -> plugin.config.accounts.perWorld)
+                                                .executes(context -> {
+                                                    var player = context.getArgument("player", OfflinePlayer.class);
+                                                    var amount = context.getArgument("amount", Double.class);
+                                                    var world = context.getArgument("world", World.class);
+                                                    var currency = context.getArgument("currency", Currency.class);
+                                                    return execute(context, successMessageWorld, List.of(player), amount, currency, world, operation, plugin);
+                                                }))
                                         .executes(context -> {
                                             var player = context.getArgument("player", OfflinePlayer.class);
                                             var amount = context.getArgument("amount", Double.class);
-                                            var world = context.getArgument("world", World.class);
-                                            return execute(context, successMessageWorld, List.of(player), amount, world, operation, plugin);
-                                        })).executes(context -> {
+                                            var currency = context.getArgument("currency", Currency.class);
+                                            return execute(context, successMessage, List.of(player), amount, currency, null, operation, plugin);
+                                        }))
+                                .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
                                     var amount = context.getArgument("amount", Double.class);
-                                    return execute(context, successMessage, List.of(player), amount, null, operation, plugin);
+                                    var currency = plugin.currencyHolder().getDefaultCurrency();
+                                    return execute(context, successMessage, List.of(player), amount, currency, null, operation, plugin);
                                 })))
                 .then(Commands.argument("players", ArgumentTypes.players())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
-                                .then(Commands.argument("world", ArgumentTypes.world())
-                                        .requires(stack -> plugin.config.accounts.perWorld)
+                                .then(Commands.argument("currency", new CurrencyArgument(plugin))
+                                        .then(Commands.argument("world", ArgumentTypes.world())
+                                                .requires(stack -> plugin.config.accounts.perWorld)
+                                                .executes(context -> {
+                                                    var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
+                                                    var amount = context.getArgument("amount", Double.class);
+                                                    var world = context.getArgument("world", World.class);
+                                                    var currency = context.getArgument("currency", Currency.class);
+                                                    return execute(context, successMessageWorld, List.copyOf(players.resolve(context.getSource())), amount, currency, world, operation, plugin);
+                                                }))
                                         .executes(context -> {
                                             var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                             var amount = context.getArgument("amount", Double.class);
-                                            var world = context.getArgument("world", World.class);
-                                            return execute(context, successMessageWorld, List.copyOf(players.resolve(context.getSource())), amount, world, operation, plugin);
-                                        })).executes(context -> {
+                                            var currency = context.getArgument("currency", Currency.class);
+                                            return execute(context, successMessage, List.copyOf(players.resolve(context.getSource())), amount, currency, null, operation, plugin);
+                                        }))
+                                .executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
                                     var amount = context.getArgument("amount", Double.class);
-                                    return execute(context, successMessage, List.copyOf(players.resolve(context.getSource())), amount, null, operation, plugin);
+                                    var currency = plugin.currencyHolder().getDefaultCurrency();
+                                    return execute(context, successMessage, List.copyOf(players.resolve(context.getSource())), amount, currency, null, operation, plugin);
                                 })));
     }
 
     private static int execute(CommandContext<CommandSourceStack> context, String successMessage,
-                               Collection<? extends OfflinePlayer> players, Number amount, @Nullable World world,
-                               Operation operation, EconomistPlugin plugin) {
+                               Collection<? extends OfflinePlayer> players, Number amount, Currency currency,
+                               @Nullable World world, Operation operation, EconomistPlugin plugin) {
         var sender = context.getSource().getSender();
         var locale = sender instanceof Player p ? p.locale() : Locale.US;
         if (!players.isEmpty()) players.forEach(player -> (world != null
                 ? plugin.economyController().tryGetAccount(player, world)
                 : plugin.economyController().tryGetAccount(player))
                 .thenAccept(optional -> optional.ifPresentOrElse(account -> {
-                    Currency currency = null; // fixme
                     var balance = operation.apply(account, amount, currency);
                     plugin.bundle().sendMessage(sender, successMessage,
                             Placeholder.parsed("world", world != null ? world.getName() : "null"),
