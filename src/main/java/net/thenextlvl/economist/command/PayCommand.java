@@ -12,6 +12,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.EconomistPlugin;
 import net.thenextlvl.economist.api.Account;
 import net.thenextlvl.economist.api.currency.Currency;
+import net.thenextlvl.economist.command.argument.CurrencyArgument;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -30,31 +31,51 @@ public class PayCommand {
         return Commands.literal("pay")
                 .requires(stack -> stack.getSender() instanceof Player player && player.hasPermission("economist.pay"))
                 .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
-                        .then(Commands.argument("amount", amountArgument).executes(context -> {
-                            var player = context.getArgument("player", OfflinePlayer.class);
-                            return pay(context, List.of(player), null, plugin);
-                        }).then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.pay.world") && plugin.config.accounts.perWorld)
+                        .then(Commands.argument("amount", amountArgument)
+                                .then(Commands.argument("currency", new CurrencyArgument(plugin))
+                                        .then(Commands.argument("world", ArgumentTypes.world())
+                                                .requires(stack -> stack.getSender().hasPermission("economist.pay.world") && plugin.config.accounts.perWorld)
+                                                .executes(context -> {
+                                                    var player = context.getArgument("player", OfflinePlayer.class);
+                                                    var world = context.getArgument("world", World.class);
+                                                    var currency = context.getArgument("currency", Currency.class);
+                                                    return pay(context, List.of(player), currency, world, plugin);
+                                                }))
+                                        .executes(context -> {
+                                            var player = context.getArgument("player", OfflinePlayer.class);
+                                            var currency = context.getArgument("currency", Currency.class);
+                                            return pay(context, List.of(player), currency, null, plugin);
+                                        }))
                                 .executes(context -> {
                                     var player = context.getArgument("player", OfflinePlayer.class);
-                                    var world = context.getArgument("world", World.class);
-                                    return pay(context, List.of(player), world, plugin);
-                                }))))
+                                    var currency = plugin.currencyHolder().getDefaultCurrency();
+                                    return pay(context, List.of(player), currency, null, plugin);
+                                })))
                 .then(Commands.argument("players", ArgumentTypes.players())
-                        .then(Commands.argument("amount", amountArgument).executes(context -> {
-                            var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
-                            return pay(context, new ArrayList<>(players.resolve(context.getSource())), null, plugin);
-                        }).then(Commands.argument("world", ArgumentTypes.world())
-                                .requires(stack -> stack.getSender().hasPermission("economist.pay.world") && plugin.config.accounts.perWorld)
+                        .then(Commands.argument("amount", amountArgument)
+                                .then(Commands.argument("currency", new CurrencyArgument(plugin))
+                                        .then(Commands.argument("world", ArgumentTypes.world())
+                                                .requires(stack -> stack.getSender().hasPermission("economist.pay.world") && plugin.config.accounts.perWorld)
+                                                .executes(context -> {
+                                                    var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
+                                                    var world = context.getArgument("world", World.class);
+                                                    var currency = context.getArgument("currency", Currency.class);
+                                                    return pay(context, new ArrayList<>(players.resolve(context.getSource())), currency, world, plugin);
+                                                }))
+                                        .executes(context -> {
+                                            var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
+                                            var currency = context.getArgument("currency", Currency.class);
+                                            return pay(context, new ArrayList<>(players.resolve(context.getSource())), currency, null, plugin);
+                                        }))
                                 .executes(context -> {
                                     var players = context.getArgument("players", PlayerSelectorArgumentResolver.class);
-                                    var world = context.getArgument("world", World.class);
-                                    return pay(context, new ArrayList<>(players.resolve(context.getSource())), world, plugin);
-                                }))))
+                                    var currency = plugin.currencyHolder().getDefaultCurrency();
+                                    return pay(context, new ArrayList<>(players.resolve(context.getSource())), currency, null, plugin);
+                                })))
                 .build();
     }
 
-    private static int pay(CommandContext<CommandSourceStack> context, List<? extends OfflinePlayer> players, @Nullable World world, EconomistPlugin plugin) {
+    private static int pay(CommandContext<CommandSourceStack> context, List<? extends OfflinePlayer> players, Currency currency, @Nullable World world, EconomistPlugin plugin) {
         var sender = (Player) context.getSource().getSender();
 
         var amount = context.getArgument("amount", Double.class);
@@ -71,7 +92,7 @@ public class PayCommand {
         getAccount(sender, world, plugin).thenAccept(optional -> optional.ifPresentOrElse(account ->
                         players.forEach(player -> getAccount(player, world, plugin).thenAccept(optional1 ->
                                 optional1.ifPresentOrElse(target ->
-                                                pay(sender, player, account, target, amount, minimum, plugin),
+                                                pay(sender, player, currency, account, target, amount, minimum, plugin),
                                         () -> missingAccount(world, sender, player, plugin)
                                 ))),
                 () -> missingAccount(world, sender, sender, plugin)));
@@ -84,9 +105,7 @@ public class PayCommand {
         return plugin.economyController().tryGetAccount(player, world);
     }
 
-    private static void pay(Player sender, OfflinePlayer player, Account source, Account target, double amount, double minimum, EconomistPlugin plugin) {
-        Currency currency = null; // fixme
-
+    private static void pay(Player sender, OfflinePlayer player, Currency currency, Account source, Account target, double amount, double minimum, EconomistPlugin plugin) {
         if (source.getBalance(currency).doubleValue() - amount < minimum) {
             plugin.bundle().sendMessage(sender, "account.funds");
             return;
