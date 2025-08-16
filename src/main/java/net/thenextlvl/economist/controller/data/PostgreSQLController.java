@@ -25,6 +25,11 @@ public class PostgreSQLController extends SQLController {
         super(createConnection(plugin), plugin);
     }
 
+    @Override
+    protected void setupDatabase(Executor executor) throws SQLException {
+        
+    }
+
     private static Connection createConnection(EconomistPlugin plugin) throws SQLException {
         return null;
     }
@@ -55,7 +60,7 @@ public class PostgreSQLController extends SQLController {
     }
 
     @Override
-    public Stream<Account> getAccountsUpdatedSince(Instant lastSync) {
+    public Stream<Account> getAccountsUpdatedSince(Instant lastSync) throws SQLException {
         return Stream.of();
     }
 
@@ -72,9 +77,5 @@ public class PostgreSQLController extends SQLController {
     @Override
     public boolean save(Account account) {
         return false;
-    }
-
-    @Override
-    protected void setupDatabase() throws SQLException {
     }
 }
