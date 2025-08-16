@@ -153,8 +153,8 @@ public class EconomistEconomyController implements EconomyController {
     }
 
     private void pullChangesFromDatabase() {
-        var currentSyncTime = Instant.now();
         try {
+            var currentSyncTime = Instant.now();
             plugin.dataController().getAccountsUpdatedSince(lastSyncTime).forEach(account -> {
                 var identifier = new Identifier(account);
                 var existingEntry = cache.get(identifier);
@@ -170,10 +170,9 @@ public class EconomistEconomyController implements EconomyController {
                 dirtyAccounts.remove(cachedAccount);
                 cache.put(identifier, new CacheEntry(account));
             });
-        } catch (Exception e) {
-            plugin.getComponentLogger().error("Failed to pull changes from database", e);
-        } finally {
             this.lastSyncTime = currentSyncTime;
+        } catch (Exception e) {
+            plugin.getComponentLogger().error("Failed to pull changes since {} from database", lastSyncTime, e);
         }
     }
 
