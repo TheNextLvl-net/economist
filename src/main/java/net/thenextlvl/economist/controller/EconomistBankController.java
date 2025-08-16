@@ -87,7 +87,6 @@ public class EconomistBankController implements BankController {
 
     public void saveDirty() {
         // todo: save dirty banks
-        //  dirtyBanks.forEach(this::save);
-        dirtyBanks.clear();
+        //  dirtyBanks.removeIf(this::save);
     }
 }

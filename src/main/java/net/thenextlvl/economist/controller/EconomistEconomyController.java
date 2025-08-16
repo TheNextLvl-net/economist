@@ -181,7 +181,6 @@ public class EconomistEconomyController implements EconomyController {
     }
 
     public void saveDirty() {
-        dirtyAccounts.forEach(plugin.dataController()::save);
-        dirtyAccounts.clear();
+        dirtyAccounts.removeIf(plugin.dataController()::save);
     }
 }
