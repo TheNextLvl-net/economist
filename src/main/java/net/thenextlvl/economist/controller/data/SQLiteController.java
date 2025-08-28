@@ -96,7 +96,8 @@ public class SQLiteController extends SQLController {
                 return new EconomistAccount(plugin, world, uuid);
             });
         } catch (SQLException e) {
-            if (e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE.code) {
+            if (e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE.code
+                || e.getErrorCode() == SQLiteErrorCode.SQLITE_CONSTRAINT_TRIGGER.code) {
                 throw new IllegalStateException("Account already exists for UUID " + uuid + " in world " + world, e);
             }
             plugin.getComponentLogger().error("Failed to create account", e);
