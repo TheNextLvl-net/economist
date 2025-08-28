@@ -43,7 +43,7 @@ public class EconomistPlugin extends JavaPlugin {
             new PluginConfig()
     ).validate().save().getRoot();
 
-    private final Key abbreviationsKey = Key.key("economist", "translations");
+    private final Key abbreviationsKey = Key.key("economist", "abbreviations");
     private final Key translationsKey = Key.key("economist", "translations");
     private final Path translations = getDataPath().resolve("translations");
 
