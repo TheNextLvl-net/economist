@@ -1,207 +1,170 @@
 package net.thenextlvl.economist.controller.data;
 
-import net.kyori.adventure.key.Key;
 import net.thenextlvl.economist.EconomistPlugin;
-import net.thenextlvl.economist.api.Account;
-import net.thenextlvl.economist.model.EconomistAccount;
-import org.bukkit.World;
-import org.jspecify.annotations.NullMarked;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.math.BigDecimal;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
-@NullMarked
-public class SQLController implements DataController {
-    private final Connection connection;
-    private final EconomistPlugin plugin;
+public abstract class SQLController implements AutoCloseable, DataController {
+    protected final @NonNull EconomistPlugin plugin;
+    private final @NonNull Executor executor = new Executor();
+    private final @NonNull Connection connection;
 
-    public SQLController(Connection connection, EconomistPlugin plugin) throws SQLException {
+    public SQLController(@NonNull Connection connection, @NonNull EconomistPlugin plugin) throws SQLException {
         this.connection = connection;
+        connection.setAutoCommit(false);
         this.plugin = plugin;
-        createAccountTable();
-        createBankTable();
+        startTransaction(executor -> {
+            migrateDatabase(executor);
+            setupDatabase(executor);
+            return null;
+        });
+    }
+
+    protected abstract void setupDatabase(Executor executor) throws SQLException;
+
+    protected void migrateDatabase(Executor executor) throws SQLException {
     }
 
     @Override
-    public boolean deleteAccounts(List<UUID> accounts, @Nullable World world) throws SQLException {
-        var name = world != null ? world.key().asString() : null;
-        var statement = "DELETE FROM accounts WHERE uuid IN (" +
-                        String.join(",", Collections.nCopies(accounts.size(), "?")) +
-                        ") AND (world = ? OR (? IS NULL AND world IS NULL))";
-        var params = new ArrayList<@Nullable Object>(accounts);
-        params.add(name);
-        params.add(name);
-        return executeUpdate(statement, params.toArray(new Object[0])) != 0;
+    public void close() throws Exception {
+        connection.close();
     }
 
-    @Override
-    public List<Account> getOrdered(@Nullable World world, int start, int limit) throws SQLException {
-        var name = world != null ? world.key().asString() : null;
-        var zero = plugin.config.balanceTop.showEmptyAccounts;
-        return Objects.requireNonNull(executeQuery("""
-                SELECT balance, uuid FROM accounts WHERE
-                (world = ? OR (? IS NULL AND world IS NULL))
-                """ + (zero ? "" : "AND balance != 0 ") + """
-                ORDER BY balance DESC LIMIT ? OFFSET ?""", resultSet -> {
-            var accounts = new LinkedList<Account>();
-            while (resultSet.next()) {
-                var balance = resultSet.getBigDecimal("balance");
-                var owner = UUID.fromString(resultSet.getString("uuid"));
-                accounts.add(new EconomistAccount(balance, world, owner));
-            }
-            return accounts;
-        }, name, name, limit, start));
-    }
-
-    @Override
-    public Account createAccount(UUID uuid, @Nullable World world) throws SQLException {
-        var balance = plugin.config.startBalance;
-        executeUpdate("INSERT INTO accounts (uuid, world, balance) VALUES (?, ?, ?)",
-                uuid, world != null ? world.key().asString() : null, balance);
-        return new EconomistAccount(BigDecimal.valueOf(balance), world, uuid);
-    }
-
-    @Override
-    public BigDecimal getTotalBalance(@Nullable World world) throws SQLException {
-        var name = world != null ? world.key().asString() : null;
-        return Objects.requireNonNull(executeQuery("""
-                SELECT SUM(balance) as total_balance FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
-                """, resultSet -> {
-            if (!resultSet.next()) return BigDecimal.ZERO;
-            return resultSet.getBigDecimal("total_balance");
-        }, name, name));
-    }
-
-    @Override
-    public Set<UUID> getAccountOwners(@Nullable World world) throws SQLException {
-        var name = world != null ? world.key().asString() : null;
-        return Objects.requireNonNull(executeQuery("""
-                SELECT uuid FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
-                """, resultSet -> {
-            var accounts = new HashSet<UUID>();
-            while (resultSet.next()) {
-                var owner = UUID.fromString(resultSet.getString("uuid"));
-                accounts.add(owner);
-            }
-            return accounts;
-        }, name, name));
-    }
-
-    @Override
-    public @Nullable Account getAccount(UUID uuid, @Nullable World world) throws SQLException {
-        var name = world != null ? world.key().asString() : null;
-        return executeQuery("SELECT balance FROM accounts WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
-                resultSet -> {
-                    if (!resultSet.next()) return null;
-                    var balance = resultSet.getBigDecimal("balance");
-                    return balance != null ? new EconomistAccount(balance, world, uuid) : null;
-                }, uuid, name, name);
-    }
-
-    @Override
-    public Set<Account> getAccounts(@Nullable World world) throws SQLException {
-        var name = world != null ? world.key().asString() : null;
-        return Objects.requireNonNull(executeQuery("""
-                SELECT uuid, balance FROM accounts WHERE (world = ? OR (? IS NULL AND world IS NULL))
-                """, resultSet -> {
-            var accounts = new HashSet<Account>();
-            while (resultSet.next()) {
-                var owner = UUID.fromString(resultSet.getString("uuid"));
-                var balance = resultSet.getBigDecimal("balance");
-                accounts.add(new EconomistAccount(balance, world, owner));
-            }
-            return accounts;
-        }, name, name));
-    }
-
-    @Override
-    public boolean save(Account account) throws SQLException {
-        var name = account.getWorld().map(World::key).map(Key::asString).orElse(null);
-        return executeUpdate("UPDATE accounts SET balance = ? WHERE uuid = ? AND (world = ? OR (? IS NULL AND world IS NULL))",
-                account.getBalance(), account.getOwner(), name, name) == 1;
-    }
-
-    protected void createAccountTable() throws SQLException {
-        executeUpdate("""
-                CREATE TABLE IF NOT EXISTS accounts (
-                  uuid TEXT NOT NULL,
-                  balance DECIMAL(65, 20) NOT NULL,
-                  world TEXT NULL,
-                  UNIQUE (uuid, world)
-                )""");
-
-        executeUpdate("""
-                CREATE TRIGGER IF NOT EXISTS enforce_unique_uuid_world
-                BEFORE INSERT ON accounts
-                FOR EACH ROW
-                WHEN NEW.world IS NULL
-                BEGIN
-                  SELECT RAISE(ABORT, 'Cannot insert another row with NULL world for the same uuid')
-                  WHERE EXISTS (
-                    SELECT 1 FROM accounts WHERE uuid = NEW.uuid AND world IS NULL
-                  );
-                END;""");
-        executeUpdate("""
-                CREATE TRIGGER IF NOT EXISTS enforce_unique_uuid_world_update
-                BEFORE UPDATE ON accounts
-                FOR EACH ROW
-                WHEN NEW.world IS NULL
-                BEGIN
-                  SELECT RAISE(ABORT, 'Cannot update to a row with NULL world for the same uuid')
-                  WHERE EXISTS (
-                    SELECT 1 FROM accounts WHERE uuid = NEW.uuid AND world IS NULL AND rowid != OLD.rowid
-                  );
-                END;""");
-    }
-
-    protected void createBankTable() throws SQLException {
-        executeUpdate("""
-                CREATE TABLE IF NOT EXISTS banks (
-                  name TEXT NOT NULL UNIQUE PRIMARY KEY,
-                  balance DECIMAL(65, 20) NOT NULL,
-                  owner TEXT NOT NULL UNIQUE,
-                  members LIST NOT NULL
-                )""");
-    }
-
-    @SuppressWarnings("SqlSourceToSinkFlow")
-    protected <T> @Nullable T executeQuery(String query, ThrowingFunction<ResultSet, T> mapper, @Nullable Object... parameters) throws SQLException {
-        try (var preparedStatement = connection.prepareStatement(query)) {
-            for (var i = 0; i < parameters.length; i++)
-                preparedStatement.setObject(i + 1, parameters[i]);
-            try (var resultSet = preparedStatement.executeQuery()) {
-                return ThrowingFunction.unchecked(mapper).apply(resultSet);
-            }
+    protected <V> V startTransaction(@NonNull Transaction<V> transaction) throws SQLException {
+        try {
+            var call = transaction.execute(executor);
+            connection.commit();
+            return call;
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
         }
     }
 
-    @SuppressWarnings("SqlSourceToSinkFlow")
-    protected int executeUpdate(String query, @Nullable Object... parameters) throws SQLException {
-        try (var preparedStatement = connection.prepareStatement(query)) {
-            for (var i = 0; i < parameters.length; i++)
-                preparedStatement.setObject(i + 1, parameters[i]);
-            return preparedStatement.executeUpdate();
+    @FunctionalInterface
+    protected interface Transaction<V> {
+        @Nullable
+        V execute(@NonNull Executor executor) throws SQLException;
+    }
+
+    protected class Executor {
+        @SuppressWarnings("SqlSourceToSinkFlow")
+        protected <T> T query(@NonNull String sql, @NonNull ThrowingFunction<ResultSet, T> mapper, Object... parameters) throws SQLException {
+            try (var statement = connection.prepareStatement(sql)) {
+                for (var i = 0; i < parameters.length; i++)
+                    statement.setObject(i + 1, parameters[i]);
+                try (var resultSet = statement.executeQuery()) {
+                    return mapper.apply(resultSet);
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new SQLException("Invalid number of parameters for SQL statement: " + sql, e);
+            }
+        }
+
+        @SuppressWarnings("SqlSourceToSinkFlow")
+        protected int[] batchUpdate(String sql, @Nullable Object[]... batches) throws SQLException {
+            try (var statement = connection.prepareStatement(sql)) {
+                for (var parameters : batches) {
+                    for (var i = 0; i < parameters.length; i++) statement.setObject(i + 1, parameters[i]);
+                    statement.addBatch();
+                }
+                return statement.executeBatch();
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new SQLException("Invalid number of parameters for SQL statement: " + sql, e);
+            } catch (SQLException e) {
+                throw new SQLException("Failed to execute SQL statement: " + sql, e);
+            }
+        }
+
+        @SuppressWarnings("SqlSourceToSinkFlow")
+        protected int[][] batchUpdates(@NonNull String[] statements, @Nullable Object[]... batches) throws SQLException {
+            var results = new int[statements.length][];
+            for (var index = 0; index < statements.length; index++) {
+                var sql = statements[index];
+                try (var statement = connection.prepareStatement(sql)) {
+                    for (var parameters : batches) {
+                        for (var i = 0; i < parameters.length; i++) statement.setObject(i + 1, parameters[i]);
+                        statement.addBatch();
+                    }
+                    var result = statement.executeBatch();
+                    results[index] = result;
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    throw new SQLException("Invalid number of parameters for SQL statement: " + sql, e);
+                } catch (SQLException e) {
+                    throw new SQLException("Failed to execute SQL statement: " + sql, e);
+                }
+            }
+            return results;
+        }
+
+        @SuppressWarnings("SqlSourceToSinkFlow")
+        protected int update(@NonNull String sql, Object... parameters) throws SQLException {
+            try (var statement = connection.prepareStatement(sql)) {
+                for (var i = 0; i < parameters.length; i++) statement.setObject(i + 1, parameters[i]);
+                return statement.executeUpdate();
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new SQLException("Invalid number of parameters for SQL statement: " + sql, e);
+            } catch (SQLException e) {
+                throw new SQLException("Failed to execute SQL statement: " + sql, e);
+            }
+        }
+
+        @SuppressWarnings("SqlSourceToSinkFlow")
+        protected int[] updates(@NonNull String[] statements, Object... parameters) throws SQLException {
+            var results = new int[statements.length];
+            for (var index = 0; index < statements.length; index++) {
+                var sql = statements[index];
+                try (var statement = connection.prepareStatement(sql)) {
+                    for (var i = 0; i < parameters.length; i++) statement.setObject(i + 1, parameters[i]);
+                    results[index] = statement.executeUpdate();
+                } catch (SQLException e) {
+                    throw new SQLException("Failed to execute SQL statement: " + sql, e);
+                }
+            }
+            return results;
+        }
+    }
+
+    @Contract(pure = true)
+    protected static @NonNull String[] statements(@NonNull String file) {
+        var stripped = statement(file)
+                .replaceAll("(?s)\\s*/\\*.*?\\*/\\s*", "") // remove /* ... */ block comments
+                .replaceAll("(?m)--.*$", ""); // remove -- line comments
+
+        var statements = new ArrayList<String>();
+        for (var statement : stripped.split(";")) {
+            if (!statement.isBlank()) statements.add(statement);
+        }
+        return statements.toArray(new String[0]);
+    }
+
+    @Contract(pure = true)
+    protected static @NonNull String statement(@NonNull String file) {
+        try (var resource = SQLController.class.getClassLoader().getResourceAsStream(file)) {
+            if (resource == null) throw new FileNotFoundException("Resource not found: " + file);
+            try (var reader = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8))) {
+                return reader.lines().collect(Collectors.joining("\n"));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
     @FunctionalInterface
     protected interface ThrowingFunction<T, R> {
         @Nullable
-        R apply(T t) throws SQLException;
-
-        static <T, R> ThrowingFunction<T, R> unchecked(ThrowingFunction<T, R> f) {
-            return f;
-        }
+        R apply(@NonNull T t) throws SQLException;
     }
 }

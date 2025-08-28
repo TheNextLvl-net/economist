@@ -1,32 +1,40 @@
 package net.thenextlvl.economist.controller.data;
 
 import net.thenextlvl.economist.api.Account;
+import net.thenextlvl.economist.api.currency.Currency;
 import org.bukkit.World;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @NullMarked
 public interface DataController {
     @Nullable
-    Account getAccount(UUID uuid, @Nullable World world) throws SQLException;
+    Account getAccount(UUID uuid, @Nullable World world);
 
-    Set<Account> getAccounts(@Nullable World world) throws SQLException;
+    @Unmodifiable
+    Set<Account> getAccounts(@Nullable World world);
 
-    Account createAccount(UUID uuid, @Nullable World world) throws SQLException;
+    Account createAccount(UUID uuid, @Nullable World world);
 
-    BigDecimal getTotalBalance(@Nullable World world) throws SQLException;
+    BigDecimal getTotalBalance(Currency currency, @Nullable World world);
 
-    List<Account> getOrdered(@Nullable World world, int start, int limit) throws SQLException;
+    List<Account> getOrdered(Currency currency, @Nullable World world, int offset, int limit);
+    
+    Stream<Account> getAccountsUpdatedSince(Instant lastSync) throws SQLException;
 
-    Set<UUID> getAccountOwners(@Nullable World world) throws SQLException;
+    int prune(Duration duration, @Nullable World world);
 
-    boolean deleteAccounts(List<UUID> accounts, @Nullable World world) throws SQLException;
+    boolean deleteAccount(UUID uuid, @Nullable World world);
 
-    boolean save(Account account) throws SQLException;
+    boolean save(Account account);
 }
