@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.9-pre4-R0.1-SNAPSHOT")
     compileOnly("net.thenextlvl.services:service-io:2.3.1")
 
     implementation("net.thenextlvl.core:i18n:3.2.2")
