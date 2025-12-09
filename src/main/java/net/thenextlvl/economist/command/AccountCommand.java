@@ -4,7 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import core.paper.command.CustomArgumentTypes;
+import core.paper.brigadier.arguments.OfflinePlayerArgumentType;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -43,7 +43,7 @@ public class AccountCommand {
     private static LiteralArgumentBuilder<CommandSourceStack> createArgument(EconomistPlugin plugin) {
         return Commands.literal("create")
                 .requires(stack -> stack.getSender().hasPermission("economist.account.create"))
-                .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
+                .then(Commands.argument("player", OfflinePlayerArgumentType.player())
                         .requires(stack -> stack.getSender().hasPermission("economist.account.create.others"))
                         .then(Commands.argument("world", ArgumentTypes.world())
                                 .requires(stack -> stack.getSender().hasPermission("economist.account.create.world") && plugin.config.accounts.perWorld)
@@ -81,7 +81,7 @@ public class AccountCommand {
     private static LiteralArgumentBuilder<CommandSourceStack> deleteArgument(EconomistPlugin plugin) {
         return Commands.literal("delete")
                 .requires(stack -> stack.getSender().hasPermission("economist.account.delete"))
-                .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
+                .then(Commands.argument("player", OfflinePlayerArgumentType.player())
                         .requires(stack -> stack.getSender().hasPermission("economist.account.delete.others"))
                         .then(Commands.argument("world", ArgumentTypes.world())
                                 .requires(stack -> stack.getSender().hasPermission("economist.account.delete.world") && plugin.config.accounts.perWorld)

@@ -1,7 +1,7 @@
 package net.thenextlvl.economist.version;
 
-import core.paper.version.PaperModrinthVersionChecker;
-import core.version.SemanticVersion;
+import net.thenextlvl.version.SemanticVersion;
+import net.thenextlvl.version.modrinth.paper.PaperModrinthVersionChecker;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;

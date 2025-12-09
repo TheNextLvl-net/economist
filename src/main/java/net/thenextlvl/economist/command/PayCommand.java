@@ -3,7 +3,7 @@ package net.thenextlvl.economist.command;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import core.paper.command.CustomArgumentTypes;
+import core.paper.brigadier.arguments.OfflinePlayerArgumentType;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -28,7 +28,7 @@ public class PayCommand {
         var amountArgument = DoubleArgumentType.doubleArg(plugin.config.minimumPayment);
         return Commands.literal("pay")
                 .requires(stack -> stack.getSender() instanceof Player player && player.hasPermission("economist.pay"))
-                .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
+                .then(Commands.argument("player", OfflinePlayerArgumentType.player())
                         .then(Commands.argument("amount", amountArgument).executes(context -> {
                             var player = context.getArgument("player", OfflinePlayer.class);
                             return pay(context, List.of(player), null, plugin);

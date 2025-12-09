@@ -1,8 +1,6 @@
 package net.thenextlvl.economist;
 
-import core.file.format.GsonFile;
-import core.i18n.file.ComponentBundle;
-import core.io.IO;
+import core.file.formats.GsonFile;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.key.Key;
 import net.thenextlvl.economist.api.EconomyController;
@@ -21,6 +19,7 @@ import net.thenextlvl.economist.listener.ConnectionListener;
 import net.thenextlvl.economist.service.ServiceBankController;
 import net.thenextlvl.economist.service.ServiceEconomyController;
 import net.thenextlvl.economist.version.PluginVersionChecker;
+import net.thenextlvl.i18n.ComponentBundle;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,7 +36,7 @@ public class EconomistPlugin extends JavaPlugin {
     private final Metrics metrics = new Metrics(this, 23261);
 
     public final PluginConfig config = new GsonFile<>(
-            IO.of(getDataFolder(), "config.json"),
+            getDataPath().resolve("config.json"),
             new PluginConfig()
     ).validate().save().getRoot();
 

@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import core.paper.command.CustomArgumentTypes;
+import core.paper.brigadier.arguments.OfflinePlayerArgumentType;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -51,7 +51,7 @@ public class EconomyCommand {
 
     private static ArgumentBuilder<CommandSourceStack, ?> reset(EconomistPlugin plugin) {
         return Commands.literal("reset")
-                .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
+                .then(Commands.argument("player", OfflinePlayerArgumentType.player())
                         .then(Commands.argument("world", ArgumentTypes.world())
                                 .requires(stack -> plugin.config.accounts.perWorld)
                                 .executes(context -> {
@@ -80,7 +80,7 @@ public class EconomyCommand {
     private static ArgumentBuilder<CommandSourceStack, ?> create(String command, String successMessage, String successMessageWorld,
                                                                  BiFunction<Account, Number, BigDecimal> function, Double minimum, EconomistPlugin plugin) {
         return Commands.literal(command)
-                .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
+                .then(Commands.argument("player", OfflinePlayerArgumentType.player())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(minimum))
                                 .then(Commands.argument("world", ArgumentTypes.world())
                                         .requires(stack -> plugin.config.accounts.perWorld)

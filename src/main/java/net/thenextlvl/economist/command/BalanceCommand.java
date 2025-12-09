@@ -3,7 +3,7 @@ package net.thenextlvl.economist.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import core.paper.command.CustomArgumentTypes;
+import core.paper.brigadier.arguments.OfflinePlayerArgumentType;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -23,7 +23,7 @@ public class BalanceCommand {
     public static LiteralCommandNode<CommandSourceStack> create(EconomistPlugin plugin) {
         return Commands.literal("balance")
                 .requires(stack -> stack.getSender().hasPermission("economist.balance"))
-                .then(Commands.argument("player", CustomArgumentTypes.cachedOfflinePlayer())
+                .then(Commands.argument("player", OfflinePlayerArgumentType.player())
                         .requires(stack -> stack.getSender().hasPermission("economist.balance.others"))
                         .then(Commands.argument("world", ArgumentTypes.world())
                                 .requires(stack -> stack.getSender().hasPermission("economist.balance.world") && plugin.config.accounts.perWorld)

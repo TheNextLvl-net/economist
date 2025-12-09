@@ -25,6 +25,7 @@ tasks.compileJava {
 repositories {
     mavenCentral()
     maven("https://repo.thenextlvl.net/releases")
+    maven("https://repo.thenextlvl.net/snapshots")
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 
@@ -32,9 +33,10 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     compileOnly("net.thenextlvl.services:service-io:2.3.1")
 
-    implementation("net.thenextlvl.core:i18n:3.2.2")
-    implementation("net.thenextlvl.core:files:3.0.1")
-    implementation("net.thenextlvl.core:paper:2.3.1")
+    implementation("net.thenextlvl.core:files:4.0.0-pre1")
+    implementation("net.thenextlvl.core:paper:3.0.0-pre1")
+    implementation("net.thenextlvl.version-checker:modrinth-paper:1.0.0")
+    implementation("net.thenextlvl:i18n:1.1.0")
     implementation("org.bstats:bstats-bukkit:3.1.0")
     implementation(project(":api"))
 }
