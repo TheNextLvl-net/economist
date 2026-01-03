@@ -34,7 +34,7 @@ dependencies {
     compileOnly("net.thenextlvl.services:service-io:2.3.1")
 
     implementation("net.thenextlvl.core:files:4.0.0-pre1")
-    implementation("net.thenextlvl.core:paper:3.0.0-pre1")
+    implementation("net.thenextlvl.core:paper:3.0.0-pre4")
     implementation("net.thenextlvl.version-checker:modrinth-paper:1.0.0")
     implementation("net.thenextlvl:i18n:1.1.0")
     implementation("org.bstats:bstats-bukkit:3.1.0")
