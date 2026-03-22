@@ -1,6 +1,8 @@
 package net.thenextlvl.economist;
 
 import core.file.formats.GsonFile;
+import dev.faststats.bukkit.BukkitMetrics;
+import dev.faststats.core.ErrorTracker;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.key.Key;
 import net.thenextlvl.economist.api.EconomyController;
@@ -32,7 +34,14 @@ import java.util.Locale;
 
 @NullMarked
 public class EconomistPlugin extends JavaPlugin {
+    public static final ErrorTracker ERROR_TRACKER = ErrorTracker.contextAware();
+
     private final PluginVersionChecker versionChecker = new PluginVersionChecker(this);
+
+    private final BukkitMetrics fastStats = BukkitMetrics.factory()
+            .errorTracker(ERROR_TRACKER)
+            .token("39a650305577ef0e9c1580de408f48b0")
+            .create(this);
     private final Metrics metrics = new Metrics(this, 23261);
 
     public final PluginConfig config = new GsonFile<>(
@@ -75,6 +84,7 @@ public class EconomistPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        fastStats.ready();
         getServer().getPluginManager().registerEvents(new ConnectionListener(this), this);
     }
 
@@ -82,6 +92,7 @@ public class EconomistPlugin extends JavaPlugin {
     public void onDisable() {
         economyController().save();
         bankController().save();
+        fastStats.shutdown();
         metrics.shutdown();
     }
 

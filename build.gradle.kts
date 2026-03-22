@@ -37,6 +37,8 @@ dependencies {
     implementation("net.thenextlvl.core:paper:3.0.0-pre4")
     implementation("net.thenextlvl.version-checker:modrinth-paper:1.0.1")
     implementation("net.thenextlvl:i18n:1.2.0")
+
+    implementation("dev.faststats.metrics:bukkit:0.18.1")
     implementation("org.bstats:bstats-bukkit:3.2.1")
     implementation(project(":api"))
 }
