@@ -14,6 +14,7 @@ public final class CurrencyCommand extends BrigadierCommand {
         final var command = new CurrencyCommand(plugin);
         return command.create()
                 .then(CurrencyCreateCommand.create(plugin))
+                .then(CurrencyDefaultCommand.create(plugin))
                 .then(CurrencyDeleteCommand.create(plugin))
                 .then(CurrencyDisplayNameCommand.create(plugin))
                 .then(CurrencyFractionalDigitsCommand.create(plugin))

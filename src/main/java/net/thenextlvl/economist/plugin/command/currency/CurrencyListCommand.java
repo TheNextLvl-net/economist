@@ -11,7 +11,6 @@ import net.thenextlvl.economist.plugin.command.brigadier.SimpleCommand;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
-import java.util.Locale;
 
 final class CurrencyListCommand extends SimpleCommand {
     private CurrencyListCommand(final EconomistPlugin plugin) {
@@ -42,7 +41,7 @@ final class CurrencyListCommand extends SimpleCommand {
                     ? "currency.list.entry.default"
                     : "currency.list.entry";
             plugin.bundle().sendMessage(sender, key,
-                    Placeholder.parsed("currency", currency.getName().toUpperCase(Locale.ROOT)),
+                    Placeholder.parsed("currency", currency.getName()),
                     Placeholder.component("symbol", currency.getSymbol()),
                     Placeholder.component("amount", currency.format(0, sender)),
                     Placeholder.parsed("digits", String.valueOf(currency.getFractionalDigits())),
