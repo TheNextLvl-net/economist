@@ -28,7 +28,8 @@ final class BankTopCommand extends SimpleCommand {
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = context.getSource().getSender();
         final var page = tryGetArgument(context, "page", Integer.class).orElse(1);
-        final var start = (page - 1) * BankSupport.PAGE_SIZE;
+        final int pageEntryCount = plugin.config.pagination.entriesPerPage;
+        final var start = (page - 1) * pageEntryCount;
         final var currency = plugin.currencyController().getDefaultCurrency();
         plugin.bankController().loadBanks().thenAccept(banks -> {
             final var ordered = banks
@@ -41,7 +42,7 @@ final class BankTopCommand extends SimpleCommand {
             }
             plugin.bundle().sendMessage(sender, "bank.top.header",
                     Placeholder.parsed("page", String.valueOf(page)));
-            for (int i = 0; i < Math.min(BankSupport.PAGE_SIZE, ordered.size() - start); i++) {
+            for (int i = 0; i < Math.min(pageEntryCount, ordered.size() - start); i++) {
                 final var bank = ordered.get(start + i);
                 plugin.bundle().sendMessage(sender, "bank.top.entry",
                         Placeholder.parsed("bank", bank.getName()),

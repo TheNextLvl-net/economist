@@ -13,8 +13,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 final class BankSupport {
-    static final int PAGE_SIZE = 10;
-
     private BankSupport() {
     }
 

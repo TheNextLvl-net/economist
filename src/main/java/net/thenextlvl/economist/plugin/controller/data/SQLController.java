@@ -92,7 +92,7 @@ public class SQLController implements DataController {
                     ON currency_balance.uuid = base.uuid
                     AND ((currency_balance.world = base.world) OR (currency_balance.world IS NULL AND base.world IS NULL))
                     AND currency_balance.currency = ?
-                """ + (plugin.config.balanceTop.showEmptyAccounts ? "" : "WHERE COALESCE(currency_balance.balance, 0) <> 0\n") + """
+                """ + (plugin.config.pagination.showEmptyAccounts ? "" : "WHERE COALESCE(currency_balance.balance, 0) <> 0\n") + """
                 ORDER BY COALESCE(currency_balance.balance, 0) DESC
                 LIMIT ? OFFSET ?
                 """;

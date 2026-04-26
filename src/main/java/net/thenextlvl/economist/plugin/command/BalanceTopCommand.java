@@ -62,7 +62,7 @@ public final class BalanceTopCommand extends SimpleCommand {
     private int top(final CommandContext<CommandSourceStack> context, final Currency currency,
                     @Nullable final World world, final int page) {
         final var sender = context.getSource().getSender();
-        final int pageEntryCount = plugin.config.balanceTop.entriesPerPage;
+        final int pageEntryCount = plugin.config.pagination.entriesPerPage;
         final var index = pageEntryCount * (page - 1);
         getOrdered(currency, world, index, pageEntryCount)
                 .thenAccept(accounts -> top(sender, accounts, currency, index, world))

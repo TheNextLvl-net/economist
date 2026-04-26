@@ -15,7 +15,7 @@ public class PluginConfig {
     public @SerializedName("balance-aliases") Set<String> balanceAliases = Set.of("bal", "money");
 
     public @SerializedName("accounts") AccountConfig accounts = new AccountConfig();
-    public @SerializedName("balance-top") BalanceTopConfig balanceTop = new BalanceTopConfig();
+    public @SerializedName("pagination") Pagination pagination = new Pagination();
     public @SerializedName("banks") BankConfig banks = new BankConfig();
     public @SerializedName("database") DatabaseConfig database = new DatabaseConfig();
 
@@ -24,7 +24,7 @@ public class PluginConfig {
         public @SerializedName("per-world") boolean perWorld = false;
     }
 
-    public static class BalanceTopConfig {
+    public static class Pagination {
         public @SerializedName("entries-per-page") int entriesPerPage = 10;
         public @SerializedName("show-empty-accounts") boolean showEmptyAccounts = false;
     }

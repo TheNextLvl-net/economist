@@ -28,7 +28,8 @@ final class BankListCommand extends SimpleCommand {
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = context.getSource().getSender();
         final var page = tryGetArgument(context, "page", Integer.class).orElse(1);
-        final var start = (page - 1) * BankSupport.PAGE_SIZE;
+        final int pageEntryCount = plugin.config.pagination.entriesPerPage;
+        final var start = (page - 1) * pageEntryCount;
         plugin.bankController().loadBanks().thenAccept(banks -> {
             final var ordered = banks
                     .sorted(Comparator.comparing(Bank::getName, String.CASE_INSENSITIVE_ORDER))
@@ -39,7 +40,7 @@ final class BankListCommand extends SimpleCommand {
             }
             plugin.bundle().sendMessage(sender, "bank.list.header",
                     Placeholder.parsed("page", String.valueOf(page)));
-            ordered.stream().skip(start).limit(BankSupport.PAGE_SIZE).forEach(bank ->
+            ordered.stream().skip(start).limit(pageEntryCount).forEach(bank ->
                     plugin.bundle().sendMessage(sender, "bank.list.entry",
                             Placeholder.parsed("bank", bank.getName()),
                             Placeholder.parsed("owner", BankSupport.playerName(plugin.getServer().getOfflinePlayer(bank.getOwner())))));
