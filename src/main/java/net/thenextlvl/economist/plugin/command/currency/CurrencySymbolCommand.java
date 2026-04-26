@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.currency.Currency;
 import net.thenextlvl.economist.plugin.EconomistPlugin;
@@ -27,7 +28,7 @@ final class CurrencySymbolCommand extends SimpleCommand {
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = context.getSource().getSender();
         final var currency = context.getArgument("currency", Currency.class);
-        final var symbol = CurrencySupport.component(context, "symbol");
+        final var symbol = MiniMessage.miniMessage().deserialize(context.getArgument("symbol", String.class));
         if (!currency.setSymbol(symbol)) {
             plugin.bundle().sendMessage(sender, "nothing.changed",
                     Placeholder.parsed("currency", currency.getName()));

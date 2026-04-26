@@ -11,6 +11,8 @@ import net.thenextlvl.economist.plugin.EconomistPlugin;
 import net.thenextlvl.economist.plugin.command.argument.CurrencyArgumentType;
 import net.thenextlvl.economist.plugin.command.brigadier.SimpleCommand;
 
+import java.math.BigDecimal;
+
 final class CurrencyMinBalanceCommand extends SimpleCommand {
     private CurrencyMinBalanceCommand(final EconomistPlugin plugin) {
         super(plugin, "min-balance", "economist.currency.min-balance");
@@ -20,6 +22,7 @@ final class CurrencyMinBalanceCommand extends SimpleCommand {
         final var command = new CurrencyMinBalanceCommand(plugin);
         return command.create()
                 .then(Commands.argument("currency", new CurrencyArgumentType(plugin))
+                        .then(Commands.literal("clear").executes(command::clear))
                         .then(Commands.argument("balance", DoubleArgumentType.doubleArg(-Double.MAX_VALUE)).executes(command)));
     }
 
@@ -27,8 +30,8 @@ final class CurrencyMinBalanceCommand extends SimpleCommand {
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = context.getSource().getSender();
         final var currency = context.getArgument("currency", Currency.class);
-        final var balance = CurrencySupport.decimal(context, "balance");
-        if (balance.compareTo(currency.getMaxBalance()) > 0) {
+        final var balance = BigDecimal.valueOf(context.getArgument("balance", double.class));
+        if (currency.getMaxBalance().map(maxBalance -> balance.compareTo(maxBalance) > 0).orElse(false)) {
             plugin.bundle().sendMessage(sender, "currency.balance-range.invalid");
             return 0;
         }
@@ -41,6 +44,20 @@ final class CurrencyMinBalanceCommand extends SimpleCommand {
         plugin.bundle().sendMessage(sender, "currency.updated.min-balance",
                 Placeholder.parsed("currency", currency.getName()),
                 Placeholder.parsed("balance", balance.toPlainString()));
+        return SINGLE_SUCCESS;
+    }
+
+    private int clear(final CommandContext<CommandSourceStack> context) {
+        final var sender = context.getSource().getSender();
+        final var currency = context.getArgument("currency", Currency.class);
+        if (!currency.setMinBalance(null)) {
+            plugin.bundle().sendMessage(sender, "nothing.changed",
+                    Placeholder.parsed("currency", currency.getName()));
+            return 0;
+        }
+        plugin.currencyController().save(plugin, currency);
+        plugin.bundle().sendMessage(sender, "currency.updated.min-balance.cleared",
+                Placeholder.parsed("currency", currency.getName()));
         return SINGLE_SUCCESS;
     }
 }

@@ -4,6 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.currency.Currency;
@@ -42,9 +43,15 @@ final class CurrencyInfoCommand extends SimpleCommand {
         plugin.bundle().sendMessage(sender, "currency.info.fractional-digits",
                 Placeholder.parsed("digits", String.valueOf(currency.getFractionalDigits())));
         plugin.bundle().sendMessage(sender, "currency.info.min-balance",
-                Placeholder.parsed("balance", currency.getMinBalance().toPlainString()));
+                Placeholder.component("balance", currency.getMinBalance()
+                        .<Component>map(balance -> Component.text(balance.toPlainString()))
+                        .orElseGet(() -> plugin.bundle().component("currency.value.unlimited",
+                                sender.getOrDefault(Identity.LOCALE, Locale.US)))));
         plugin.bundle().sendMessage(sender, "currency.info.max-balance",
-                Placeholder.parsed("balance", currency.getMaxBalance().toPlainString()));
+                Placeholder.component("balance", currency.getMaxBalance()
+                        .<Component>map(balance -> Component.text(balance.toPlainString()))
+                        .orElseGet(() -> plugin.bundle().component("currency.value.unlimited",
+                                sender.getOrDefault(Identity.LOCALE, Locale.US)))));
         plugin.bundle().sendMessage(sender, "currency.info.singular",
                 Placeholder.component("name", singular));
         plugin.bundle().sendMessage(sender, "currency.info.plural",

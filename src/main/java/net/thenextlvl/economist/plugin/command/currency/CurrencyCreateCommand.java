@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.currency.CurrencyData;
 import net.thenextlvl.economist.plugin.EconomistPlugin;
@@ -38,7 +39,7 @@ final class CurrencyCreateCommand extends SimpleCommand {
         final var digits = tryGetArgument(context, "fractional-digits", Integer.class)
                 .orElse(plugin.currencyController().getDefaultCurrency().getFractionalDigits());
         final var symbol = tryGetArgument(context, "symbol", String.class)
-                .map(CurrencySupport.MINI_MESSAGE::deserialize)
+                .map(MiniMessage.miniMessage()::deserialize)
                 .orElse(plugin.currencyController().getDefaultCurrency().getSymbol());
         try {
             final var currency = plugin.currencyController().createCurrency(CurrencyData.of(name, symbol, digits));
