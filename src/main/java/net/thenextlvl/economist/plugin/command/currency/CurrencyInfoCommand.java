@@ -52,6 +52,8 @@ final class CurrencyInfoCommand extends SimpleCommand {
                         .<Component>map(balance -> Component.text(balance.toPlainString()))
                         .orElseGet(() -> plugin.bundle().component("currency.value.unlimited",
                                 sender.getOrDefault(Identity.LOCALE, Locale.US)))));
+        plugin.bundle().sendMessage(sender, "currency.info.starter-balance",
+                Placeholder.parsed("balance", currency.getStarterBalance().toPlainString()));
         plugin.bundle().sendMessage(sender, "currency.info.singular",
                 Placeholder.component("name", singular));
         plugin.bundle().sendMessage(sender, "currency.info.plural",

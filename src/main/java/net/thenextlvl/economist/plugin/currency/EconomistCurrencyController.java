@@ -95,13 +95,15 @@ public final class EconomistCurrencyController implements CurrencyController {
                 final var existing = currencies.get(storedCurrency.data().name());
                 if (existing != null) {
                     if (existing instanceof final EconomistCurrency economistCurrency) {
-                        apply(economistCurrency, storedCurrency.data(), storedCurrency.minBalance(), storedCurrency.maxBalance());
+                        apply(economistCurrency, storedCurrency.data(), storedCurrency.minBalance(),
+                                storedCurrency.maxBalance(), storedCurrency.starterBalance());
                     }
                     return;
                 }
                 final var created = createCurrency(storedCurrency.data());
                 created.setMinBalance(storedCurrency.minBalance());
                 created.setMaxBalance(storedCurrency.maxBalance());
+                created.setStarterBalance(storedCurrency.starterBalance());
             });
             final var defaultCurrencyName = plugin.dataController().getDefaultCurrencyName();
             if (defaultCurrencyName != null) {
@@ -148,9 +150,11 @@ public final class EconomistCurrencyController implements CurrencyController {
     }
 
     private static void apply(final EconomistCurrency currency, final CurrencyData data,
-                              final @Nullable BigDecimal minBalance, final @Nullable BigDecimal maxBalance) {
+                              final @Nullable BigDecimal minBalance, final @Nullable BigDecimal maxBalance,
+                              final BigDecimal starterBalance) {
         currency.apply(data);
         currency.setMinBalance(minBalance);
         currency.setMaxBalance(maxBalance);
+        currency.setStarterBalance(starterBalance);
     }
 }

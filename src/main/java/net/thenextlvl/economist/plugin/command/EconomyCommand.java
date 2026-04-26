@@ -198,7 +198,7 @@ public final class EconomyCommand extends BrigadierCommand {
                     .orElse(plugin.currencyController().getDefaultCurrency());
             final var world = tryGetArgument(context, "world", World.class).orElse(null);
             final var successMessage = world != null ? "balance.reset.world" : "balance.reset";
-            return execute(plugin, context, successMessage, players, plugin.config.startBalance,
+            return execute(plugin, context, successMessage, players, currency.getStarterBalance(),
                     currency, world, Account::setBalance);
         }
     }

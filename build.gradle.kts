@@ -275,9 +275,9 @@ paper {
                 "economist.currency.list",
                 "economist.currency.max-balance",
                 "economist.currency.min-balance",
+                "economist.currency.starter-balance",
                 "economist.currency.symbol",
-                "economist.pay.world",
-                "economist.loan"
+                "economist.pay.world"
             )
         }
 
@@ -315,6 +315,10 @@ paper {
         }
         register("economist.currency.min-balance") {
             description = "Allows players to edit currency min balances."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.starter-balance") {
+            description = "Allows players to edit currency starter balances."
             children = listOf("economist.currency")
         }
         register("economist.currency.symbol") {
@@ -355,11 +359,6 @@ paper {
         register("economist.pay") {
             default = BukkitPluginDescription.Permission.Default.TRUE
             description = "Allows players to make payments."
-        }
-
-        register("economist.loan") {
-            default = BukkitPluginDescription.Permission.Default.OP
-            description = "Allows players to loan money when making payments with insufficient funds."
         }
     }
 }

@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS currencies
     symbol            TEXT            NOT NULL,
     fractional_digits INTEGER         NOT NULL,
     min_balance       DECIMAL(65, 20) NULL,
-    max_balance       DECIMAL(65, 20) NULL
+    max_balance       DECIMAL(65, 20) NULL,
+    starter_balance   DECIMAL(65, 20) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS currency_settings

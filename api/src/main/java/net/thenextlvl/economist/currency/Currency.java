@@ -39,12 +39,15 @@ public interface Currency {
 
     /**
      * Updates the maximum balance allowed for this currency.
+     * <p>
+     * If the current starter balance is higher than the new maximum balance, it is clamped to the new maximum balance.
      *
      * @param maxBalance the new inclusive upper balance bound, or {@code null} for no upper bound
      * @return {@code true} if the value changed
+     * @throws IllegalArgumentException if {@code maxBalance} is lower than the current minimum balance
      * @since 0.3.0
      */
-    boolean setMaxBalance(@Nullable BigDecimal maxBalance);
+    boolean setMaxBalance(@Nullable BigDecimal maxBalance) throws IllegalArgumentException;
 
     /**
      * Retrieves the minimum balance allowed for this currency.
@@ -57,12 +60,34 @@ public interface Currency {
 
     /**
      * Updates the minimum balance allowed for this currency.
+     * <p>
+     * If the current starter balance is lower than the new minimum balance, it is clamped to the new minimum balance.
      *
      * @param minBalance the new inclusive lower balance bound, or {@code null} for no lower bound
      * @return {@code true} if the value changed
+     * @throws IllegalArgumentException if {@code minBalance} is higher than the current maximum balance
      * @since 0.3.0
      */
-    boolean setMinBalance(@Nullable BigDecimal minBalance);
+    boolean setMinBalance(@Nullable BigDecimal minBalance) throws IllegalArgumentException;
+
+    /**
+     * Retrieves the initial balance assigned for this currency.
+     *
+     * @return the starter balance
+     * @since 0.3.0
+     */
+    @Contract(pure = true)
+    BigDecimal getStarterBalance();
+
+    /**
+     * Updates the initial balance assigned for this currency.
+     *
+     * @param starterBalance the new starter balance
+     * @return {@code true} if the value changed
+     * @throws IllegalArgumentException if {@code starterBalance} is outside the currency balance range
+     * @since 0.3.0
+     */
+    boolean setStarterBalance(BigDecimal starterBalance) throws IllegalArgumentException;
 
     /**
      * Retrieves the currency symbol.

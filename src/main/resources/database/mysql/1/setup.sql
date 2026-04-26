@@ -79,7 +79,12 @@ CREATE TABLE IF NOT EXISTS currencies
 (
     65,
     20
-) NULL
+) NULL,
+    starter_balance DECIMAL
+(
+    65,
+    20
+) NOT NULL DEFAULT 0
     );
 
 CREATE TABLE IF NOT EXISTS currency_settings

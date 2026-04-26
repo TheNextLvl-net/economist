@@ -21,6 +21,7 @@ public final class EconomistCurrency implements Currency {
     private volatile int fractionalDigits = 2;
     private volatile @Nullable BigDecimal maxBalance = null;
     private volatile @Nullable BigDecimal minBalance = BigDecimal.ZERO;
+    private volatile BigDecimal starterBalance = BigDecimal.ZERO;
 
     private final Map<Locale, Component> plural = new ConcurrentHashMap<>();
     private final Map<Locale, Component> singular = new ConcurrentHashMap<>();
@@ -50,8 +51,15 @@ public final class EconomistCurrency implements Currency {
 
     @Override
     public boolean setMaxBalance(final @Nullable BigDecimal maxBalance) {
+        if (maxBalance != null && minBalance != null && maxBalance.compareTo(minBalance) < 0) {
+            throw new IllegalArgumentException("Max balance cannot be lower than min balance");
+        }
+        final var updatedStarterBalance = maxBalance != null && starterBalance.compareTo(maxBalance) > 0
+                ? maxBalance
+                : starterBalance;
         if (Objects.equals(this.maxBalance, maxBalance)) return false;
         this.maxBalance = maxBalance;
+        this.starterBalance = updatedStarterBalance;
         return true;
     }
 
@@ -62,8 +70,34 @@ public final class EconomistCurrency implements Currency {
 
     @Override
     public boolean setMinBalance(final @Nullable BigDecimal minBalance) {
+        if (minBalance != null && maxBalance != null && minBalance.compareTo(maxBalance) > 0) {
+            throw new IllegalArgumentException("Min balance cannot be higher than max balance");
+        }
+        final var updatedStarterBalance = minBalance != null && starterBalance.compareTo(minBalance) < 0
+                ? minBalance
+                : starterBalance;
         if (Objects.equals(this.minBalance, minBalance)) return false;
         this.minBalance = minBalance;
+        this.starterBalance = updatedStarterBalance;
+        return true;
+    }
+
+    @Override
+    public BigDecimal getStarterBalance() {
+        return starterBalance;
+    }
+
+    @Override
+    public boolean setStarterBalance(final BigDecimal starterBalance) {
+        Objects.requireNonNull(starterBalance, "starterBalance");
+        if (minBalance != null && starterBalance.compareTo(minBalance) < 0) {
+            throw new IllegalArgumentException("Starter balance cannot be lower than min balance");
+        }
+        if (maxBalance != null && starterBalance.compareTo(maxBalance) > 0) {
+            throw new IllegalArgumentException("Starter balance cannot be higher than max balance");
+        }
+        if (Objects.equals(this.starterBalance, starterBalance)) return false;
+        this.starterBalance = starterBalance;
         return true;
     }
 

@@ -113,7 +113,7 @@ public class SQLController implements DataController {
     public Account createAccount(final UUID uuid, @Nullable final World world) throws SQLException {
         final var balances = new ConcurrentHashMap<String, BigDecimal>();
         final var currency = defaultCurrency();
-        final var balance = BigDecimal.valueOf(plugin.config.startBalance);
+        final var balance = currency.getStarterBalance();
         balances.put(currency.getName(), balance);
         executeUpdate("INSERT INTO accounts (uuid, world, currency, balance) VALUES (?, ?, ?, ?)",
                 uuid, worldName(world), currency.getName(), balance);
@@ -261,7 +261,7 @@ public class SQLController implements DataController {
 
     @Override
     public Bank createBank(final UUID owner, final String name) throws SQLException {
-        final var balance = BigDecimal.valueOf(plugin.config.startBalance);
+        final var balance = defaultCurrency().getStarterBalance();
         executeUpdate("""
                 INSERT INTO banks (name, balance, owner, members)
                 VALUES (?, ?, ?, ?)
@@ -291,7 +291,7 @@ public class SQLController implements DataController {
     @Override
     public Map<String, StoredCurrency> getCurrencies() throws SQLException {
         final var currencies = executeQuery("""
-                SELECT name, symbol, fractional_digits, min_balance, max_balance
+                SELECT name, symbol, fractional_digits, min_balance, max_balance, starter_balance
                 FROM currencies
                 ORDER BY name
                 """, resultSet -> {
@@ -306,7 +306,8 @@ public class SQLController implements DataController {
                 values.put(name, new StoredCurrency(
                         data,
                         resultSet.getBigDecimal("min_balance"),
-                        resultSet.getBigDecimal("max_balance")
+                        resultSet.getBigDecimal("max_balance"),
+                        resultSet.getBigDecimal("starter_balance")
                 ));
             }
             return values;
@@ -361,7 +362,8 @@ public class SQLController implements DataController {
                             MINI_MESSAGE.serialize(currency.getSymbol()),
                             currency.getFractionalDigits(),
                             currency.getMinBalance().orElse(null),
-                            currency.getMaxBalance().orElse(null)
+                            currency.getMaxBalance().orElse(null),
+                            currency.getStarterBalance()
                     );
                     upsert.executeUpdate();
                 }
@@ -535,22 +537,24 @@ public class SQLController implements DataController {
     private String currencyUpsertQuery() {
         return switch (dialect) {
             case SQLITE, POSTGRESQL -> """
-                    INSERT INTO currencies (name, symbol, fractional_digits, min_balance, max_balance)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO currencies (name, symbol, fractional_digits, min_balance, max_balance, starter_balance)
+                    VALUES (?, ?, ?, ?, ?, ?)
                     ON CONFLICT(name) DO UPDATE SET
                         symbol = excluded.symbol,
                         fractional_digits = excluded.fractional_digits,
                         min_balance = excluded.min_balance,
-                        max_balance = excluded.max_balance
+                        max_balance = excluded.max_balance,
+                        starter_balance = excluded.starter_balance
                     """;
             case MYSQL, MARIADB -> """
-                    INSERT INTO currencies (name, symbol, fractional_digits, min_balance, max_balance)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO currencies (name, symbol, fractional_digits, min_balance, max_balance, starter_balance)
+                    VALUES (?, ?, ?, ?, ?, ?)
                     ON DUPLICATE KEY UPDATE
                         symbol = VALUES(symbol),
                         fractional_digits = VALUES(fractional_digits),
                         min_balance = VALUES(min_balance),
-                        max_balance = VALUES(max_balance)
+                        max_balance = VALUES(max_balance),
+                        starter_balance = VALUES(starter_balance)
                     """;
         };
     }

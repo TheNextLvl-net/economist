@@ -9,8 +9,6 @@ public class PluginConfig {
     public @SerializedName("scientific-numbers") boolean scientificNumbers = false;
 
     public @SerializedName("minimum-payment-amount") double minimumPayment = 0.01;
-    public @SerializedName("max-loan-amount") double maxLoanAmount = 250;
-    public @SerializedName("start-balance") double startBalance = 0;
 
     public @SerializedName("minimum-prune-days") int minimumPruneDays = 30;
 

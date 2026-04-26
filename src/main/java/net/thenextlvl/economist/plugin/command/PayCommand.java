@@ -89,7 +89,6 @@ public final class PayCommand extends SimpleCommand {
         final var sender = (Player) context.getSource().getSender();
 
         final var amount = context.getArgument("amount", Double.class);
-        final var minimum = sender.hasPermission("economist.loan") ? -plugin.config.maxLoanAmount : 0;
 
         if (players.isEmpty()) {
             plugin.bundle().sendMessage(sender, "player.define");
@@ -102,7 +101,7 @@ public final class PayCommand extends SimpleCommand {
         resolveAccount(sender, world).thenAccept(optional -> optional.ifPresentOrElse(account ->
                         players.forEach(player -> resolveAccount(player, world).thenAccept(optional1 ->
                                 optional1.ifPresentOrElse(target ->
-                                                pay(sender, player, account, target, amount, currency, minimum),
+                                                pay(sender, player, account, target, amount, currency),
                                         () -> missingAccount(world, sender, player, plugin)
                                 ))),
                 () -> missingAccount(world, sender, sender, plugin)));
@@ -116,13 +115,8 @@ public final class PayCommand extends SimpleCommand {
     }
 
     private void pay(final Player sender, final OfflinePlayer player, final Account source, final Account target,
-                     final double amount, final Currency currency, final double minimum) {
+                     final double amount, final Currency currency) {
         if (!source.canHold(currency) || !target.canHold(currency)) {
-            return;
-        }
-
-        if (source.getBalance(currency).doubleValue() - amount < minimum) {
-            plugin.bundle().sendMessage(sender, "account.funds");
             return;
         }
 

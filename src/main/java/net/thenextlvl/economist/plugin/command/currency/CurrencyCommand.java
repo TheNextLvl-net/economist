@@ -22,6 +22,7 @@ public final class CurrencyCommand extends BrigadierCommand {
                 .then(CurrencyListCommand.create(plugin))
                 .then(CurrencyMaxBalanceCommand.create(plugin))
                 .then(CurrencyMinBalanceCommand.create(plugin))
+                .then(CurrencyStarterBalanceCommand.create(plugin))
                 .then(CurrencySymbolCommand.create(plugin))
                 .build();
     }

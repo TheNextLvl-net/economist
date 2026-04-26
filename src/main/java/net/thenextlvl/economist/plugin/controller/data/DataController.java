@@ -63,6 +63,7 @@ public interface DataController {
 
     boolean deleteCurrency(String name) throws SQLException;
 
-    record StoredCurrency(CurrencyData data, @Nullable BigDecimal minBalance, @Nullable BigDecimal maxBalance) {
+    record StoredCurrency(CurrencyData data, @Nullable BigDecimal minBalance, @Nullable BigDecimal maxBalance,
+                          BigDecimal starterBalance) {
     }
 }
