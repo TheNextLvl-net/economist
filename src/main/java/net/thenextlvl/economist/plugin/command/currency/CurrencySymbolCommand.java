@@ -29,7 +29,7 @@ final class CurrencySymbolCommand extends SimpleCommand {
         final var currency = context.getArgument("currency", Currency.class);
         final var symbol = CurrencySupport.component(context, "symbol");
         if (!currency.setSymbol(symbol)) {
-            plugin.bundle().sendMessage(sender, "currency.unchanged",
+            plugin.bundle().sendMessage(sender, "nothing.changed",
                     Placeholder.parsed("currency", currency.getName()));
             return 0;
         }

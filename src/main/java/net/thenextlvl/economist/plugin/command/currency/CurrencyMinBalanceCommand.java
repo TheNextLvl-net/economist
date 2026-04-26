@@ -33,7 +33,7 @@ final class CurrencyMinBalanceCommand extends SimpleCommand {
             return 0;
         }
         if (!currency.setMinBalance(balance)) {
-            plugin.bundle().sendMessage(sender, "currency.unchanged",
+            plugin.bundle().sendMessage(sender, "nothing.changed",
                     Placeholder.parsed("currency", currency.getName()));
             return 0;
         }

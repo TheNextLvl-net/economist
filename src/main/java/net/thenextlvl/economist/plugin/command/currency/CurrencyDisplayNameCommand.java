@@ -49,7 +49,7 @@ final class CurrencyDisplayNameCommand extends SimpleCommand {
             changed = singular ? currency.setDisplayNameSingular(locale, name) : currency.setDisplayNamePlural(locale, name);
         }
         if (!changed) {
-            plugin.bundle().sendMessage(sender, "currency.unchanged",
+            plugin.bundle().sendMessage(sender, "nothing.changed",
                     Placeholder.parsed("currency", currency.getName()));
             return 0;
         }

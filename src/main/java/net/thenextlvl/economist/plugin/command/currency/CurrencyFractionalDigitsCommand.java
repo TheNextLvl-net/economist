@@ -29,7 +29,7 @@ final class CurrencyFractionalDigitsCommand extends SimpleCommand {
         final var currency = context.getArgument("currency", Currency.class);
         final var digits = context.getArgument("digits", Integer.class);
         if (!currency.setFractionalDigits(digits)) {
-            plugin.bundle().sendMessage(sender, "currency.unchanged",
+            plugin.bundle().sendMessage(sender, "nothing.changed",
                     Placeholder.parsed("currency", currency.getName()));
             return 0;
         }
