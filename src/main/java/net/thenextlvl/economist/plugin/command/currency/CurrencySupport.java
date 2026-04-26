@@ -5,6 +5,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.thenextlvl.economist.currency.Currency;
+import net.thenextlvl.economist.plugin.EconomistPlugin;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -19,7 +20,7 @@ final class CurrencySupport {
     private CurrencySupport() {
     }
 
-    static List<Currency> ordered(final net.thenextlvl.economist.plugin.EconomistPlugin plugin) {
+    static List<Currency> ordered(final EconomistPlugin plugin) {
         return plugin.currencyController().getCurrencies()
                 .sorted(Comparator.comparing(Currency::getName, String.CASE_INSENSITIVE_ORDER))
                 .toList();

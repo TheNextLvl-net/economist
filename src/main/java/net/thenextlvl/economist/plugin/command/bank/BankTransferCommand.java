@@ -1,6 +1,7 @@
 package net.thenextlvl.economist.plugin.command.bank;
 
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -26,9 +27,9 @@ final class BankTransferCommand extends SimpleCommand {
 
     static LiteralArgumentBuilder<CommandSourceStack> create(final EconomistPlugin plugin) {
         final var command = new BankTransferCommand(plugin);
-        final var target = Commands.argument(TARGET_ARGUMENT, com.mojang.brigadier.arguments.StringArgumentType.word());
+        final var target = Commands.argument(TARGET_ARGUMENT, StringArgumentType.word());
         final var amount = Commands.argument("amount", DoubleArgumentType.doubleArg(plugin.config.minimumPayment));
-        final var sourceBank = Commands.argument(BANK_ARGUMENT, com.mojang.brigadier.arguments.StringArgumentType.word())
+        final var sourceBank = Commands.argument(BANK_ARGUMENT, StringArgumentType.word())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.transfer.others"));
         return command.create()
                 .then(target.then(amount.executes(command)))

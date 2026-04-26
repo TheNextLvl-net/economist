@@ -1,6 +1,7 @@
 package net.thenextlvl.economist.plugin.command.bank;
 
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -24,7 +25,7 @@ final class BankWithdrawCommand extends SimpleCommand {
     static LiteralArgumentBuilder<CommandSourceStack> create(final EconomistPlugin plugin) {
         final var command = new BankWithdrawCommand(plugin);
         final var amount = Commands.argument("amount", DoubleArgumentType.doubleArg(plugin.config.minimumPayment));
-        final var name = Commands.argument(NAME_ARGUMENT, com.mojang.brigadier.arguments.StringArgumentType.word())
+        final var name = Commands.argument(NAME_ARGUMENT, StringArgumentType.word())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.withdraw.others"));
         return command.create()
                 .then(amount.executes(command)

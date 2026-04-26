@@ -1,5 +1,6 @@
 package net.thenextlvl.economist.plugin.command.bank;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import core.paper.brigadier.arguments.OfflinePlayerArgumentType;
@@ -21,7 +22,7 @@ final class BankCreateCommand extends SimpleCommand {
 
     static LiteralArgumentBuilder<CommandSourceStack> create(final EconomistPlugin plugin) {
         final var command = new BankCreateCommand(plugin);
-        final var name = Commands.argument(NAME_ARGUMENT, com.mojang.brigadier.arguments.StringArgumentType.word());
+        final var name = Commands.argument(NAME_ARGUMENT, StringArgumentType.word());
         final var owner = Commands.argument(OWNER_ARGUMENT, OfflinePlayerArgumentType.player())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.create.others"));
         return command.create()

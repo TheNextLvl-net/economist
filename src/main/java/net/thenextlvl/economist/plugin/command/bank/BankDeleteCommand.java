@@ -1,5 +1,6 @@
 package net.thenextlvl.economist.plugin.command.bank;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import core.paper.brigadier.arguments.OfflinePlayerArgumentType;
@@ -22,7 +23,7 @@ final class BankDeleteCommand extends SimpleCommand {
         final var command = new BankDeleteCommand(plugin);
         final var owner = Commands.argument(OWNER_ARGUMENT, OfflinePlayerArgumentType.player())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.delete.others"));
-        final var name = Commands.argument(NAME_ARGUMENT, com.mojang.brigadier.arguments.StringArgumentType.word())
+        final var name = Commands.argument(NAME_ARGUMENT, StringArgumentType.word())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.delete.others"));
         return command.create()
                 .executes(command)

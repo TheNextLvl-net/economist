@@ -9,6 +9,7 @@ import org.bukkit.World;
 import org.jspecify.annotations.Nullable;
 
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -183,7 +184,7 @@ public final class EconomistBankController implements BankController {
     }
 
     private static String key(final String name) {
-        return name.toLowerCase(java.util.Locale.ROOT);
+        return name.toLowerCase(Locale.ROOT);
     }
 
     private static String normalizedName(final String name) {
