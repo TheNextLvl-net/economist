@@ -12,14 +12,18 @@ plugins {
 }
 
 group = "net.thenextlvl.economist"
-version = "0.2.4"
+version = "0.3.0"
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+extensions.configure<JavaPluginExtension> {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
 }
 
 tasks.compileJava {
     options.release.set(21)
+}
+
+configurations.compileClasspath {
+    attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 25)
 }
 
 repositories {
@@ -40,6 +44,12 @@ dependencies {
 
     implementation("dev.faststats.metrics:bukkit:0.22.0")
     implementation("org.bstats:bstats-bukkit:3.2.1")
+
+    implementation("de.chojo.sadu:sadu-sqlite:2.3.5")
+    runtimeOnly("org.postgresql:postgresql:42.7.8")
+    runtimeOnly("com.mysql:mysql-connector-j:9.6.0")
+    runtimeOnly("org.mariadb.jdbc:mariadb-java-client:3.5.8")
+
     implementation(project(":api"))
 }
 
@@ -47,9 +57,26 @@ tasks.shadowJar {
     relocate("org.bstats", "${rootProject.group}.metrics")
 }
 
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.addAll(listOf("--add-reads", "economist.main=ALL-UNNAMED"))
+}
+
+tasks.withType<Test>().configureEach {
+    jvmArgs("--add-reads", "economist.main=ALL-UNNAMED")
+}
+
+tasks.withType<JavaExec>().configureEach {
+    jvmArgs("--add-reads", "economist.main=ALL-UNNAMED")
+}
+
+tasks.withType<Javadoc>().configureEach {
+    val options = options as StandardJavadocDocletOptions
+    options.addStringOption("-add-reads", "economist.main=ALL-UNNAMED")
+}
+
 paper {
     name = "Economist"
-    main = "net.thenextlvl.economist.EconomistPlugin"
+    main = "net.thenextlvl.economist.plugin.EconomistPlugin"
     author = "NonSwag"
     apiVersion = "1.21"
     foliaSupported = true
@@ -194,6 +221,11 @@ paper {
             description = "Allows players to view bank info."
             children = listOf("economist.bank.balance")
         }
+        register("economist.bank.list") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to list banks."
+            children = listOf("economist.bank")
+        }
         register("economist.bank.balance") {
             description = "Allows players to view their bank's balance."
             children = listOf("economist.bank")
@@ -235,9 +267,63 @@ paper {
                 "economist.account.delete.others",
                 "economist.account.prune",
                 "economist.balance-top.world",
-                "economist.pay.world",
-                "economist.loan"
+                "economist.currency.create",
+                "economist.currency.delete",
+                "economist.currency.display-name",
+                "economist.currency.fractional-digits",
+                "economist.currency.info",
+                "economist.currency.list",
+                "economist.currency.max-balance",
+                "economist.currency.min-balance",
+                "economist.currency.starter-balance",
+                "economist.currency.symbol",
+                "economist.pay.world"
             )
+        }
+
+        register("economist.currency") {
+            default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows players to manage currencies."
+        }
+        register("economist.currency.create") {
+            description = "Allows players to create currencies."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.delete") {
+            description = "Allows players to delete currencies."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.display-name") {
+            description = "Allows players to edit currency display names."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.fractional-digits") {
+            description = "Allows players to edit currency fractional digits."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.info") {
+            description = "Allows players to inspect currencies."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.list") {
+            description = "Allows players to list currencies."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.max-balance") {
+            description = "Allows players to edit currency max balances."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.min-balance") {
+            description = "Allows players to edit currency min balances."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.starter-balance") {
+            description = "Allows players to edit currency starter balances."
+            children = listOf("economist.currency")
+        }
+        register("economist.currency.symbol") {
+            description = "Allows players to edit currency symbols."
+            children = listOf("economist.currency")
         }
 
         register("economist.balance.world") {
@@ -273,11 +359,6 @@ paper {
         register("economist.pay") {
             default = BukkitPluginDescription.Permission.Default.TRUE
             description = "Allows players to make payments."
-        }
-
-        register("economist.loan") {
-            default = BukkitPluginDescription.Permission.Default.OP
-            description = "Allows players to loan money when making payments with insufficient funds."
         }
     }
 }

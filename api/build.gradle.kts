@@ -3,18 +3,27 @@ plugins {
     id("maven-publish")
 }
 
-group = rootProject.group
-version = rootProject.version
-
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
-    withJavadocJar()
+extensions.configure<JavaPluginExtension> {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
     withSourcesJar()
+    withJavadocJar()
 }
 
 tasks.compileJava {
     options.release.set(21)
 }
+
+configurations.compileClasspath {
+    attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 25)
+}
+
+tasks.withType<Javadoc>().configureEach {
+    val options = options as StandardJavadocDocletOptions
+    options.tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:")
+}
+
+group = rootProject.group
+version = rootProject.version
 
 repositories {
     mavenCentral()
@@ -24,6 +33,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    implementation("net.thenextlvl:static-binder:0.1.3")
 }
 
 publishing {
