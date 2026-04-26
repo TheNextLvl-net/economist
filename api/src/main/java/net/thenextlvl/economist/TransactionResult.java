@@ -66,6 +66,12 @@ public record TransactionResult(
          */
         CURRENCY_NOT_SUPPORTED,
         /**
+         * The transaction would move the balance outside the allowed range.
+         *
+         * @since 0.3.0
+         */
+        OUT_OF_BOUNDS,
+        /**
          * The transaction failed for an unspecified reason.
          *
          * @since 0.3.0

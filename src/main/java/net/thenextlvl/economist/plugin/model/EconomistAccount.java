@@ -61,7 +61,7 @@ public class EconomistAccount implements Account {
         this.balance.compute(currency.getName(), (ignored, current) -> {
             final var existing = current != null ? current : BigDecimal.ZERO;
             if (outsideBounds(value, currency)) {
-                result.set(new TransactionResult(currency, value, existing, TransactionResult.Status.FAILURE));
+                result.set(new TransactionResult(currency, value, existing, TransactionResult.Status.OUT_OF_BOUNDS));
                 return current;
             }
             result.set(new TransactionResult(currency, value, value, TransactionResult.Status.SUCCESS));
@@ -96,7 +96,7 @@ public class EconomistAccount implements Account {
             final var existing = current != null ? current : BigDecimal.ZERO;
             final var updated = existing.add(delta);
             if (outsideBounds(updated, currency)) {
-                result.set(new TransactionResult(currency, amount, existing, TransactionResult.Status.FAILURE));
+                result.set(new TransactionResult(currency, amount, existing, TransactionResult.Status.OUT_OF_BOUNDS));
                 return current;
             }
             result.set(new TransactionResult(currency, amount, updated, TransactionResult.Status.SUCCESS));

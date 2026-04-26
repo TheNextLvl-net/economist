@@ -130,10 +130,21 @@ public final class PayCommand extends SimpleCommand {
         if (!withdrawn.successful()) {
             if (withdrawn.status() == TransactionResult.Status.INSUFFICIENT_FUNDS) {
                 plugin.bundle().sendMessage(sender, "account.funds");
+            } else if (withdrawn.status() == TransactionResult.Status.OUT_OF_BOUNDS) {
+                plugin.bundle().sendMessage(sender, "account.balance-range.invalid");
             }
             return;
         }
-        target.deposit(amount, currency);
+        final var deposited = target.deposit(amount, currency);
+        if (!deposited.successful()) {
+            source.deposit(amount, currency);
+            if (deposited.status() == TransactionResult.Status.OUT_OF_BOUNDS) {
+                plugin.bundle().sendMessage(sender, "account.balance-range.invalid");
+            } else {
+                plugin.bundle().sendMessage(sender, "operation.failed");
+            }
+            return;
+        }
 
         plugin.bundle().sendMessage(sender, "player.pay.outgoing",
                 Placeholder.component("amount", currency.format(amount, sender)),

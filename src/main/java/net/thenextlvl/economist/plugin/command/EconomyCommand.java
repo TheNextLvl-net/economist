@@ -55,6 +55,10 @@ public final class EconomyCommand extends BrigadierCommand {
                     if (!result.successful()) {
                         if (result.status() == TransactionResult.Status.INSUFFICIENT_FUNDS) {
                             plugin.bundle().sendMessage(sender, "account.funds");
+                        } else if (result.status() == TransactionResult.Status.OUT_OF_BOUNDS) {
+                            plugin.bundle().sendMessage(sender, "account.balance-range.invalid");
+                        } else {
+                            plugin.bundle().sendMessage(sender, "operation.failed");
                         }
                         return;
                     }
