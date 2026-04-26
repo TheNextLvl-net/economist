@@ -11,9 +11,6 @@ import net.thenextlvl.economist.plugin.EconomistPlugin;
 import net.thenextlvl.economist.plugin.command.brigadier.SimpleCommand;
 import org.bukkit.entity.Player;
 
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.NAME_ARGUMENT;
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.OWNER_ARGUMENT;
-
 final class BankBalanceCommand extends SimpleCommand {
     private BankBalanceCommand(final EconomistPlugin plugin) {
         super(plugin, "balance", "economist.bank.balance");
@@ -21,9 +18,9 @@ final class BankBalanceCommand extends SimpleCommand {
 
     static LiteralArgumentBuilder<CommandSourceStack> create(final EconomistPlugin plugin) {
         final var command = new BankBalanceCommand(plugin);
-        final var owner = Commands.argument(OWNER_ARGUMENT, OfflinePlayerArgumentType.player())
+        final var owner = Commands.argument("owner", OfflinePlayerArgumentType.player())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.balance.others"));
-        final var name = Commands.argument(NAME_ARGUMENT, StringArgumentType.word())
+        final var name = Commands.argument("name", StringArgumentType.word())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.balance.others"));
         return command.create()
                 .executes(command)
@@ -35,7 +32,7 @@ final class BankBalanceCommand extends SimpleCommand {
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = context.getSource().getSender();
         BankSupport.resolveBankTarget(plugin, context).thenAccept(optional -> optional.ifPresentOrElse(bank -> {
-            final var currency = BankSupport.currency(plugin);
+            final var currency = plugin.currencyController().getDefaultCurrency();
             final var self = sender instanceof final Player player && bank.getOwner().equals(player.getUniqueId());
             plugin.bundle().sendMessage(sender, self ? "bank.balance.self" : "bank.balance.other",
                     Placeholder.parsed("bank", bank.getName()),

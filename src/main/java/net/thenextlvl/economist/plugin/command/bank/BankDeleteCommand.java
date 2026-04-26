@@ -11,9 +11,6 @@ import net.thenextlvl.economist.plugin.EconomistPlugin;
 import net.thenextlvl.economist.plugin.command.brigadier.SimpleCommand;
 import org.bukkit.entity.Player;
 
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.NAME_ARGUMENT;
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.OWNER_ARGUMENT;
-
 final class BankDeleteCommand extends SimpleCommand {
     private BankDeleteCommand(final EconomistPlugin plugin) {
         super(plugin, "delete", "economist.bank.delete");
@@ -21,9 +18,9 @@ final class BankDeleteCommand extends SimpleCommand {
 
     static LiteralArgumentBuilder<CommandSourceStack> create(final EconomistPlugin plugin) {
         final var command = new BankDeleteCommand(plugin);
-        final var owner = Commands.argument(OWNER_ARGUMENT, OfflinePlayerArgumentType.player())
+        final var owner = Commands.argument("owner", OfflinePlayerArgumentType.player())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.delete.others"));
-        final var name = Commands.argument(NAME_ARGUMENT, StringArgumentType.word())
+        final var name = Commands.argument("name", StringArgumentType.word())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.delete.others"));
         return command.create()
                 .executes(command)

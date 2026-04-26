@@ -17,9 +17,6 @@ import org.bukkit.entity.Player;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.BANK_ARGUMENT;
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.TARGET_ARGUMENT;
-
 final class BankTransferCommand extends SimpleCommand {
     private BankTransferCommand(final EconomistPlugin plugin) {
         super(plugin, "transfer", "economist.bank.transfer");
@@ -27,9 +24,9 @@ final class BankTransferCommand extends SimpleCommand {
 
     static LiteralArgumentBuilder<CommandSourceStack> create(final EconomistPlugin plugin) {
         final var command = new BankTransferCommand(plugin);
-        final var target = Commands.argument(TARGET_ARGUMENT, StringArgumentType.word());
+        final var target = Commands.argument("target", StringArgumentType.word());
         final var amount = Commands.argument("amount", DoubleArgumentType.doubleArg(plugin.config.minimumPayment));
-        final var sourceBank = Commands.argument(BANK_ARGUMENT, StringArgumentType.word())
+        final var sourceBank = Commands.argument("bank", StringArgumentType.word())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.transfer.others"));
         return command.create()
                 .then(target.then(amount.executes(command)))
@@ -45,9 +42,9 @@ final class BankTransferCommand extends SimpleCommand {
     @Override
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = (Player) context.getSource().getSender();
-        final var targetName = context.getArgument(TARGET_ARGUMENT, String.class);
+        final var targetName = context.getArgument("target", String.class);
         final var amount = context.getArgument("amount", Double.class);
-        final var currency = BankSupport.currency(plugin);
+        final var currency = plugin.currencyController().getDefaultCurrency();
         resolveTransferSource(context, sender).thenAccept(optionalSource -> optionalSource.ifPresentOrElse(source ->
                         plugin.bankController().resolveBank(targetName).thenAccept(optionalTarget ->
                                 optionalTarget.ifPresentOrElse(target -> transfer(sender, context, source, target, amount, currency),
@@ -59,7 +56,7 @@ final class BankTransferCommand extends SimpleCommand {
 
     private CompletableFuture<Optional<Bank>> resolveTransferSource(final CommandContext<CommandSourceStack> context,
                                                                     final Player sender) {
-        return BankSupport.findArgument(context, BANK_ARGUMENT, String.class)
+        return tryGetArgument(context, "bank", String.class)
                 .map(plugin.bankController()::resolveBank)
                 .orElseGet(() -> plugin.bankController().resolveBank(sender));
     }
@@ -70,7 +67,7 @@ final class BankTransferCommand extends SimpleCommand {
             plugin.bundle().sendMessage(sender, "operation.failed");
             return;
         }
-        final var admin = BankSupport.findArgument(context, BANK_ARGUMENT, String.class).isPresent()
+        final var admin = tryGetArgument(context, "bank", String.class).isPresent()
                 && sender.hasPermission("economist.bank.transfer.others");
         if (!admin && !source.canWithdraw(sender, amount, currency)) {
             plugin.bundle().sendMessage(sender, "bank.access.denied");

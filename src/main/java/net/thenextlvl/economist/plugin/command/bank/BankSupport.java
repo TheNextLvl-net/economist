@@ -4,7 +4,6 @@ import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.economist.bank.Bank;
-import net.thenextlvl.economist.currency.Currency;
 import net.thenextlvl.economist.plugin.EconomistPlugin;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -14,35 +13,20 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 final class BankSupport {
-    static final String OWNER_ARGUMENT = "owner";
-    static final String NAME_ARGUMENT = "name";
-    static final String BANK_ARGUMENT = "bank";
-    static final String TARGET_ARGUMENT = "target";
     static final int PAGE_SIZE = 10;
 
     private BankSupport() {
     }
 
-    static Currency currency(final EconomistPlugin plugin) {
-        return plugin.currencyController().getDefaultCurrency();
-    }
-
     static CompletableFuture<Optional<Bank>> resolveBankTarget(final EconomistPlugin plugin,
                                                                final CommandContext<CommandSourceStack> context) {
-        return findArgument(context, OWNER_ARGUMENT, OfflinePlayer.class)
+        return findArgument(context, "owner", OfflinePlayer.class)
                 .map(plugin.bankController()::resolveBank)
-                .orElseGet(() -> findArgument(context, NAME_ARGUMENT, String.class)
+                .orElseGet(() -> findArgument(context, "name", String.class)
                         .map(plugin.bankController()::resolveBank)
                         .orElseGet(() -> senderPlayer(context)
                                 .map(plugin.bankController()::resolveBank)
                                 .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()))));
-    }
-
-    static CompletableFuture<Optional<Bank>> resolveMemberBank(final EconomistPlugin plugin,
-                                                               final CommandContext<CommandSourceStack> context) {
-        return findArgument(context, BANK_ARGUMENT, String.class)
-                .map(plugin.bankController()::resolveBank)
-                .orElseGet(() -> resolveBankTarget(plugin, context));
     }
 
     static <T> Optional<T> findArgument(final CommandContext<CommandSourceStack> context,
@@ -60,8 +44,8 @@ final class BankSupport {
 
     static void sendBankNotFound(final EconomistPlugin plugin, final CommandSender sender,
                                  final CommandContext<CommandSourceStack> context) {
-        final var owner = findArgument(context, OWNER_ARGUMENT, OfflinePlayer.class).orElse(null);
-        final var name = findArgument(context, NAME_ARGUMENT, String.class).orElse(null);
+        final var owner = findArgument(context, "owner", OfflinePlayer.class).orElse(null);
+        final var name = findArgument(context, "name", String.class).orElse(null);
         if (owner != null) {
             plugin.bundle().sendMessage(sender, "bank.not-found.other",
                     Placeholder.parsed("owner", playerName(owner)));
@@ -79,7 +63,7 @@ final class BankSupport {
         if (sender instanceof final Player player && bank.getOwner().equals(player.getUniqueId())) {
             return true;
         }
-        return findArgument(context, BANK_ARGUMENT, String.class).isPresent()
+        return findArgument(context, "bank", String.class).isPresent()
                 && sender.hasPermission("economist.bank.manage.others");
     }
 

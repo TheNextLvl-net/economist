@@ -27,9 +27,9 @@ final class BankTopCommand extends SimpleCommand {
     @Override
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = context.getSource().getSender();
-        final var page = BankSupport.findArgument(context, "page", Integer.class).orElse(1);
+        final var page = tryGetArgument(context, "page", Integer.class).orElse(1);
         final var start = (page - 1) * BankSupport.PAGE_SIZE;
-        final var currency = BankSupport.currency(plugin);
+        final var currency = plugin.currencyController().getDefaultCurrency();
         plugin.bankController().loadBanks().thenAccept(banks -> {
             final var ordered = banks
                     .sorted(Comparator.comparing((Bank bank) -> bank.getBalance(currency)).reversed()

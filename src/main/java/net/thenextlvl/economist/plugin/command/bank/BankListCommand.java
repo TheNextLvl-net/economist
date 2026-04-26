@@ -27,7 +27,7 @@ final class BankListCommand extends SimpleCommand {
     @Override
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = context.getSource().getSender();
-        final var page = BankSupport.findArgument(context, "page", Integer.class).orElse(1);
+        final var page = tryGetArgument(context, "page", Integer.class).orElse(1);
         final var start = (page - 1) * BankSupport.PAGE_SIZE;
         plugin.bankController().loadBanks().thenAccept(banks -> {
             final var ordered = banks

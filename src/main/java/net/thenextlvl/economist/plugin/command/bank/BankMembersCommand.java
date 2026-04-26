@@ -13,11 +13,9 @@ import net.thenextlvl.economist.plugin.command.brigadier.SimpleCommand;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
+import java.util.Optional;
 import java.util.Set;
-
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.BANK_ARGUMENT;
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.NAME_ARGUMENT;
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.OWNER_ARGUMENT;
+import java.util.concurrent.CompletableFuture;
 
 final class BankMembersCommand extends SimpleCommand {
     private BankMembersCommand(final EconomistPlugin plugin) {
@@ -27,11 +25,11 @@ final class BankMembersCommand extends SimpleCommand {
     static LiteralArgumentBuilder<CommandSourceStack> create(final EconomistPlugin plugin) {
         final var command = new BankMembersCommand(plugin);
         final var targetPlayer = Commands.argument("member", OfflinePlayerArgumentType.player());
-        final var targetBank = Commands.argument(BANK_ARGUMENT, StringArgumentType.word())
+        final var targetBank = Commands.argument("bank", StringArgumentType.word())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.manage.others"));
-        final var owner = Commands.argument(OWNER_ARGUMENT, OfflinePlayerArgumentType.player())
+        final var owner = Commands.argument("owner", OfflinePlayerArgumentType.player())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.info.others"));
-        final var name = Commands.argument(NAME_ARGUMENT, StringArgumentType.word())
+        final var name = Commands.argument("name", StringArgumentType.word())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.info.others"));
         return command.create()
                 .executes(command)
@@ -57,7 +55,7 @@ final class BankMembersCommand extends SimpleCommand {
                 .findFirst()
                 .orElse("list");
 
-        BankSupport.resolveMemberBank(plugin, context).thenAccept(optional -> optional.ifPresentOrElse(bank -> {
+        resolveMemberBank(plugin, context).thenAccept(optional -> optional.ifPresentOrElse(bank -> {
             switch (action) {
                 case "add" -> mutateMember(sender, context, bank, Mutation.ADD);
                 case "remove" -> mutateMember(sender, context, bank, Mutation.REMOVE);
@@ -66,6 +64,12 @@ final class BankMembersCommand extends SimpleCommand {
             }
         }, () -> BankSupport.sendBankNotFound(plugin, sender, context)));
         return SINGLE_SUCCESS;
+    }
+
+    CompletableFuture<Optional<Bank>> resolveMemberBank(final EconomistPlugin plugin, final CommandContext<CommandSourceStack> context) {
+        return tryGetArgument(context, "bank", String.class)
+                .map(plugin.bankController()::resolveBank)
+                .orElseGet(() -> BankSupport.resolveBankTarget(plugin, context));
     }
 
     private void listMembers(final CommandSender sender, final Bank bank) {

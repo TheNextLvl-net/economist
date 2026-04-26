@@ -12,9 +12,6 @@ import net.thenextlvl.economist.plugin.command.brigadier.SimpleCommand;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.NAME_ARGUMENT;
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.OWNER_ARGUMENT;
-
 final class BankCreateCommand extends SimpleCommand {
     private BankCreateCommand(final EconomistPlugin plugin) {
         super(plugin, "create", "economist.bank.create");
@@ -22,8 +19,8 @@ final class BankCreateCommand extends SimpleCommand {
 
     static LiteralArgumentBuilder<CommandSourceStack> create(final EconomistPlugin plugin) {
         final var command = new BankCreateCommand(plugin);
-        final var name = Commands.argument(NAME_ARGUMENT, StringArgumentType.word());
-        final var owner = Commands.argument(OWNER_ARGUMENT, OfflinePlayerArgumentType.player())
+        final var name = Commands.argument("name", StringArgumentType.word());
+        final var owner = Commands.argument("owner", OfflinePlayerArgumentType.player())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.create.others"));
         return command.create()
                 .then(name.executes(command))
@@ -33,8 +30,8 @@ final class BankCreateCommand extends SimpleCommand {
     @Override
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = context.getSource().getSender();
-        final var name = context.getArgument(NAME_ARGUMENT, String.class);
-        final var owner = BankSupport.findArgument(context, OWNER_ARGUMENT, OfflinePlayer.class)
+        final var name = context.getArgument("name", String.class);
+        final var owner = tryGetArgument(context, "owner", OfflinePlayer.class)
                 .orElseGet(() -> sender instanceof final Player player ? player : null);
         if (owner == null) {
             plugin.bundle().sendMessage(sender, "player.define");

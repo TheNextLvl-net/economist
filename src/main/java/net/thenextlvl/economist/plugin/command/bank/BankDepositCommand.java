@@ -15,8 +15,6 @@ import net.thenextlvl.economist.plugin.EconomistPlugin;
 import net.thenextlvl.economist.plugin.command.brigadier.SimpleCommand;
 import org.bukkit.entity.Player;
 
-import static net.thenextlvl.economist.plugin.command.bank.BankSupport.NAME_ARGUMENT;
-
 final class BankDepositCommand extends SimpleCommand {
     private BankDepositCommand(final EconomistPlugin plugin) {
         super(plugin, "deposit", "economist.bank.deposit");
@@ -25,7 +23,7 @@ final class BankDepositCommand extends SimpleCommand {
     static LiteralArgumentBuilder<CommandSourceStack> create(final EconomistPlugin plugin) {
         final var command = new BankDepositCommand(plugin);
         final var amount = Commands.argument("amount", DoubleArgumentType.doubleArg(plugin.config.minimumPayment));
-        final var name = Commands.argument(NAME_ARGUMENT, StringArgumentType.word())
+        final var name = Commands.argument("name", StringArgumentType.word())
                 .requires(stack -> stack.getSender().hasPermission("economist.bank.deposit.others"));
         return command.create()
                 .then(amount.executes(command)
@@ -41,7 +39,7 @@ final class BankDepositCommand extends SimpleCommand {
     public int run(final CommandContext<CommandSourceStack> context) {
         final var sender = (Player) context.getSource().getSender();
         final var amount = context.getArgument("amount", Double.class);
-        final var currency = BankSupport.currency(plugin);
+        final var currency = plugin.currencyController().getDefaultCurrency();
         plugin.economyController().resolveAccount(sender).thenAccept(optional -> optional.ifPresentOrElse(account ->
                         BankSupport.resolveBankTarget(plugin, context).thenAccept(optionalBank ->
                                 optionalBank.ifPresentOrElse(bank -> deposit(sender, context, account, bank, amount, currency),
@@ -52,7 +50,7 @@ final class BankDepositCommand extends SimpleCommand {
 
     private void deposit(final Player sender, final CommandContext<CommandSourceStack> context,
                          final Account account, final Bank bank, final double amount, final Currency currency) {
-        final var admin = BankSupport.findArgument(context, NAME_ARGUMENT, String.class).isPresent()
+        final var admin = tryGetArgument(context, "name", String.class).isPresent()
                 && sender.hasPermission("economist.bank.deposit.others");
         if (!admin && !bank.canDeposit(sender, amount, currency)) {
             plugin.bundle().sendMessage(sender, "bank.access.denied");
