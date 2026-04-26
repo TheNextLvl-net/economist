@@ -23,19 +23,12 @@ public final class EconomistCurrencyController implements CurrencyController {
     private final Currency defaultCurrency;
 
     public EconomistCurrencyController(final EconomistPlugin plugin) {
-        final var singularUs = plugin.bundle().component("currency.name.singular", Locale.US);
-        final var pluralUs = plugin.bundle().component("currency.name.plural", Locale.US);
-        final var data = CurrencyData.of(
-                        normalizeName(PLAIN.serialize(singularUs)),
-                        Component.text(plugin.config.currency.symbol),
-                        plugin.config.currency.maxFractionalDigits
-                ).displayNameSingular(Locale.US, singularUs)
-                .displayNamePlural(Locale.US, pluralUs)
-                .displayNameSingular(Locale.GERMANY, plugin.bundle().component("currency.name.singular", Locale.GERMANY))
-                .displayNamePlural(Locale.GERMANY, plugin.bundle().component("currency.name.plural", Locale.GERMANY));
+        final var data = CurrencyData.of("euro", Component.text("€"), 2)
+                .displayNameSingular(Locale.US, Component.text("Euro"))
+                .displayNamePlural(Locale.US, Component.text("Euro"));
         final var currency = new EconomistCurrency(data.name());
-        apply(currency, data);
-        currencies.put(key(currency.getName()), currency);
+        currency.apply(data);
+        currencies.put(currency.getName(), currency);
         this.defaultCurrency = currency;
     }
 
@@ -51,24 +44,22 @@ public final class EconomistCurrencyController implements CurrencyController {
 
     @Override
     public Optional<Currency> getCurrency(final String name) {
-        return Optional.ofNullable(currencies.get(key(name)));
+        return Optional.ofNullable(currencies.get(name));
     }
 
     @Override
     public boolean currencyExists(final String name) {
-        return currencies.containsKey(key(name));
+        return currencies.containsKey(name);
     }
 
     @Override
     public Currency createCurrency(final CurrencyData data) throws IllegalArgumentException {
-        final var normalized = normalizeName(data.name());
-        final var key = key(normalized);
-        if (currencies.containsKey(key)) {
+        if (currencies.containsKey(data.name())) {
             throw new IllegalArgumentException("Currency already exists: " + data.name());
         }
-        final var currency = new EconomistCurrency(normalized);
-        apply(currency, data.name(normalized));
-        final var existing = currencies.putIfAbsent(key, currency);
+        final var currency = new EconomistCurrency(data.name());
+        currency.apply(data.name(data.name()));
+        final var existing = currencies.putIfAbsent(data.name(), currency);
         if (existing != null) {
             throw new IllegalArgumentException("Currency already exists: " + data.name());
         }
@@ -78,14 +69,14 @@ public final class EconomistCurrencyController implements CurrencyController {
     @Override
     public boolean deleteCurrency(final String name) {
         if (defaultCurrency.getName().equalsIgnoreCase(name)) return false;
-        return currencies.remove(key(name)) != null;
+        return currencies.remove(name) != null;
     }
 
     public void load(final EconomistPlugin plugin) {
         try {
             final var storedCurrencies = plugin.dataController().getCurrencies();
             storedCurrencies.values().forEach(storedCurrency -> {
-                final var existing = currencies.get(key(storedCurrency.data().name()));
+                final var existing = currencies.get(storedCurrency.data().name());
                 if (existing != null) {
                     if (existing instanceof final EconomistCurrency economistCurrency) {
                         apply(economistCurrency, storedCurrency.data(), storedCurrency.minBalance(), storedCurrency.maxBalance());
@@ -100,10 +91,6 @@ public final class EconomistCurrencyController implements CurrencyController {
         } catch (final Exception exception) {
             plugin.getComponentLogger().error("Failed to load currencies from the database", exception);
         }
-    }
-
-    private static void apply(final EconomistCurrency currency, final CurrencyData data) {
-        currency.apply(data);
     }
 
     public void save(final EconomistPlugin plugin) {
@@ -134,16 +121,8 @@ public final class EconomistCurrencyController implements CurrencyController {
 
     private static void apply(final EconomistCurrency currency, final CurrencyData data,
                               final @Nullable BigDecimal minBalance, final @Nullable BigDecimal maxBalance) {
-        apply(currency, data);
+        currency.apply(data);
         currency.setMinBalance(minBalance);
         currency.setMaxBalance(maxBalance);
-    }
-
-    private static String key(final String name) {
-        return name.toLowerCase(Locale.ROOT);
-    }
-
-    private static String normalizeName(final String name) {
-        return name.trim().toLowerCase(Locale.ROOT).replace(' ', '_');
     }
 }

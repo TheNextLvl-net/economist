@@ -19,7 +19,6 @@ public class PluginConfig {
     public @SerializedName("accounts") AccountConfig accounts = new AccountConfig();
     public @SerializedName("balance-top") BalanceTopConfig balanceTop = new BalanceTopConfig();
     public @SerializedName("banks") BankConfig banks = new BankConfig();
-    public @SerializedName("currency") Currency currency = new Currency();
     public @SerializedName("database") DatabaseConfig database = new DatabaseConfig();
 
     public static class AccountConfig {
@@ -34,12 +33,6 @@ public class PluginConfig {
 
     public static class BankConfig {
         public @SerializedName("enabled") boolean enabled = true;
-    }
-
-    public static class Currency {
-        public @SerializedName("currency-symbol") String symbol = "$";
-        public @SerializedName("minimum-fractional-digits") int minFractionalDigits = 0;
-        public @SerializedName("maximum-fractional-digits") int maxFractionalDigits = 2;
     }
 
     public static class DatabaseConfig {
