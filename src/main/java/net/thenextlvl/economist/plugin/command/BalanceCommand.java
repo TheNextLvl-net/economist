@@ -14,6 +14,7 @@ import net.thenextlvl.economist.plugin.command.argument.CurrencyArgumentType;
 import net.thenextlvl.economist.plugin.command.brigadier.SimpleCommand;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
@@ -42,7 +43,10 @@ public final class BalanceCommand extends SimpleCommand {
         final var sender = context.getSource().getSender();
         final var currency = tryGetArgument(context, "currency", Currency.class)
                 .orElse(plugin.currencyController().getDefaultCurrency());
-        final var player = tryGetArgument(context, "player", OfflinePlayer.class);
+        final var player = tryGetArgument(context, "player", OfflinePlayer.class).or(() -> {
+            final var executor = sender instanceof final Player p ? p : null;
+            return Optional.ofNullable(executor);
+        });
         final var world = tryGetArgument(context, "world", World.class).orElse(null);
 
         return player.map(offline -> balance(context, offline, currency, world)).orElseGet(() -> {
