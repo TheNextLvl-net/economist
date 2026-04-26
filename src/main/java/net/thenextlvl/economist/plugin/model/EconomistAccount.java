@@ -86,8 +86,8 @@ public class EconomistAccount implements Account {
     }
 
     private static boolean outsideBounds(final BigDecimal balance, final Currency currency) {
-        return balance.compareTo(currency.getMinBalance()) < 0
-                || balance.compareTo(currency.getMaxBalance()) > 0;
+        return currency.getMinBalance().map(minBalance -> balance.compareTo(minBalance) < 0).orElse(false)
+                || currency.getMaxBalance().map(maxBalance -> balance.compareTo(maxBalance) > 0).orElse(false);
     }
 
     private TransactionResult adjustBalance(final Number amount, final BigDecimal delta, final Currency currency) {

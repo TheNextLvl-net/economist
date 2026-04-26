@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS currencies
     name              TEXT            NOT NULL PRIMARY KEY,
     symbol            TEXT            NOT NULL,
     fractional_digits INTEGER         NOT NULL,
-    min_balance       DECIMAL(65, 20) NOT NULL,
-    max_balance       DECIMAL(65, 20) NOT NULL
+    min_balance       DECIMAL(65, 20) NULL,
+    max_balance       DECIMAL(65, 20) NULL
 );
 
 CREATE TABLE IF NOT EXISTS currency_translations

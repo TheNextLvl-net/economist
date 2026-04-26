@@ -74,12 +74,12 @@ CREATE TABLE IF NOT EXISTS currencies
 (
     65,
     20
-) NOT NULL,
+) NULL,
     max_balance DECIMAL
 (
     65,
     20
-) NOT NULL
+) NULL
     );
 
 CREATE TABLE IF NOT EXISTS currency_translations

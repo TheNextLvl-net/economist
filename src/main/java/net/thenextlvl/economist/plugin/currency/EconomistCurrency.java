@@ -19,8 +19,8 @@ public final class EconomistCurrency implements Currency {
 
     private volatile Component symbol = Component.empty();
     private volatile int fractionalDigits = 2;
-    private volatile BigDecimal maxBalance = BigDecimal.valueOf(Double.MAX_VALUE);
-    private volatile BigDecimal minBalance = BigDecimal.ZERO;
+    private volatile @Nullable BigDecimal maxBalance = null;
+    private volatile @Nullable BigDecimal minBalance = BigDecimal.ZERO;
 
     private final Map<Locale, Component> plural = new ConcurrentHashMap<>();
     private final Map<Locale, Component> singular = new ConcurrentHashMap<>();
@@ -44,25 +44,25 @@ public final class EconomistCurrency implements Currency {
     }
 
     @Override
-    public BigDecimal getMaxBalance() {
-        return maxBalance;
+    public Optional<BigDecimal> getMaxBalance() {
+        return Optional.ofNullable(maxBalance);
     }
 
     @Override
-    public boolean setMaxBalance(final BigDecimal maxBalance) {
-        if (this.maxBalance.compareTo(maxBalance) == 0) return false;
+    public boolean setMaxBalance(final @Nullable BigDecimal maxBalance) {
+        if (Objects.equals(this.maxBalance, maxBalance)) return false;
         this.maxBalance = maxBalance;
         return true;
     }
 
     @Override
-    public BigDecimal getMinBalance() {
-        return minBalance;
+    public Optional<BigDecimal> getMinBalance() {
+        return Optional.ofNullable(minBalance);
     }
 
     @Override
-    public boolean setMinBalance(final BigDecimal minBalance) {
-        if (this.minBalance.compareTo(minBalance) == 0) return false;
+    public boolean setMinBalance(final @Nullable BigDecimal minBalance) {
+        if (Objects.equals(this.minBalance, minBalance)) return false;
         this.minBalance = minBalance;
         return true;
     }

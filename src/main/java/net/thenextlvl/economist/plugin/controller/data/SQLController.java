@@ -343,8 +343,8 @@ public class SQLController implements DataController {
                             currency.getName(),
                             MINI_MESSAGE.serialize(currency.getSymbol()),
                             currency.getFractionalDigits(),
-                            currency.getMinBalance(),
-                            currency.getMaxBalance()
+                            currency.getMinBalance().orElse(null),
+                            currency.getMaxBalance().orElse(null)
                     );
                     upsert.executeUpdate();
                 }
@@ -569,7 +569,7 @@ public class SQLController implements DataController {
         }
     }
 
-    private static void bind(final PreparedStatement statement, @Nullable final Object... parameters) throws SQLException {
+    private void bind(final PreparedStatement statement, @Nullable final Object... parameters) throws SQLException {
         for (var i = 0; i < parameters.length; i++) {
             statement.setObject(i + 1, parameters[i]);
         }

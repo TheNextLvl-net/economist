@@ -34,33 +34,35 @@ public interface Currency {
      * @return the inclusive upper balance bound
      * @since 0.3.0
      */
-    BigDecimal getMaxBalance();
+    @Contract(pure = true)
+    Optional<BigDecimal> getMaxBalance();
 
     /**
      * Updates the maximum balance allowed for this currency.
      *
-     * @param maxBalance the new inclusive upper balance bound
+     * @param maxBalance the new inclusive upper balance bound, or {@code null} for no upper bound
      * @return {@code true} if the value changed
      * @since 0.3.0
      */
-    boolean setMaxBalance(BigDecimal maxBalance);
+    boolean setMaxBalance(@Nullable BigDecimal maxBalance);
 
     /**
      * Retrieves the minimum balance allowed for this currency.
      *
-     * @return the inclusive lower balance bound
+     * @return the inclusive lower balance bound, or {@code null} for no lower bound
      * @since 0.3.0
      */
-    BigDecimal getMinBalance();
+    @Contract(pure = true)
+    Optional<BigDecimal> getMinBalance();
 
     /**
      * Updates the minimum balance allowed for this currency.
      *
-     * @param minBalance the new inclusive lower balance bound
+     * @param minBalance the new inclusive lower balance bound, or {@code null} for no lower bound
      * @return {@code true} if the value changed
      * @since 0.3.0
      */
-    boolean setMinBalance(BigDecimal minBalance);
+    boolean setMinBalance(@Nullable BigDecimal minBalance);
 
     /**
      * Retrieves the currency symbol.

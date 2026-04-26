@@ -6,6 +6,7 @@ import net.thenextlvl.economist.currency.Currency;
 import net.thenextlvl.economist.currency.CurrencyController;
 import net.thenextlvl.economist.currency.CurrencyData;
 import net.thenextlvl.economist.plugin.EconomistPlugin;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -132,7 +133,7 @@ public final class EconomistCurrencyController implements CurrencyController {
     }
 
     private static void apply(final EconomistCurrency currency, final CurrencyData data,
-                              final BigDecimal minBalance, final BigDecimal maxBalance) {
+                              final @Nullable BigDecimal minBalance, final @Nullable BigDecimal maxBalance) {
         apply(currency, data);
         currency.setMinBalance(minBalance);
         currency.setMaxBalance(maxBalance);
