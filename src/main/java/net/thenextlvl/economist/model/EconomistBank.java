@@ -20,7 +20,7 @@ public class EconomistBank extends EconomistAccount implements Bank {
     private final Set<UUID> members;
     private final String name;
 
-    public EconomistBank(String name, BigDecimal balance, @Nullable World world, UUID owner, Set<UUID> members) {
+    public EconomistBank(final String name, final BigDecimal balance, @Nullable final World world, final UUID owner, final Set<UUID> members) {
         super(balance, world, owner);
         this.members = members;
         this.owner = owner;
@@ -43,22 +43,22 @@ public class EconomistBank extends EconomistAccount implements Bank {
     }
 
     @Override
-    public boolean addMember(UUID uuid) {
+    public boolean addMember(final UUID uuid) {
         return members.add(uuid);
     }
 
     @Override
-    public boolean isMember(UUID uuid) {
+    public boolean isMember(final UUID uuid) {
         return members.contains(uuid);
     }
 
     @Override
-    public boolean removeMember(UUID uuid) {
+    public boolean removeMember(final UUID uuid) {
         return members.remove(uuid);
     }
 
     @Override
-    public boolean setOwner(UUID uuid) {
+    public boolean setOwner(final UUID uuid) {
         if (getWorld().map(world -> plugin.bankController().hasBank(uuid, world))
                 .orElseGet(() -> plugin.bankController().hasBank(uuid))) return false;
         this.owner = uuid;

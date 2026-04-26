@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class ServiceBankController implements BankController {
     private final EconomistPlugin plugin;
 
-    public ServiceBankController(EconomistPlugin plugin) {
+    public ServiceBankController(final EconomistPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -29,7 +29,7 @@ public class ServiceBankController implements BankController {
     }
 
     @Override
-    public String format(Number number) {
+    public String format(final Number number) {
         return plugin.economyController().format(number, Locale.US);
     }
 
@@ -39,27 +39,27 @@ public class ServiceBankController implements BankController {
     }
 
     @Override
-    public CompletableFuture<Bank> createBank(UUID uuid, String name) throws IllegalStateException {
+    public CompletableFuture<Bank> createBank(final UUID uuid, final String name) throws IllegalStateException {
         return bankController().createBank(uuid, name).thenApply(ServiceBank::new);
     }
 
     @Override
-    public CompletableFuture<Bank> createBank(UUID uuid, String name, World world) throws IllegalStateException {
+    public CompletableFuture<Bank> createBank(final UUID uuid, final String name, final World world) throws IllegalStateException {
         return bankController().createBank(uuid, name, world).thenApply(ServiceBank::new);
     }
 
     @Override
-    public CompletableFuture<Bank> loadBank(String name) {
+    public CompletableFuture<Bank> loadBank(final String name) {
         return bankController().loadBank(name).thenApply(ServiceBank::new);
     }
 
     @Override
-    public CompletableFuture<Bank> loadBank(UUID uuid) {
+    public CompletableFuture<Bank> loadBank(final UUID uuid) {
         return bankController().loadBank(uuid).thenApply(ServiceBank::new);
     }
 
     @Override
-    public CompletableFuture<Bank> loadBank(UUID uuid, World world) {
+    public CompletableFuture<Bank> loadBank(final UUID uuid, final World world) {
         return bankController().loadBank(uuid, world).thenApply(ServiceBank::new);
     }
 
@@ -70,23 +70,23 @@ public class ServiceBankController implements BankController {
     }
 
     @Override
-    public CompletableFuture<@Unmodifiable Set<Bank>> loadBanks(World world) {
+    public CompletableFuture<@Unmodifiable Set<Bank>> loadBanks(final World world) {
         return bankController().loadBanks(world).thenApply(banks -> banks.stream()
                 .map(ServiceBank::new).collect(Collectors.toUnmodifiableSet()));
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteBank(String name) {
+    public CompletableFuture<Boolean> deleteBank(final String name) {
         return bankController().deleteBank(name);
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteBank(UUID uuid) {
+    public CompletableFuture<Boolean> deleteBank(final UUID uuid) {
         return bankController().deleteBank(uuid);
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteBank(UUID uuid, World world) {
+    public CompletableFuture<Boolean> deleteBank(final UUID uuid, final World world) {
         return bankController().deleteBank(uuid, world);
     }
 
@@ -98,24 +98,24 @@ public class ServiceBankController implements BankController {
     }
 
     @Override
-    public @Unmodifiable Set<Bank> getBanks(World world) {
+    public @Unmodifiable Set<Bank> getBanks(final World world) {
         return bankController().getBanks(world).stream()
                 .map(ServiceBank::new)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public Optional<Bank> getBank(String name) {
+    public Optional<Bank> getBank(final String name) {
         return bankController().getBank(name).map(ServiceBank::new);
     }
 
     @Override
-    public Optional<Bank> getBank(UUID uuid) {
+    public Optional<Bank> getBank(final UUID uuid) {
         return bankController().getBank(uuid).map(ServiceBank::new);
     }
 
     @Override
-    public Optional<Bank> getBank(UUID uuid, World world) {
+    public Optional<Bank> getBank(final UUID uuid, final World world) {
         return bankController().getBank(uuid, world).map(ServiceBank::new);
     }
 

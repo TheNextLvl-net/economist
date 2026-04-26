@@ -47,26 +47,26 @@ public class DurationArgument implements CustomArgumentType<Duration, String> {
     private final Duration min;
     private final Duration max;
 
-    private DurationArgument(Duration min, Duration max) {
+    private DurationArgument(final Duration min, final Duration max) {
         this.min = min;
         this.max = max;
     }
 
     @Override
-    public Duration parse(StringReader reader) throws CommandSyntaxException {
-        var type = getNativeType().parse(reader);
+    public Duration parse(final StringReader reader) throws CommandSyntaxException {
+        final var type = getNativeType().parse(reader);
         var duration = Duration.ZERO;
         try {
             duration = Duration.ofMillis(Long.parseLong(type));
-        } catch (NumberFormatException e) {
-            var unit = UNITS.entrySet().stream()
+        } catch (final NumberFormatException e) {
+            final var unit = UNITS.entrySet().stream()
                     .filter(entry -> type.endsWith(entry.getKey()))
                     .findFirst()
                     .orElseThrow(() -> ERROR_INVALID_UNIT.createWithContext(reader));
-            var s = type.substring(0, type.length() - unit.getKey().length());
+            final var s = type.substring(0, type.length() - unit.getKey().length());
             try {
                 duration = Duration.of(Long.parseLong(s), unit.getValue());
-            } catch (NumberFormatException ignored) {
+            } catch (final NumberFormatException ignored) {
                 throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidLong().createWithContext(reader, s);
             }
         }
@@ -81,19 +81,19 @@ public class DurationArgument implements CustomArgumentType<Duration, String> {
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        var reader = new StringReader(builder.getRemaining());
+    public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
+        final var reader = new StringReader(builder.getRemaining());
 
         try {
             reader.readLong();
-        } catch (CommandSyntaxException var5) {
+        } catch (final CommandSyntaxException var5) {
             return builder.buildFuture();
         }
 
-        var offset = builder.createOffset(builder.getStart() + reader.getCursor());
-        var input = offset.getRemaining().toLowerCase();
+        final var offset = builder.createOffset(builder.getStart() + reader.getCursor());
+        final var input = offset.getRemaining().toLowerCase();
 
-        for (var unit : UNITS.keySet()) {
+        for (final var unit : UNITS.keySet()) {
             if (matchesSubStr(input, unit.toLowerCase())) {
                 offset.suggest(unit);
             }
@@ -102,10 +102,10 @@ public class DurationArgument implements CustomArgumentType<Duration, String> {
         return offset.buildFuture();
     }
 
-    private static boolean matchesSubStr(String remaining, String candidate) {
+    private static boolean matchesSubStr(final String remaining, final String candidate) {
         for (int i = 0; !candidate.startsWith(remaining, i); i++) {
-            int j = candidate.indexOf(46, i);
-            int k = candidate.indexOf(95, i);
+            final int j = candidate.indexOf(46, i);
+            final int k = candidate.indexOf(95, i);
             if (Math.max(j, k) < 0) {
                 return false;
             }
@@ -123,11 +123,11 @@ public class DurationArgument implements CustomArgumentType<Duration, String> {
         return duration(Duration.ZERO);
     }
 
-    public static DurationArgument duration(Duration min) {
+    public static DurationArgument duration(final Duration min) {
         return duration(min, ChronoUnit.FOREVER.getDuration());
     }
 
-    public static DurationArgument duration(Duration min, Duration max) {
+    public static DurationArgument duration(final Duration min, final Duration max) {
         return new DurationArgument(min, max);
     }
 }

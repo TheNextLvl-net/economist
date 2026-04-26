@@ -8,12 +8,12 @@ import org.jspecify.annotations.Nullable;
 
 @NullMarked
 public class PluginVersionChecker extends PaperModrinthVersionChecker<SemanticVersion> {
-    public PluginVersionChecker(Plugin plugin) {
+    public PluginVersionChecker(final Plugin plugin) {
         super(plugin, "VQ63EMAa");
     }
 
     @Override
-    public @Nullable SemanticVersion parseVersion(String version) {
+    public @Nullable SemanticVersion parseVersion(final String version) {
         return SemanticVersion.parse(version);
     }
 }

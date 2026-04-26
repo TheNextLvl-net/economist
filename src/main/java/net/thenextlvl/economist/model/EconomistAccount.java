@@ -15,7 +15,7 @@ public class EconomistAccount implements Account {
     private final @Nullable World world;
     private final UUID owner;
 
-    public EconomistAccount(BigDecimal balance, @Nullable World world, UUID owner) {
+    public EconomistAccount(final BigDecimal balance, @Nullable final World world, final UUID owner) {
         this.balance = balance;
         this.world = world;
         this.owner = owner;
@@ -32,7 +32,7 @@ public class EconomistAccount implements Account {
     }
 
     @Override
-    public synchronized BigDecimal setBalance(BigDecimal balance) {
+    public synchronized BigDecimal setBalance(final BigDecimal balance) {
         return this.balance = balance;
     }
 

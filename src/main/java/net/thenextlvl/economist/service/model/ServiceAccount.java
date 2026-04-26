@@ -12,12 +12,12 @@ import java.util.UUID;
 public class ServiceAccount implements Account {
     private final net.thenextlvl.economist.api.Account account;
 
-    public ServiceAccount(net.thenextlvl.economist.api.Account account) {
+    public ServiceAccount(final net.thenextlvl.economist.api.Account account) {
         this.account = account;
     }
 
     @Override
-    public BigDecimal deposit(Number amount) {
+    public BigDecimal deposit(final Number amount) {
         return account.deposit(amount);
     }
 
@@ -27,7 +27,7 @@ public class ServiceAccount implements Account {
     }
 
     @Override
-    public BigDecimal withdraw(Number amount) {
+    public BigDecimal withdraw(final Number amount) {
         return account.withdraw(amount);
     }
 
@@ -42,7 +42,7 @@ public class ServiceAccount implements Account {
     }
 
     @Override
-    public void setBalance(Number balance) {
+    public void setBalance(final Number balance) {
         account.setBalance(balance);
     }
 }

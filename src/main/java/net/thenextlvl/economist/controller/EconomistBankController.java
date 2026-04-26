@@ -16,32 +16,32 @@ import java.util.concurrent.CompletableFuture;
 public class EconomistBankController implements BankController {
     private final EconomistPlugin plugin;
 
-    public EconomistBankController(EconomistPlugin plugin) {
+    public EconomistBankController(final EconomistPlugin plugin) {
         this.plugin = plugin;
     }
 
     @Override
-    public CompletableFuture<Bank> createBank(UUID uuid, String name) throws IllegalStateException {
+    public CompletableFuture<Bank> createBank(final UUID uuid, final String name) throws IllegalStateException {
         return null;
     }
 
     @Override
-    public CompletableFuture<Bank> createBank(UUID uuid, String name, World world) throws IllegalStateException {
+    public CompletableFuture<Bank> createBank(final UUID uuid, final String name, final World world) throws IllegalStateException {
         return null;
     }
 
     @Override
-    public CompletableFuture<Bank> loadBank(String name) {
+    public CompletableFuture<Bank> loadBank(final String name) {
         return null;
     }
 
     @Override
-    public CompletableFuture<Bank> loadBank(UUID uuid) {
+    public CompletableFuture<Bank> loadBank(final UUID uuid) {
         return null;
     }
 
     @Override
-    public CompletableFuture<Bank> loadBank(UUID uuid, World world) {
+    public CompletableFuture<Bank> loadBank(final UUID uuid, final World world) {
         return null;
     }
 
@@ -51,22 +51,22 @@ public class EconomistBankController implements BankController {
     }
 
     @Override
-    public CompletableFuture<@Unmodifiable Set<Bank>> loadBanks(World world) {
+    public CompletableFuture<@Unmodifiable Set<Bank>> loadBanks(final World world) {
         return null;
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteBank(String name) {
+    public CompletableFuture<Boolean> deleteBank(final String name) {
         return null;
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteBank(UUID uuid) {
+    public CompletableFuture<Boolean> deleteBank(final UUID uuid) {
         return null;
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteBank(UUID uuid, World world) {
+    public CompletableFuture<Boolean> deleteBank(final UUID uuid, final World world) {
         return null;
     }
 
@@ -76,37 +76,37 @@ public class EconomistBankController implements BankController {
     }
 
     @Override
-    public @Unmodifiable Set<Bank> getBanks(World world) {
+    public @Unmodifiable Set<Bank> getBanks(final World world) {
         return Set.of();
     }
 
     @Override
-    public Optional<Bank> getBank(String name) {
+    public Optional<Bank> getBank(final String name) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<Bank> getBank(UUID uuid) {
+    public Optional<Bank> getBank(final UUID uuid) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<Bank> getBank(UUID uuid, World world) {
+    public Optional<Bank> getBank(final UUID uuid, final World world) {
         return Optional.empty();
     }
 
     @Override
-    public boolean hasBank(String name) {
+    public boolean hasBank(final String name) {
         return false;
     }
 
     @Override
-    public boolean hasBank(UUID uuid) {
+    public boolean hasBank(final UUID uuid) {
         return false;
     }
 
     @Override
-    public boolean hasBank(UUID uuid, World world) {
+    public boolean hasBank(final UUID uuid, final World world) {
         return false;
     }
 

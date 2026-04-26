@@ -9,7 +9,7 @@ import java.sql.SQLException;
 
 @NullMarked
 public class SQLiteController extends SQLController {
-    public SQLiteController(EconomistPlugin plugin) throws SQLException {
+    public SQLiteController(final EconomistPlugin plugin) throws SQLException {
         super(DriverManager.getConnection("jdbc:sqlite:" + new File(plugin.getDataFolder(), "saves.db")), plugin);
     }
 }

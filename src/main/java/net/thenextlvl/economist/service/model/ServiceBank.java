@@ -14,12 +14,12 @@ import java.util.UUID;
 public class ServiceBank implements Bank {
     private final net.thenextlvl.economist.api.bank.Bank bank;
 
-    public ServiceBank(net.thenextlvl.economist.api.bank.Bank bank) {
+    public ServiceBank(final net.thenextlvl.economist.api.bank.Bank bank) {
         this.bank = bank;
     }
 
     @Override
-    public BigDecimal deposit(Number amount) {
+    public BigDecimal deposit(final Number amount) {
         return bank.deposit(amount);
     }
 
@@ -29,7 +29,7 @@ public class ServiceBank implements Bank {
     }
 
     @Override
-    public BigDecimal withdraw(Number amount) {
+    public BigDecimal withdraw(final Number amount) {
         return bank.withdraw(amount);
     }
 
@@ -44,7 +44,7 @@ public class ServiceBank implements Bank {
     }
 
     @Override
-    public void setBalance(Number balance) {
+    public void setBalance(final Number balance) {
         bank.setBalance(balance);
     }
 
@@ -59,22 +59,22 @@ public class ServiceBank implements Bank {
     }
 
     @Override
-    public boolean addMember(UUID uuid) {
+    public boolean addMember(final UUID uuid) {
         return bank.addMember(uuid);
     }
 
     @Override
-    public boolean isMember(UUID uuid) {
+    public boolean isMember(final UUID uuid) {
         return bank.isMember(uuid);
     }
 
     @Override
-    public boolean removeMember(UUID uuid) {
+    public boolean removeMember(final UUID uuid) {
         return bank.removeMember(uuid);
     }
 
     @Override
-    public boolean setOwner(UUID uuid) {
+    public boolean setOwner(final UUID uuid) {
         return bank.setOwner(uuid);
     }
 }

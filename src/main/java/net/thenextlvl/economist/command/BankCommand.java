@@ -9,12 +9,12 @@ import org.jspecify.annotations.NullMarked;
 public class BankCommand {
     private final EconomistPlugin plugin;
 
-    public BankCommand(EconomistPlugin plugin) {
+    public BankCommand(final EconomistPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void register() {
-        var command = Commands.literal("bank")
+        final var command = Commands.literal("bank")
                 .requires(stack -> stack.getSender().hasPermission("economist.bank"))
                 .then(Commands.literal("balance").requires(stack -> stack.getSender().hasPermission("economist.bank.balance")))
                 .then(Commands.literal("create").requires(stack -> stack.getSender().hasPermission("economist.bank.create")))

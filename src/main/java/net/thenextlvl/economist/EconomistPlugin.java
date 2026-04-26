@@ -97,13 +97,13 @@ public class EconomistPlugin extends JavaPlugin {
     }
 
     private void registerServices() {
-        var services = getServer().getServicesManager();
+        final var services = getServer().getServicesManager();
         if (config.banks.enabled)
             services.register(BankController.class, bankController, this, ServicePriority.Highest);
         services.register(EconomyController.class, economyController, this, ServicePriority.Highest);
 
         if (getServer().getPluginManager().getPlugin("ServiceIO") == null) return;
-        var banks = config.banks.enabled ? new ServiceBankController(this) : null;
+        final var banks = config.banks.enabled ? new ServiceBankController(this) : null;
         new ServiceEconomyController(banks, this).register();
         getComponentLogger().info("Registered ServiceIO support");
     }

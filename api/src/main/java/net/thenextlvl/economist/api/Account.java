@@ -18,7 +18,7 @@ public interface Account extends Comparable<Account> {
      * @param amount the amount to be deposited
      * @return the new balance after the deposit
      */
-    default BigDecimal deposit(Number amount) {
+    default BigDecimal deposit(final Number amount) {
         return setBalance(getBalance().add(new BigDecimal(amount.toString())));
     }
 
@@ -35,7 +35,7 @@ public interface Account extends Comparable<Account> {
      * @param amount the amount to be withdrawn
      * @return the new balance after the withdrawal
      */
-    default BigDecimal withdraw(Number amount) {
+    default BigDecimal withdraw(final Number amount) {
         return setBalance(getBalance().subtract(new BigDecimal(amount.toString())));
     }
 
@@ -61,7 +61,7 @@ public interface Account extends Comparable<Account> {
      * less than, equal to, or greater than the specified account
      */
     @Override
-    default int compareTo(Account account) {
+    default int compareTo(final Account account) {
         return getBalance().compareTo(account.getBalance());
     }
 
@@ -79,7 +79,7 @@ public interface Account extends Comparable<Account> {
      * @param balance the new balance of the account
      * @return the updated balance of the account
      */
-    default BigDecimal setBalance(Number balance) {
+    default BigDecimal setBalance(final Number balance) {
         return setBalance(new BigDecimal(balance.toString()));
     }
 }

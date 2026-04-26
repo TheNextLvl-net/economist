@@ -12,12 +12,12 @@ import org.jspecify.annotations.NullMarked;
 public class ConnectionListener implements Listener {
     private final EconomistPlugin plugin;
 
-    public ConnectionListener(EconomistPlugin plugin) {
+    public ConnectionListener(final EconomistPlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerJoin(final PlayerJoinEvent event) {
         if (!plugin.config.accounts.autoCreate) return;
         plugin.economyController().tryGetAccount(event.getPlayer()).thenAccept(optional -> {
             if (optional.isEmpty()) plugin.economyController().createAccount(event.getPlayer());
@@ -25,7 +25,7 @@ public class ConnectionListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerQuit(PlayerQuitEvent event) {
+    public void onPlayerQuit(final PlayerQuitEvent event) {
         plugin.economyController().getAccount(event.getPlayer())
                 .ifPresent(plugin.economyController()::save);
     }

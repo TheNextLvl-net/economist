@@ -15,25 +15,25 @@ public interface Bank extends Account {
 
     String getName();
 
-    default boolean addMember(OfflinePlayer player) {
+    default boolean addMember(final OfflinePlayer player) {
         return addMember(player.getUniqueId());
     }
 
     boolean addMember(UUID uuid);
 
-    default boolean isMember(OfflinePlayer player) {
+    default boolean isMember(final OfflinePlayer player) {
         return isMember(player.getUniqueId());
     }
 
     boolean isMember(UUID uuid);
 
-    default boolean removeMember(OfflinePlayer player) {
+    default boolean removeMember(final OfflinePlayer player) {
         return removeMember(player.getUniqueId());
     }
 
     boolean removeMember(UUID uuid);
 
-    default boolean setOwner(OfflinePlayer player) {
+    default boolean setOwner(final OfflinePlayer player) {
         return setOwner(player.getUniqueId());
     }
 

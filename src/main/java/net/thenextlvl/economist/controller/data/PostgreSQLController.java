@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 @NullMarked
 public class PostgreSQLController extends SQLController {
-    public PostgreSQLController(Connection connection, EconomistPlugin plugin) throws SQLException {
+    public PostgreSQLController(final Connection connection, final EconomistPlugin plugin) throws SQLException {
         super(connection, plugin);
     }
 

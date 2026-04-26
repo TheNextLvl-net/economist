@@ -20,7 +20,7 @@ public interface BankController {
      * @return a CompletableFuture that completes with the created bank
      * @throws IllegalStateException if a similar bank already exists
      */
-    default CompletableFuture<Bank> createBank(OfflinePlayer player, String name) throws IllegalStateException {
+    default CompletableFuture<Bank> createBank(final OfflinePlayer player, final String name) throws IllegalStateException {
         return createBank(player.getUniqueId(), name);
     }
 
@@ -33,7 +33,7 @@ public interface BankController {
      * @return a CompletableFuture that completes with the created bank
      * @throws IllegalStateException if a similar bank already exists
      */
-    default CompletableFuture<Bank> createBank(OfflinePlayer player, String name, World world) throws IllegalStateException {
+    default CompletableFuture<Bank> createBank(final OfflinePlayer player, final String name, final World world) throws IllegalStateException {
         return createBank(player.getUniqueId(), name, world);
     }
 
@@ -64,7 +64,7 @@ public interface BankController {
      * @param player the player for whom the bank should be loaded
      * @return a CompletableFuture that completes with the loaded bank
      */
-    default CompletableFuture<Bank> loadBank(OfflinePlayer player) {
+    default CompletableFuture<Bank> loadBank(final OfflinePlayer player) {
         return loadBank(player.getUniqueId());
     }
 
@@ -75,7 +75,7 @@ public interface BankController {
      * @param world  the world in which the bank is located
      * @return a CompletableFuture that completes with the loaded bank
      */
-    default CompletableFuture<Bank> loadBank(OfflinePlayer player, World world) {
+    default CompletableFuture<Bank> loadBank(final OfflinePlayer player, final World world) {
         return loadBank(player.getUniqueId(), world);
     }
 
@@ -126,7 +126,7 @@ public interface BankController {
      * @return a {@code CompletableFuture<Bank>} that completes with an {@code Optional<Bank>} containing the bank
      * associated with the name, or an empty Optional if not found
      */
-    default CompletableFuture<Bank> tryGetBank(String name) {
+    default CompletableFuture<Bank> tryGetBank(final String name) {
         return getBank(name)
                 .map(CompletableFuture::completedFuture)
                 .orElseGet(() -> loadBank(name));
@@ -139,7 +139,7 @@ public interface BankController {
      * @return a CompletableFuture that completes with an Optional containing the Bank associated with
      * the player, or an empty Optional if not found
      */
-    default CompletableFuture<Bank> tryGetBank(OfflinePlayer player) {
+    default CompletableFuture<Bank> tryGetBank(final OfflinePlayer player) {
         return getBank(player)
                 .map(CompletableFuture::completedFuture)
                 .orElseGet(() -> loadBank(player));
@@ -153,7 +153,7 @@ public interface BankController {
      * @return a CompletableFuture that completes with an Optional containing the Bank associated with
      * the player and world, or an empty Optional if not found
      */
-    default CompletableFuture<Bank> tryGetBank(OfflinePlayer player, World world) {
+    default CompletableFuture<Bank> tryGetBank(final OfflinePlayer player, final World world) {
         return getBank(player, world)
                 .map(CompletableFuture::completedFuture)
                 .orElseGet(() -> loadBank(player, world));
@@ -166,7 +166,7 @@ public interface BankController {
      * @return a CompletableFuture that completes with an Optional containing the Bank associated with the UUID,
      * or an empty Optional if not found
      */
-    default CompletableFuture<Bank> tryGetBank(UUID uuid) {
+    default CompletableFuture<Bank> tryGetBank(final UUID uuid) {
         return getBank(uuid)
                 .map(CompletableFuture::completedFuture)
                 .orElseGet(() -> loadBank(uuid));
@@ -180,7 +180,7 @@ public interface BankController {
      * @return a CompletableFuture that completes with an Optional containing the Bank associated with
      * the UUID and world, or an empty Optional if not found
      */
-    default CompletableFuture<Bank> tryGetBank(UUID uuid, World world) {
+    default CompletableFuture<Bank> tryGetBank(final UUID uuid, final World world) {
         return getBank(uuid, world)
                 .map(CompletableFuture::completedFuture)
                 .orElseGet(() -> loadBank(uuid, world));
@@ -192,7 +192,7 @@ public interface BankController {
      * @param bank the bank to be deleted
      * @return a CompletableFuture that completes with a boolean value indicating whether the deletion was successful
      */
-    default CompletableFuture<Boolean> deleteBank(Bank bank) {
+    default CompletableFuture<Boolean> deleteBank(final Bank bank) {
         return bank.getWorld()
                 .map(world -> deleteBank(bank.getOwner(), world))
                 .orElseGet(() -> deleteBank(bank.getOwner()));
@@ -204,7 +204,7 @@ public interface BankController {
      * @param player the player whose bank is to be deleted
      * @return a CompletableFuture that completes with a boolean value indicating whether the deletion was successful
      */
-    default CompletableFuture<Boolean> deleteBank(OfflinePlayer player) {
+    default CompletableFuture<Boolean> deleteBank(final OfflinePlayer player) {
         return deleteBank(player.getUniqueId());
     }
 
@@ -215,7 +215,7 @@ public interface BankController {
      * @param world  the world where the bank is located
      * @return a CompletableFuture that completes with a boolean value indicating whether the deletion was successful
      */
-    default CompletableFuture<Boolean> deleteBank(OfflinePlayer player, World world) {
+    default CompletableFuture<Boolean> deleteBank(final OfflinePlayer player, final World world) {
         return deleteBank(player.getUniqueId(), world);
     }
 
@@ -275,7 +275,7 @@ public interface BankController {
      * @param player the player whose bank is being retrieved
      * @return an {@code Optional<Bank>} containing the bank associated with the player, or empty if not found
      */
-    default Optional<Bank> getBank(OfflinePlayer player) {
+    default Optional<Bank> getBank(final OfflinePlayer player) {
         return getBank(player.getUniqueId());
     }
 
@@ -286,7 +286,7 @@ public interface BankController {
      * @param world  the world the bank belongs to
      * @return an {@code Optional<Bank>} containing the bank associated with the player and world, or empty if not found
      */
-    default Optional<Bank> getBank(OfflinePlayer player, World world) {
+    default Optional<Bank> getBank(final OfflinePlayer player, final World world) {
         return getBank(player.getUniqueId(), world);
     }
 
@@ -321,7 +321,7 @@ public interface BankController {
      * @param player the player for whom to check the bank account
      * @return true if the player has a bank account, false otherwise
      */
-    default boolean hasBank(OfflinePlayer player) {
+    default boolean hasBank(final OfflinePlayer player) {
         return hasBank(player.getUniqueId());
     }
 
@@ -332,7 +332,7 @@ public interface BankController {
      * @param world  the world in which to check for the player's bank
      * @return true if the player has a bank in the specified world, false otherwise
      */
-    default boolean hasBank(OfflinePlayer player, World world) {
+    default boolean hasBank(final OfflinePlayer player, final World world) {
         return hasBank(player.getUniqueId(), world);
     }
 
