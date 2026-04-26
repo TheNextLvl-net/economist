@@ -82,6 +82,18 @@ CREATE TABLE IF NOT EXISTS currencies
 ) NULL
     );
 
+CREATE TABLE IF NOT EXISTS currency_settings
+(
+    id INT NOT NULL PRIMARY KEY,
+    default_currency VARCHAR
+(
+    255
+) NOT NULL
+    );
+
+INSERT IGNORE INTO currency_settings (id, default_currency)
+VALUES (1, 'euro');
+
 CREATE TABLE IF NOT EXISTS currency_translations
 (
     currency_name

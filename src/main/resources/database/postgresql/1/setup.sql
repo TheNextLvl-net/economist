@@ -77,6 +77,16 @@ CREATE TABLE IF NOT EXISTS currencies
 ) NULL
     );
 
+CREATE TABLE IF NOT EXISTS currency_settings
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    default_currency TEXT NOT NULL
+    );
+
+INSERT INTO currency_settings (id, default_currency)
+VALUES (1, 'euro')
+ON CONFLICT (id) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS currency_translations
 (
     currency_name

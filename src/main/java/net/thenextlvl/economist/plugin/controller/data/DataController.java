@@ -52,7 +52,12 @@ public interface DataController {
 
     boolean save(Bank bank) throws SQLException;
 
+    @Nullable
+    String getDefaultCurrencyName() throws SQLException;
+
     Map<String, StoredCurrency> getCurrencies() throws SQLException;
+
+    boolean setDefaultCurrency(String name) throws SQLException;
 
     boolean save(Currency currency) throws SQLException;
 

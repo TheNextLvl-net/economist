@@ -34,6 +34,15 @@ CREATE TABLE IF NOT EXISTS currencies
     max_balance       DECIMAL(65, 20) NULL
 );
 
+CREATE TABLE IF NOT EXISTS currency_settings
+(
+    id               INTEGER NOT NULL PRIMARY KEY,
+    default_currency TEXT    NOT NULL
+);
+
+INSERT OR IGNORE INTO currency_settings (id, default_currency)
+VALUES (1, 'euro');
+
 CREATE TABLE IF NOT EXISTS currency_translations
 (
     currency_name TEXT NOT NULL,

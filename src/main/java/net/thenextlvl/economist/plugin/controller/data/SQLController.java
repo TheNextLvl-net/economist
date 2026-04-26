@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken;
 import de.chojo.sadu.core.databases.Database;
 import de.chojo.sadu.core.updater.SqlVersion;
 import de.chojo.sadu.updater.BaseSqlUpdaterBuilder;
-import de.chojo.sadu.updater.QueryReplacement;
 import de.chojo.sadu.updater.SqlUpdater;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -334,6 +333,24 @@ public class SQLController implements DataController {
     }
 
     @Override
+    public @Nullable String getDefaultCurrencyName() throws SQLException {
+        return executeQuery("""
+                SELECT default_currency
+                FROM currency_settings
+                WHERE id = 1
+                """, resultSet -> resultSet.next() ? resultSet.getString("default_currency") : null);
+    }
+
+    @Override
+    public boolean setDefaultCurrency(final String name) throws SQLException {
+        return executeUpdate("""
+                UPDATE currency_settings
+                SET default_currency = ?
+                WHERE id = 1
+                """, name) > 0;
+    }
+
+    @Override
     public boolean save(final Currency currency) throws SQLException {
         try (final var connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
@@ -426,7 +443,6 @@ public class SQLController implements DataController {
             final var builder = (BaseSqlUpdaterBuilder<?, ?>) SqlUpdater.builder(dataSource, database);
             builder.setVersion(SCHEMA_VERSION);
             builder.setVersionTable(VERSION_TABLE);
-            builder.setReplacements(new QueryReplacement("\\{\\{default_currency}}", defaultCurrency().getName()));
             builder.withClassLoader(plugin.getClass().getClassLoader());
             builder.execute();
         } catch (final IOException exception) {

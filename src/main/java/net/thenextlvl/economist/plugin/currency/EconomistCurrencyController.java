@@ -20,9 +20,11 @@ public final class EconomistCurrencyController implements CurrencyController {
     private static final PlainTextComponentSerializer PLAIN = PlainTextComponentSerializer.plainText();
 
     private final Map<String, Currency> currencies = new ConcurrentHashMap<>();
-    private final Currency defaultCurrency;
+    private final EconomistPlugin plugin;
+    private volatile Currency defaultCurrency;
 
     public EconomistCurrencyController(final EconomistPlugin plugin) {
+        this.plugin = plugin;
         final var data = CurrencyData.of("euro", Component.text("€"), 2)
                 .displayNameSingular(Locale.US, Component.text("Euro"))
                 .displayNamePlural(Locale.US, Component.text("Euro"));
@@ -72,6 +74,20 @@ public final class EconomistCurrencyController implements CurrencyController {
         return currencies.remove(name) != null;
     }
 
+    @Override
+    public boolean setDefaultCurrency(final String name) {
+        final var currency = currencies.get(name);
+        if (currency == null) return false;
+        try {
+            if (!plugin.dataController().setDefaultCurrency(currency.getName())) return false;
+            defaultCurrency = currency;
+            return true;
+        } catch (final Exception exception) {
+            plugin.getComponentLogger().error("Failed to set default currency {}", name, exception);
+            return false;
+        }
+    }
+
     public void load(final EconomistPlugin plugin) {
         try {
             final var storedCurrencies = plugin.dataController().getCurrencies();
@@ -87,13 +103,25 @@ public final class EconomistCurrencyController implements CurrencyController {
                 created.setMinBalance(storedCurrency.minBalance());
                 created.setMaxBalance(storedCurrency.maxBalance());
             });
-            save(plugin, defaultCurrency);
+            final var defaultCurrencyName = plugin.dataController().getDefaultCurrencyName();
+            if (defaultCurrencyName != null) {
+                final var storedDefault = currencies.get(defaultCurrencyName);
+                if (storedDefault != null) {
+                    defaultCurrency = storedDefault;
+                }
+            }
+            save(plugin);
         } catch (final Exception exception) {
             plugin.getComponentLogger().error("Failed to load currencies from the database", exception);
         }
     }
 
     public void save(final EconomistPlugin plugin) {
+        try {
+            plugin.dataController().setDefaultCurrency(defaultCurrency.getName());
+        } catch (final Exception exception) {
+            plugin.getComponentLogger().error("Failed to save default currency {}", defaultCurrency.getName(), exception);
+        }
         currencies.values().stream()
                 .sorted(Comparator.comparing(Currency::getName, String.CASE_INSENSITIVE_ORDER))
                 .forEach(currency -> save(plugin, currency));

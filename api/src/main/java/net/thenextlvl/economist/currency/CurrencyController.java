@@ -103,6 +103,26 @@ public interface CurrencyController {
     }
 
     /**
+     * Sets the specified currency as the default currency.
+     *
+     * @param currency the currency to set as default
+     * @return {@code true} if the default currency was updated
+     * @since 0.3.0
+     */
+    default boolean setDefaultCurrency(final Currency currency) {
+        return setDefaultCurrency(currency.getName());
+    }
+
+    /**
+     * Sets a currency by name as the default currency.
+     *
+     * @param name the name of the currency to set as default
+     * @return {@code true} if the default currency was updated
+     * @since 0.3.0
+     */
+    boolean setDefaultCurrency(String name);
+
+    /**
      * Deletes a currency by name.
      *
      * @param name the name of the currency to delete
