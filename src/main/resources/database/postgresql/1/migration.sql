@@ -1,0 +1,1 @@
+-- Initial schema version. No migration step is required.
