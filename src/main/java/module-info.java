@@ -8,7 +8,7 @@ module economist.main {
     requires de.chojo.sadu.sqlite;
     requires de.chojo.sadu.updater;
     requires dev.faststats.bukkit;
-    requires dev.faststats.core;
+    requires dev.faststats;
     requires java.sql;
     requires net.kyori.adventure.key;
     requires net.kyori.adventure.text.minimessage;
